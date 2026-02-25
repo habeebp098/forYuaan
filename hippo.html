@@ -10,6 +10,10 @@
             padding: 0;
             font-family: 'Comic Sans MS', sans-serif;
             background-color: #e8f6f3;
+            /* Fun jungle leaf pattern background */
+            background-image: radial-gradient(#55efc4 10%, transparent 10%), radial-gradient(#55efc4 10%, transparent 10%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -23,6 +27,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 100;
         }
 
         .btn {
@@ -38,7 +44,7 @@
         }
 
         .btn:active { transform: scale(0.95); }
-        .reset-btn { background-color: #0984e3; }
+        .reset-btn { background-color: #0984e3; margin-left: 10px; }
 
         /* Play Area */
         #play-area {
@@ -61,6 +67,8 @@
             padding: 10px 30px;
             border-radius: 20px;
             border: 5px dashed #00b894;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            z-index: 50;
         }
 
         /* Apples Container */
@@ -71,37 +79,44 @@
             width: 40%;
             justify-content: center;
             z-index: 10;
+            background: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 30px;
+            border: 4px solid #55efc4;
         }
 
         .apple {
             font-size: 5rem;
             cursor: pointer;
-            transition: all 0.5s ease-in-out;
+            transition: transform 0.2s;
             user-select: none;
+            /* Keeps the apple above other things when it flies */
+            position: relative; 
+            z-index: 100;
         }
 
-        .apple:hover { transform: scale(1.1); }
+        .apple:hover { transform: scale(1.1) rotate(-10deg); }
 
         /* The Hippo */
         #hippo {
             font-size: 12rem;
-            transition: transform 0.2s;
             user-select: none;
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.2));
+            /* Make sure the hippo is positioned so we can track it */
+            position: relative;
+            z-index: 20;
         }
 
-        /* Animation class for eating */
-        .eating {
-            transform: translate(300px, 0px) scale(0);
-            opacity: 0;
-        }
     </style>
 </head>
 <body>
 
     <div id="controls">
         <button class="btn" onclick="goHome()">🏠 Home</button>
-        <button class="btn reset-btn" onclick="spawnApples(5)">🍎 Give 5 Apples</button>
-        <button class="btn reset-btn" onclick="spawnApples(10)">🍎 Give 10 Apples</button>
+        <div>
+            <button class="btn reset-btn" onclick="spawnApples(5)">🍎 5 Apples</button>
+            <button class="btn reset-btn" onclick="spawnApples(10)">🍎 10 Apples</button>
+        </div>
     </div>
 
     <div id="play-area">
@@ -177,30 +192,62 @@
         }
 
         function eatApple(appleElement) {
-            // Prevent double-clicking
-            if (appleElement.classList.contains('eating')) return;
+            // Prevent double-clicking while it's already flying
+            if (appleElement.classList.contains('flying')) return;
+            appleElement.classList.add('flying');
 
-            playSound('chomp');
-            
-            // Make hippo bounce
-            hippo.style.transform = 'scale(1.2)';
-            setTimeout(() => hippo.style.transform = 'scale(1)', 200);
+            // 1. Get the exact screen coordinates of the Apple
+            const appleRect = appleElement.getBoundingClientRect();
+            const startX = appleRect.left + (appleRect.width / 2);
+            const startY = appleRect.top + (appleRect.height / 2);
 
-            // Animate apple
-            appleElement.classList.add('eating');
-            
-            currentApples--;
-            updateCounter();
-            
-            // Speak the remaining number
-            if (currentApples === 0) {
-                setTimeout(() => speak("All gone!"), 500);
-            } else {
-                setTimeout(() => speak(currentApples), 500);
-            }
+            // 2. Get the exact screen coordinates of the Hippo's mouth
+            const hippoRect = hippo.getBoundingClientRect();
+            // We aim for the left side of the hippo emoji where the mouth is
+            const endX = hippoRect.left + (hippoRect.width * 0.2); 
+            const endY = hippoRect.top + (hippoRect.height * 0.6);
 
-            // Remove from HTML after animation
-            setTimeout(() => appleElement.remove(), 500);
+            // 3. Calculate the distance it needs to travel
+            const travelX = endX - startX;
+            const travelY = endY - startY;
+
+            // 4. Animate the apple flying over
+            const flight = appleElement.animate([
+                { transform: 'translate(0px, 0px) scale(1) rotate(0deg)' },
+                // It spins while it flies, shrinks to fit in the mouth, and fades out
+                { transform: `translate(${travelX}px, ${travelY}px) scale(0.2) rotate(360deg)`, opacity: 0 }
+            ], {
+                duration: 600, // Takes 0.6 seconds to fly
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)', // Starts fast, slows down at the mouth
+                fill: 'forwards'
+            });
+
+            // 5. What happens when the apple finally hits the hippo
+            flight.onfinish = () => {
+                // Play the sound exactly when it lands
+                playSound('chomp');
+                
+                // Make the hippo do a chewing animation
+                hippo.animate([
+                    { transform: 'scale(1)' },
+                    { transform: 'scale(1.2) rotate(-10deg)' },
+                    { transform: 'scale(0.9) rotate(10deg)' },
+                    { transform: 'scale(1.1) rotate(-5deg)' },
+                    { transform: 'scale(1)' }
+                ], { duration: 400 });
+
+                // Remove the apple from the page and do the math
+                appleElement.remove();
+                currentApples--;
+                updateCounter();
+                
+                // Announce the new number
+                if (currentApples === 0) {
+                    setTimeout(() => speak("All gone!"), 300);
+                } else {
+                    setTimeout(() => speak(currentApples), 300);
+                }
+            };
         }
 
         function updateCounter() {
