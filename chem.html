@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Comic Sans MS', sans-serif;
-            background-color: #2f3640; /* Dark lab background */
+            background-color: #2f3640; 
             color: white;
             display: flex;
             flex-direction: column;
@@ -22,6 +22,8 @@
             padding: 10px 20px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            z-index: 100;
         }
 
         .btn {
@@ -34,7 +36,6 @@
             cursor: pointer;
             font-weight: bold;
             transition: transform 0.1s;
-            margin-right: 15px;
         }
 
         .btn:active { transform: scale(0.95); }
@@ -46,34 +47,83 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 40px;
+            gap: 50px;
+            position: relative;
         }
 
         /* The Beaker / Bowl */
         #bowl-container {
             width: 300px;
-            height: 250px;
-            border: 8px solid white;
+            height: 280px;
+            border: 10px solid rgba(255, 255, 255, 0.8);
             border-top: none;
             border-radius: 0 0 150px 150px;
             position: relative;
-            overflow: hidden;
-            background-color: rgba(255,255,255,0.1);
+            background-color: rgba(255,255,255,0.05);
+            /* A little glow effect */
+            box-shadow: 0 0 30px rgba(255,255,255,0.1);
+        }
+
+        /* The rim of the glass */
+        #bowl-container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            height: 20px;
+            border: 10px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
         }
 
         #water {
             position: absolute;
             bottom: 0;
             width: 100%;
-            height: 70%;
-            background-color: #dcdde1; /* Default clear/cloudy water */
+            height: 75%;
+            background-color: #dcdde1; 
             transition: background-color 1s ease-in-out;
+            border-radius: 0 0 140px 140px;
+            overflow: hidden;
+        }
+
+        /* Animated Bubbles */
+        .bubble {
+            position: absolute;
+            bottom: -20px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: rise 2s infinite ease-in;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
+        }
+
+        /* The pop-up surprise item */
+        #surprise-item {
+            position: absolute;
+            font-size: 8rem;
+            top: 50px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(50px) scale(0);
+            z-index: 50;
+        }
+
+        .show-surprise {
+            opacity: 1 !important;
+            transform: translateY(-120px) scale(1) !important;
         }
 
         /* Potion Buttons */
         #potions {
             display: flex;
             gap: 30px;
+            z-index: 100;
         }
 
         .potion {
@@ -82,17 +132,27 @@
             transition: transform 0.2s;
             user-select: none;
             background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 20px;
-            border: 4px solid transparent;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 5px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .potion:hover { transform: scale(1.1) rotate(10deg); }
+        .potion-label {
+            font-size: 1.2rem;
+            font-family: sans-serif;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .potion:hover { transform: scale(1.1) translateY(-10px); }
         .potion:active { transform: scale(0.9); }
 
-        #btn-red { border-color: #e84118; }
-        #btn-blue { border-color: #00a8ff; }
-        #btn-yellow { border-color: #fbc531; }
+        #btn-red { border-color: #e84118; color: #e84118; }
+        #btn-blue { border-color: #00a8ff; color: #00a8ff; }
+        #btn-yellow { border-color: #fbc531; color: #fbc531; }
 
     </style>
 </head>
@@ -100,28 +160,58 @@
 
     <div id="controls">
         <button class="btn" onclick="goHome()">🏠 Home</button>
-        <button class="btn reset-btn" onclick="resetWater()">🔄 Clean Bowl</button>
+        <button class="btn reset-btn" onclick="resetWater()">🔄 Empty Bowl</button>
     </div>
 
     <div id="play-area">
+        <div id="surprise-item"></div>
+        
         <div id="bowl-container">
-            <div id="water"></div>
+            <div id="water">
+                </div>
         </div>
 
         <div id="potions">
-            <div class="potion" id="btn-red" onclick="addDrop('red')">🩸 Red</div>
-            <div class="potion" id="btn-blue" onclick="addDrop('blue')">💧 Blue</div>
-            <div class="potion" id="btn-yellow" onclick="addDrop('yellow')">⚡ Yellow</div>
+            <div class="potion" id="btn-red" onclick="addDrop('red')">🩸 <span class="potion-label">RED</span></div>
+            <div class="potion" id="btn-yellow" onclick="addDrop('yellow')">⚡ <span class="potion-label">YELLOW</span></div>
+            <div class="potion" id="btn-blue" onclick="addDrop('blue')">💧 <span class="potion-label">BLUE</span></div>
         </div>
     </div>
 
     <script>
         const water = document.getElementById('water');
+        const surpriseEl = document.getElementById('surprise-item');
         
-        // Track what is currently in the bowl
         let hasRed = false;
         let hasBlue = false;
         let hasYellow = false;
+
+        // Dictionary of colors and their real-world items
+        const colorData = {
+            "#e84118": { name: "Red", item: "🍎", phrase: "Red! Like an apple!" },
+            "#00a8ff": { name: "Blue", item: "🐳", phrase: "Blue! Like a whale!" },
+            "#fbc531": { name: "Yellow", item: "☀️", phrase: "Yellow! Like the sun!" },
+            "#4cd137": { name: "Green", item: "🐸", phrase: "Green! Like a frog!" },
+            "#ff9f43": { name: "Orange", item: "🍊", phrase: "Orange! Like an orange!" },
+            "#9c88ff": { name: "Purple", item: "🍇", phrase: "Purple! Like grapes!" },
+            "#8B4513": { name: "Brown", item: "🐻", phrase: "Brown! Like a bear!" },
+            "#dcdde1": { name: "Clean", item: "✨", phrase: "All clean!" }
+        };
+
+        // Initialize bubbles
+        function createBubbles() {
+            for(let i=0; i<8; i++) {
+                let bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.width = Math.random() * 20 + 10 + 'px';
+                bubble.style.height = bubble.style.width;
+                bubble.style.animationDuration = Math.random() * 2 + 2 + 's';
+                bubble.style.animationDelay = Math.random() * 2 + 's';
+                water.appendChild(bubble);
+            }
+        }
+        createBubbles();
 
         function speak(text) {
             if ('speechSynthesis' in window) {
@@ -133,23 +223,27 @@
             }
         }
 
-        function playSplash() {
+        // Bubbling synthesizer sound
+        function playBubbles() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
             const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.2);
-            gain.gain.setValueAtTime(0.8, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.2);
+            
+            for(let i=0; i<3; i++) {
+                setTimeout(() => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400 + (Math.random()*400), ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                }, i * 150);
+            }
         }
 
         function goHome() {
@@ -161,51 +255,43 @@
             hasBlue = false;
             hasYellow = false;
             water.style.backgroundColor = '#dcdde1';
-            speak("All clean");
+            
+            surpriseEl.innerText = "✨";
+            surpriseEl.classList.add('show-surprise');
+            speak(colorData["#dcdde1"].phrase);
+            
+            setTimeout(() => { surpriseEl.classList.remove('show-surprise'); }, 2000);
         }
 
         function addDrop(color) {
-            playSplash();
+            playBubbles();
 
-            // Update state
             if (color === 'red') hasRed = true;
             if (color === 'blue') hasBlue = true;
             if (color === 'yellow') hasYellow = true;
 
-            // Determine the mixed color
-            let newColorName = "";
-            let newColorHex = "";
+            let hex = "";
 
-            if (hasRed && hasBlue && hasYellow) {
-                newColorName = "Brown! Yucky!";
-                newColorHex = "#8B4513";
-            } else if (hasRed && hasBlue) {
-                newColorName = "Purple!";
-                newColorHex = "#9c88ff";
-            } else if (hasRed && hasYellow) {
-                newColorName = "Orange!";
-                newColorHex = "#ff9f43";
-            } else if (hasBlue && hasYellow) {
-                newColorName = "Green!";
-                newColorHex = "#4cd137";
-            } else if (hasRed) {
-                newColorName = "Red!";
-                newColorHex = "#e84118";
-            } else if (hasBlue) {
-                newColorName = "Blue!";
-                newColorHex = "#00a8ff";
-            } else if (hasYellow) {
-                newColorName = "Yellow!";
-                newColorHex = "#fbc531";
-            }
+            if (hasRed && hasBlue && hasYellow) { hex = "#8B4513"; } 
+            else if (hasRed && hasBlue) { hex = "#9c88ff"; } // Purple
+            else if (hasRed && hasYellow) { hex = "#ff9f43"; } // Orange
+            else if (hasBlue && hasYellow) { hex = "#4cd137"; } // Green
+            else if (hasRed) { hex = "#e84118"; } 
+            else if (hasBlue) { hex = "#00a8ff"; } 
+            else if (hasYellow) { hex = "#fbc531"; }
 
-            // Apply visual change and speak
-            water.style.backgroundColor = newColorHex;
+            // Change water color
+            water.style.backgroundColor = hex;
             
-            // Wait slightly for the animation to start before speaking
+            // Hide previous surprise, then pop up the new one
+            surpriseEl.classList.remove('show-surprise');
+            
             setTimeout(() => {
-                speak(newColorName);
-            }, 300);
+                const data = colorData[hex];
+                surpriseEl.innerText = data.item;
+                surpriseEl.classList.add('show-surprise');
+                speak(data.phrase);
+            }, 800); // Wait for the water to change color before popping the surprise
         }
     </script>
 </body>
