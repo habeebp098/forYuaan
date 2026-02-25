@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Magic Science</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #2f3640; /* Dark lab background */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #controls {
+            background-color: #192a56;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: #ff9f43;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+            margin-right: 15px;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .reset-btn { background-color: #7f8fa6; }
+
+        #play-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        /* The Beaker / Bowl */
+        #bowl-container {
+            width: 300px;
+            height: 250px;
+            border: 8px solid white;
+            border-top: none;
+            border-radius: 0 0 150px 150px;
+            position: relative;
+            overflow: hidden;
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        #water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70%;
+            background-color: #dcdde1; /* Default clear/cloudy water */
+            transition: background-color 1s ease-in-out;
+        }
+
+        /* Potion Buttons */
+        #potions {
+            display: flex;
+            gap: 30px;
+        }
+
+        .potion {
+            font-size: 4rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            user-select: none;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 20px;
+            border: 4px solid transparent;
+        }
+
+        .potion:hover { transform: scale(1.1) rotate(10deg); }
+        .potion:active { transform: scale(0.9); }
+
+        #btn-red { border-color: #e84118; }
+        #btn-blue { border-color: #00a8ff; }
+        #btn-yellow { border-color: #fbc531; }
+
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <button class="btn" onclick="goHome()">🏠 Home</button>
+        <button class="btn reset-btn" onclick="resetWater()">🔄 Clean Bowl</button>
+    </div>
+
+    <div id="play-area">
+        <div id="bowl-container">
+            <div id="water"></div>
+        </div>
+
+        <div id="potions">
+            <div class="potion" id="btn-red" onclick="addDrop('red')">🩸 Red</div>
+            <div class="potion" id="btn-blue" onclick="addDrop('blue')">💧 Blue</div>
+            <div class="potion" id="btn-yellow" onclick="addDrop('yellow')">⚡ Yellow</div>
+        </div>
+    </div>
+
+    <script>
+        const water = document.getElementById('water');
+        
+        // Track what is currently in the bowl
+        let hasRed = false;
+        let hasBlue = false;
+        let hasYellow = false;
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.2;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playSplash() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.8, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.2);
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        function resetWater() {
+            hasRed = false;
+            hasBlue = false;
+            hasYellow = false;
+            water.style.backgroundColor = '#dcdde1';
+            speak("All clean");
+        }
+
+        function addDrop(color) {
+            playSplash();
+
+            // Update state
+            if (color === 'red') hasRed = true;
+            if (color === 'blue') hasBlue = true;
+            if (color === 'yellow') hasYellow = true;
+
+            // Determine the mixed color
+            let newColorName = "";
+            let newColorHex = "";
+
+            if (hasRed && hasBlue && hasYellow) {
+                newColorName = "Brown! Yucky!";
+                newColorHex = "#8B4513";
+            } else if (hasRed && hasBlue) {
+                newColorName = "Purple!";
+                newColorHex = "#9c88ff";
+            } else if (hasRed && hasYellow) {
+                newColorName = "Orange!";
+                newColorHex = "#ff9f43";
+            } else if (hasBlue && hasYellow) {
+                newColorName = "Green!";
+                newColorHex = "#4cd137";
+            } else if (hasRed) {
+                newColorName = "Red!";
+                newColorHex = "#e84118";
+            } else if (hasBlue) {
+                newColorName = "Blue!";
+                newColorHex = "#00a8ff";
+            } else if (hasYellow) {
+                newColorName = "Yellow!";
+                newColorHex = "#fbc531";
+            }
+
+            // Apply visual change and speak
+            water.style.backgroundColor = newColorHex;
+            
+            // Wait slightly for the animation to start before speaking
+            setTimeout(() => {
+                speak(newColorName);
+            }, 300);
+        }
+    </script>
+</body>
+</html>
