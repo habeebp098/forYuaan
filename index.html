@@ -18,7 +18,8 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden; /* Keeps magic stars from causing scrollbars */
+            overflow-x: hidden; /* Keeps magic stars from causing scrollbars */
+            padding-bottom: 40px; /* Extra space at the bottom */
         }
 
         h1 {
@@ -28,6 +29,7 @@
             margin-bottom: 10px;
             text-shadow: 4px 4px 0px white;
             z-index: 10;
+            text-align: center;
         }
 
         p {
@@ -41,6 +43,7 @@
             border-radius: 20px;
             border: 4px dashed #0984e3;
             z-index: 10;
+            text-align: center;
         }
 
         /* The Grid for the Buttons */
@@ -49,7 +52,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 40px;
-            max-width: 900px;
+            max-width: 1000px; /* Slightly wider to fit 5 items nicely */
             padding: 20px;
             z-index: 10;
         }
@@ -95,6 +98,7 @@
         #card-hippo .emoji { animation-delay: 0.5s; }
         #card-chem .emoji { animation-delay: 1s; }
         #card-drop .emoji { animation-delay: 1.5s; }
+        #card-count .emoji { animation-delay: 2.0s; } /* New delay for counting box */
 
         .title {
             font-size: 1.8rem;
@@ -106,12 +110,13 @@
         #card-hippo { border-color: #00b894; }   
         #card-chem { border-color: #fdcb6e; }    
         #card-drop { border-color: #e84393; }    
+        #card-count { border-color: #9c88ff; } /* Purple border for the new game */   
 
         /* Magic Stars CSS */
         .magic-star {
             position: absolute;
             font-size: 2rem;
-            pointer-events: none; /* So it doesn't block clicks */
+            pointer-events: none; 
             animation: floatUp 1s forwards ease-out;
             z-index: 100;
         }
@@ -139,29 +144,32 @@
             <div class="title">Hungry Hippo</div>
         </div>
 
+        <div class="game-card" id="card-count" onclick="goToGame('counting.html')">
+            <div class="emoji">🎁</div>
+            <div class="title">Counting Box</div>
+        </div>
+
         <div class="game-card" id="card-chem" onclick="goToGame('chem.html')">
             <div class="emoji">🧪</div>
             <div class="title">Color Magic</div>
         </div>
 
-        <div class="game-card" id="card-drop" onclick="goToGame('#')">
+        <div class="game-card" id="card-drop" onclick="goToGame('drop.html')">
             <div class="emoji">🍎</div>
             <div class="title">Splat Drop</div>
         </div>
     </div>
 
     <script>
-        // --- 1. Synthesize a fun "Bloop" sound without needing audio files ---
         function playBloop() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return; // Fallback for very old browsers
+            if (!AudioContext) return; 
             
             const ctx = new AudioContext();
             const osc = ctx.createOscillator();
             const gainNode = ctx.createGain();
             
             osc.type = 'sine';
-            // Start at a low frequency and slide up fast for a "bloop" or "pop"
             osc.frequency.setValueAtTime(300, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
             
@@ -175,10 +183,8 @@
             osc.stop(ctx.currentTime + 0.1);
         }
 
-        // --- 2. Handle Game Navigation with Sound Delay ---
         function goToGame(url) {
             playBloop();
-            // Wait just a tiny bit (250ms) so the sound finishes before the page changes
             setTimeout(() => {
                 if(url !== '#') {
                     window.location.href = url;
@@ -186,24 +192,19 @@
             }, 250);
         }
 
-        // --- 3. Magic Sparkles when clicking the background ---
         document.body.addEventListener('click', function(e) {
-            // Only make stars if we didn't click on a game card directly
             if (e.target.closest('.game-card')) return;
 
-            // Create a star element
             const star = document.createElement('div');
             star.classList.add('magic-star');
             star.innerText = '⭐';
             
-            // Put it exactly where the mouse clicked
-            star.style.left = (e.clientX - 15) + 'px'; // -15 to center it on the mouse
+            star.style.left = (e.clientX - 15) + 'px'; 
             star.style.top = (e.clientY - 15) + 'px';
             
             document.body.appendChild(star);
-            playBloop(); // Play a sound for the magic star too!
+            playBloop(); 
 
-            // Remove the star from the HTML after the animation finishes (1 second)
             setTimeout(() => {
                 star.remove();
             }, 1000);
