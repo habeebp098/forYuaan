@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shape Monster Maker: Deluxe</title>
+    <title>Shape Monster Maker: Talking Edition</title>
     <style>
         body {
             margin: 0;
@@ -28,7 +28,7 @@
         }
 
         .home-btn {
-            background-color: #ff9f43; /* Bright orange */
+            background-color: #ff9f43;
             color: white;
             border: none;
             border-radius: 8px;
@@ -47,7 +47,7 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            margin: 0 auto; /* This perfectly centers the color and size tools */
+            margin: 0 auto;
         }
 
         input[type="color"] {
@@ -171,7 +171,21 @@
         let offsetX = 0;
         let offsetY = 0;
 
-        // Sound Effect Function for the Home Button
+        // --- NEW: The Robot Voice Function ---
+        function speakWord(word) {
+            // Check if the browser supports speech
+            if ('speechSynthesis' in window) {
+                // Cancel anything currently being spoken so it doesn't stutter
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.rate = 0.9;  // Slightly slower for a toddler to hear clearly
+                utterance.pitch = 1.2; // Slightly higher pitch to sound friendly
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
         function playBloop() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return; 
@@ -194,21 +208,29 @@
             osc.stop(ctx.currentTime + 0.1);
         }
 
-        // Navigation Function
         function goHome() {
             playBloop();
             setTimeout(() => {
                 window.location.href = 'index.html';
-            }, 250); // Small delay to let the sound play
+            }, 250); 
         }
 
-        // Shape Spawning Logic
         function addShape(type) {
             const color = document.getElementById('shapeColor').value;
             const size = document.getElementById('shapeSize').value;
             
             const shape = document.createElement('div');
             shape.classList.add('shape', type);
+            
+            // Format the word nicely for the voice
+            let spokenWord = type;
+            if (type === 'eye') { spokenWord = 'googly eye'; }
+            
+            // Save the word inside the shape so it remembers its name
+            shape.dataset.shapeName = spokenWord;
+
+            // Speak immediately when spawned!
+            speakWord(spokenWord);
             
             // Apply Dynamic Size and Color
             if (type === 'triangle') {
@@ -231,13 +253,12 @@
                 shape.style.backgroundColor = color;
             }
 
-            // Spawn in the center of the screen
             shape.style.left = (window.innerWidth / 2 - (size/2)) + 'px';
             shape.style.top = (window.innerHeight / 2 - (size/2)) + 'px';
 
-            // Events for dragging and deleting
             shape.addEventListener('pointerdown', startDrag);
             shape.addEventListener('dblclick', function() {
+                speakWord('bye bye ' + shape.dataset.shapeName); // Says bye bye when deleted!
                 shape.remove(); 
             });
 
@@ -245,12 +266,17 @@
         }
 
         function clearCanvas() {
+            speakWord('cleared');
             canvas.innerHTML = '';
         }
 
         // Drag and Drop Logic
         function startDrag(e) {
             activeShape = e.currentTarget;
+            
+            // Speak the shape's name when clicked to drag
+            speakWord(activeShape.dataset.shapeName);
+
             const rect = activeShape.getBoundingClientRect();
             offsetX = e.clientX - rect.left;
             offsetY = e.clientY - rect.top;
