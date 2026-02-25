@@ -6,210 +6,140 @@
     <title>Magic Screen Space</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: 'Comic Sans MS', sans-serif;
             background-color: #ffeaa7;
-            /* Fun polka-dot background */
             background-image: radial-gradient(#fdcb6e 10%, transparent 10%), radial-gradient(#fdcb6e 10%, transparent 10%);
             background-size: 60px 60px;
             background-position: 0 0, 30px 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
-            overflow-x: hidden; /* Keeps magic stars from causing scrollbars */
-            padding-bottom: 40px; /* Extra space at the bottom */
+            overflow-x: hidden; 
+            padding-bottom: 40px; 
         }
 
         h1 {
             color: #d63031;
-            font-size: 4rem;
-            margin-top: 30px;
-            margin-bottom: 10px;
-            text-shadow: 4px 4px 0px white;
-            z-index: 10;
-            text-align: center;
+            /* clamp(minimum size, preferred size, maximum size) */
+            font-size: clamp(2.5rem, 8vw, 4rem); 
+            margin-top: 30px; margin-bottom: 10px;
+            text-shadow: 3px 3px 0px white;
+            z-index: 10; text-align: center; padding: 0 10px;
         }
 
         p {
-            font-size: 1.8rem;
-            color: #2d3436;
-            margin-top: 0;
-            margin-bottom: 40px;
-            font-weight: bold;
-            background-color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: 4px dashed #0984e3;
-            z-index: 10;
-            text-align: center;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            color: #2d3436; margin: 0 10px 40px 10px;
+            font-weight: bold; background-color: white;
+            padding: 10px 20px; border-radius: 20px;
+            border: 4px dashed #0984e3; z-index: 10; text-align: center;
         }
 
-        /* The Grid for the Buttons */
         .game-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 40px;
-            max-width: 1000px; /* Slightly wider to fit 5 items nicely */
-            padding: 20px;
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: clamp(20px, 5vw, 40px);
+            width: 90%; max-width: 1000px;
             z-index: 10;
         }
 
-        /* The Big Buttons */
         .game-card {
-            background-color: white;
-            border-radius: 30px;
-            width: 250px;
-            height: 220px;
-            color: #2d3436;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background-color: white; border-radius: 30px;
+            /* Fluid width and height based on screen size */
+            width: clamp(140px, 40vw, 250px);
+            height: clamp(150px, 40vw, 220px);
+            color: #2d3436; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            border: 8px solid;
-            cursor: pointer;
-            transition: transform 0.2s;
+            border: clamp(4px, 1.5vw, 8px) solid;
+            cursor: pointer; transition: transform 0.2s;
         }
 
-        .game-card:hover {
-            transform: scale(1.1);
-        }
+        .game-card:hover { transform: scale(1.05); }
+        .game-card:active { transform: scale(0.95); }
 
-        .game-card:active {
-            transform: scale(0.9);
-        }
-
-        /* Wiggle Animation for Emojis */
         @keyframes wiggle {
             0%, 100% { transform: rotate(-5deg) scale(1); }
             50% { transform: rotate(5deg) scale(1.1); }
         }
 
         .emoji {
-            font-size: 5rem;
-            margin-bottom: 15px;
+            font-size: clamp(3rem, 10vw, 5rem);
+            margin-bottom: 10px;
             animation: wiggle 2s infinite ease-in-out;
         }
 
-        /* Stagger the animations so they don't all move exactly together */
         #card-hippo .emoji { animation-delay: 0.5s; }
         #card-chem .emoji { animation-delay: 1s; }
         #card-drop .emoji { animation-delay: 1.5s; }
-        #card-count .emoji { animation-delay: 2.0s; } /* New delay for counting box */
+        #card-count .emoji { animation-delay: 2.0s; } 
 
         .title {
-            font-size: 1.8rem;
-            font-weight: bold;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-weight: bold; text-align: center;
         }
 
-        /* Specific Colors for Each Game Button */
         #card-monster { border-color: #0984e3; } 
         #card-hippo { border-color: #00b894; }   
+        #card-count { border-color: #9c88ff; } 
         #card-chem { border-color: #fdcb6e; }    
         #card-drop { border-color: #e84393; }    
-        #card-count { border-color: #9c88ff; } /* Purple border for the new game */   
 
-        /* Magic Stars CSS */
         .magic-star {
-            position: absolute;
-            font-size: 2rem;
-            pointer-events: none; 
-            animation: floatUp 1s forwards ease-out;
-            z-index: 100;
+            position: absolute; font-size: 2rem; pointer-events: none; 
+            animation: floatUp 1s forwards ease-out; z-index: 100;
         }
 
         @keyframes floatUp {
             0% { transform: translateY(0) scale(0.5); opacity: 1; }
             100% { transform: translateY(-100px) scale(1.5) rotate(45deg); opacity: 0; }
         }
-
     </style>
 </head>
 <body>
-
-    <h1>✨ Magic Space for Yuaan ✨</h1>
+    <h1>✨ Magic Space For Yuaan ✨</h1>
     <p>What are we playing today?</p>
-
     <div class="game-grid">
         <div class="game-card" id="card-monster" onclick="goToGame('monster.html')">
-            <div class="emoji">👾</div>
-            <div class="title">Shape Monster</div>
+            <div class="emoji">👾</div><div class="title">Shape Monster</div>
         </div>
-
         <div class="game-card" id="card-hippo" onclick="goToGame('hippo.html')">
-            <div class="emoji">🦛</div>
-            <div class="title">Hungry Hippo</div>
+            <div class="emoji">🦛</div><div class="title">Hungry Hippo</div>
         </div>
-
         <div class="game-card" id="card-count" onclick="goToGame('counting.html')">
-            <div class="emoji">🎁</div>
-            <div class="title">Counting Box</div>
+            <div class="emoji">🎁</div><div class="title">Counting Box</div>
         </div>
-
         <div class="game-card" id="card-chem" onclick="goToGame('chem.html')">
-            <div class="emoji">🧪</div>
-            <div class="title">Color Magic</div>
+            <div class="emoji">🧪</div><div class="title">Color Magic</div>
         </div>
-
         <div class="game-card" id="card-drop" onclick="goToGame('drop.html')">
-            <div class="emoji">🍎</div>
-            <div class="title">Splat Drop</div>
+            <div class="emoji">🍎</div><div class="title">Splat Drop</div>
         </div>
     </div>
-
     <script>
         function playBloop() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return; 
-            
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gainNode = ctx.createGain();
-            
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(300, ctx.currentTime);
+            const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gainNode = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-            
             gainNode.gain.setValueAtTime(1, ctx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-            
-            osc.connect(gainNode);
-            gainNode.connect(ctx.destination);
-            
-            osc.start();
-            osc.stop(ctx.currentTime + 0.1);
+            osc.connect(gainNode); gainNode.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.1);
         }
-
         function goToGame(url) {
             playBloop();
-            setTimeout(() => {
-                if(url !== '#') {
-                    window.location.href = url;
-                }
-            }, 250);
+            setTimeout(() => { if(url !== '#') window.location.href = url; }, 250);
         }
-
         document.body.addEventListener('click', function(e) {
             if (e.target.closest('.game-card')) return;
-
             const star = document.createElement('div');
-            star.classList.add('magic-star');
-            star.innerText = '⭐';
-            
-            star.style.left = (e.clientX - 15) + 'px'; 
-            star.style.top = (e.clientY - 15) + 'px';
-            
+            star.classList.add('magic-star'); star.innerText = '⭐';
+            star.style.left = (e.clientX - 15) + 'px'; star.style.top = (e.clientY - 15) + 'px';
             document.body.appendChild(star);
             playBloop(); 
-
-            setTimeout(() => {
-                star.remove();
-            }, 1000);
+            setTimeout(() => { star.remove(); }, 1000);
         });
     </script>
-
 </body>
 </html>
