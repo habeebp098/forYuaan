@@ -6,121 +6,72 @@
     <title>Magic Color Bowl</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Comic Sans MS', sans-serif;
-            background-color: #f7f1e3; /* Soft, warm background */
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f7f1e3; display: flex; flex-direction: column;
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        /* Top Navigation */
         #controls {
-            background-color: #ffb142;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            z-index: 100;
+            background-color: #ffb142; padding: 15px 20px;
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 100;
         }
 
         .btn {
-            background-color: white;
-            color: #ff5252;
-            border: 4px solid #ff5252;
-            border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
+            background-color: white; color: #ff5252; border: 4px solid #ff5252;
+            border-radius: 12px; padding: 10px 20px; font-size: clamp(1rem, 3vw, 1.2rem);
+            cursor: pointer; font-weight: bold; transition: all 0.2s;
         }
-
         .btn:active { transform: scale(0.95); }
         .reset-btn { border-color: #34ace0; color: #34ace0; }
 
-        /* Play Area */
         #play-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 60px;
+            flex-grow: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: clamp(30px, 8vw, 60px); padding: 20px;
         }
 
-        /* The Elegant Glass Bowl */
         #bowl-container {
-            width: 300px;
-            height: 250px;
-            border: 8px solid #d1ccc0;
-            border-top: none;
-            border-radius: 0 0 150px 150px;
-            position: relative;
-            background-color: rgba(255,255,255,0.5);
+            /* Fluid dimensions */
+            width: clamp(200px, 60vw, 300px);
+            height: clamp(160px, 50vw, 250px);
+            border: clamp(5px, 2vw, 8px) solid #d1ccc0;
+            border-top: none; border-radius: 0 0 150px 150px;
+            position: relative; background-color: rgba(255,255,255,0.5);
             box-shadow: 0 20px 20px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 10px;
+            display: flex; justify-content: center; align-items: flex-end;
+            padding-bottom: 10px; margin-top: 50px;
         }
 
-        /* Glass Rim */
         #bowl-container::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -8px;
-            right: -8px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: #d1ccc0;
+            content: ''; position: absolute;
+            top: clamp(-8px, -2vw, -10px); left: clamp(-5px, -1vw, -8px); right: clamp(-5px, -1vw, -8px);
+            height: clamp(10px, 3vw, 16px);
+            border-radius: 50%; background-color: #d1ccc0;
         }
 
-        /* The Magic Water */
         #water {
-            width: 95%;
-            height: 85%;
-            background-color: #ecf0f1; /* Clear/Cloudy water */
-            border-radius: 0 0 140px 140px;
-            transition: background-color 1.5s ease-in-out; /* Smooth, elegant color mixing */
+            width: 95%; height: 85%; background-color: #ecf0f1; 
+            border-radius: 0 0 140px 140px; transition: background-color 1.5s ease-in-out; 
             position: relative;
         }
 
-        /* The Big Emoji */
         #emoji-display {
-            position: absolute;
-            top: -100px;
-            font-size: 7rem;
-            width: 100%;
-            text-align: center;
-            opacity: 0;
-            transform: scale(0);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
+            position: absolute; top: clamp(-70px, -20vw, -100px);
+            font-size: clamp(4rem, 15vw, 7rem); width: 100%; text-align: center;
+            opacity: 0; transform: scale(0);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
         }
 
-        .show-emoji {
-            opacity: 1 !important;
-            transform: scale(1) translateY(-20px) !important;
-        }
+        .show-emoji { opacity: 1 !important; transform: scale(1) translateY(-20px) !important; }
 
-        /* The Paint Drops (Buttons) */
-        #paint-drops {
-            display: flex;
-            gap: 40px;
-        }
+        #paint-drops { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(15px, 5vw, 40px); }
 
         .drop {
-            width: 100px;
-            height: 100px;
-            border-radius: 50% 50% 50% 10%; /* Makes it look like a teardrop/paint drop */
-            transform: rotate(45deg);
-            cursor: pointer;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+            /* Fluid paint drop sizes */
+            width: clamp(60px, 18vw, 100px); height: clamp(60px, 18vw, 100px);
+            border-radius: 50% 50% 50% 10%; transform: rotate(45deg);
+            cursor: pointer; box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
@@ -130,39 +81,29 @@
         #drop-red { background-color: #ff5252; }
         #drop-yellow { background-color: #ffda79; }
         #drop-blue { background-color: #34ace0; }
-
     </style>
 </head>
 <body>
-
     <div id="controls">
         <button class="btn" onclick="goHome()">🏠 Home</button>
         <button class="btn reset-btn" onclick="resetBowl()">🔄 Clean Bowl</button>
     </div>
-
     <div id="play-area">
-        
         <div id="bowl-container">
             <div id="emoji-display">✨</div>
             <div id="water"></div>
         </div>
-
         <div id="paint-drops">
             <div class="drop" id="drop-red" onclick="addPaint('red')"></div>
             <div class="drop" id="drop-yellow" onclick="addPaint('yellow')"></div>
             <div class="drop" id="drop-blue" onclick="addPaint('blue')"></div>
         </div>
-
     </div>
-
     <script>
         const water = document.getElementById('water');
         const emojiDisplay = document.getElementById('emoji-display');
-        
-        // Track what colors are in the bowl
         let colorsInBowl = { red: false, yellow: false, blue: false };
 
-        // Dictionary for the color combinations
         const mixResults = {
             "red": { hex: "#ff5252", item: "🍎", phrase: "Red! Like an apple!" },
             "yellow": { hex: "#ffda79", item: "☀️", phrase: "Yellow! Like the sun!" },
@@ -178,46 +119,25 @@
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;
-                utterance.pitch = 1.2;
-                window.speechSynthesis.speak(utterance);
+                utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance);
             }
         }
-
         function playSplash() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3);
-            gain.gain.setValueAtTime(0.5, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.3);
         }
-
-        function goHome() {
-            window.location.href = 'index.html';
-        }
-
+        function goHome() { window.location.href = 'index.html'; }
         function resetBowl() {
             colorsInBowl = { red: false, yellow: false, blue: false };
-            updateBowl("clean");
-            speak(mixResults["clean"].phrase);
+            updateBowl("clean"); speak(mixResults["clean"].phrase);
         }
-
         function addPaint(color) {
-            playSplash();
-            colorsInBowl[color] = true;
-
-            // Figure out the current combination
+            playSplash(); colorsInBowl[color] = true;
             let mixKey = "";
             if (colorsInBowl.blue && colorsInBowl.red && colorsInBowl.yellow) mixKey = "blue-red-yellow";
             else if (colorsInBowl.blue && colorsInBowl.red) mixKey = "blue-red";
@@ -226,20 +146,12 @@
             else if (colorsInBowl.red) mixKey = "red";
             else if (colorsInBowl.blue) mixKey = "blue";
             else if (colorsInBowl.yellow) mixKey = "yellow";
-
             updateBowl(mixKey);
         }
-
         function updateBowl(mixKey) {
             const result = mixResults[mixKey];
-            
-            // Change water color elegantly
             water.style.backgroundColor = result.hex;
-            
-            // Hide current emoji
             emojiDisplay.classList.remove('show-emoji');
-            
-            // Wait for water transition, then show new emoji and speak
             setTimeout(() => {
                 emojiDisplay.innerText = result.item;
                 emojiDisplay.classList.add('show-emoji');
