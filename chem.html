@@ -5,82 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magic Color Bowl</title>
     <style>
-        body {
-            margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif;
-            background-color: #f7f1e3; display: flex; flex-direction: column;
-            min-height: 100vh; overflow-x: hidden;
-        }
-
-        #controls {
-            background-color: #ffb142; padding: 15px 20px;
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 100;
-        }
-
-        .btn {
-            background-color: white; color: #ff5252; border: 4px solid #ff5252;
-            border-radius: 12px; padding: 10px 20px; font-size: clamp(1rem, 3vw, 1.2rem);
-            cursor: pointer; font-weight: bold; transition: all 0.2s;
-        }
-        .btn:active { transform: scale(0.95); }
-        .reset-btn { border-color: #34ace0; color: #34ace0; }
-
-        #play-area {
-            flex-grow: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: clamp(30px, 8vw, 60px); padding: 20px;
-        }
-
-        #bowl-container {
-            /* Fluid dimensions */
-            width: clamp(200px, 60vw, 300px);
-            height: clamp(160px, 50vw, 250px);
-            border: clamp(5px, 2vw, 8px) solid #d1ccc0;
-            border-top: none; border-radius: 0 0 150px 150px;
-            position: relative; background-color: rgba(255,255,255,0.5);
-            box-shadow: 0 20px 20px rgba(0,0,0,0.05);
-            display: flex; justify-content: center; align-items: flex-end;
-            padding-bottom: 10px; margin-top: 50px;
-        }
-
-        #bowl-container::before {
-            content: ''; position: absolute;
-            top: clamp(-8px, -2vw, -10px); left: clamp(-5px, -1vw, -8px); right: clamp(-5px, -1vw, -8px);
-            height: clamp(10px, 3vw, 16px);
-            border-radius: 50%; background-color: #d1ccc0;
-        }
-
-        #water {
-            width: 95%; height: 85%; background-color: #ecf0f1; 
-            border-radius: 0 0 140px 140px; transition: background-color 1.5s ease-in-out; 
-            position: relative;
-        }
-
-        #emoji-display {
-            position: absolute; top: clamp(-70px, -20vw, -100px);
-            font-size: clamp(4rem, 15vw, 7rem); width: 100%; text-align: center;
-            opacity: 0; transform: scale(0);
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
-        }
-
+        body { margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif; background-color: #f7f1e3; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
+        #controls { background-color: #ffb142; padding: 15px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 100; }
+        .btn { background-color: white; color: #ff5252; border: 4px solid #ff5252; border-radius: 12px; padding: 10px 20px; font-size: clamp(1rem, 3vw, 1.2rem); cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .btn:active { transform: scale(0.95); } .reset-btn { border-color: #34ace0; color: #34ace0; }
+        #play-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(30px, 8vw, 60px); padding: 20px; }
+        #bowl-container { width: clamp(200px, 60vw, 300px); height: clamp(160px, 50vw, 250px); border: clamp(5px, 2vw, 8px) solid #d1ccc0; border-top: none; border-radius: 0 0 150px 150px; position: relative; background-color: rgba(255,255,255,0.5); box-shadow: 0 20px 20px rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: flex-end; padding-bottom: 10px; margin-top: 50px; }
+        #bowl-container::before { content: ''; position: absolute; top: clamp(-8px, -2vw, -10px); left: clamp(-5px, -1vw, -8px); right: clamp(-5px, -1vw, -8px); height: clamp(10px, 3vw, 16px); border-radius: 50%; background-color: #d1ccc0; }
+        #water { width: 95%; height: 85%; background-color: #ecf0f1; border-radius: 0 0 140px 140px; transition: background-color 1.5s ease-in-out; position: relative; }
+        #emoji-display { position: absolute; top: clamp(-70px, -20vw, -100px); font-size: clamp(4rem, 15vw, 7rem); width: 100%; text-align: center; opacity: 0; transform: scale(0); transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; }
         .show-emoji { opacity: 1 !important; transform: scale(1) translateY(-20px) !important; }
-
         #paint-drops { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(15px, 5vw, 40px); }
-
-        .drop {
-            /* Fluid paint drop sizes */
-            width: clamp(60px, 18vw, 100px); height: clamp(60px, 18vw, 100px);
-            border-radius: 50% 50% 50% 10%; transform: rotate(45deg);
-            cursor: pointer; box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .drop:hover { transform: rotate(45deg) scale(1.1); box-shadow: 8px 8px 20px rgba(0,0,0,0.15); }
-        .drop:active { transform: rotate(45deg) scale(0.9); }
-
-        #drop-red { background-color: #ff5252; }
-        #drop-yellow { background-color: #ffda79; }
-        #drop-blue { background-color: #34ace0; }
+        .drop { width: clamp(60px, 18vw, 100px); height: clamp(60px, 18vw, 100px); border-radius: 50% 50% 50% 10%; transform: rotate(45deg); cursor: pointer; box-shadow: 5px 5px 15px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
+        .drop:hover { transform: rotate(45deg) scale(1.1); box-shadow: 8px 8px 20px rgba(0,0,0,0.15); } .drop:active { transform: rotate(45deg) scale(0.9); }
+        #drop-red { background-color: #ff5252; } #drop-yellow { background-color: #ffda79; } #drop-blue { background-color: #34ace0; }
     </style>
 </head>
 <body>
@@ -89,10 +27,7 @@
         <button class="btn reset-btn" onclick="resetBowl()">🔄 Clean Bowl</button>
     </div>
     <div id="play-area">
-        <div id="bowl-container">
-            <div id="emoji-display">✨</div>
-            <div id="water"></div>
-        </div>
+        <div id="bowl-container"><div id="emoji-display">✨</div><div id="water"></div></div>
         <div id="paint-drops">
             <div class="drop" id="drop-red" onclick="addPaint('red')"></div>
             <div class="drop" id="drop-yellow" onclick="addPaint('yellow')"></div>
@@ -100,63 +35,24 @@
         </div>
     </div>
     <script>
-        const water = document.getElementById('water');
-        const emojiDisplay = document.getElementById('emoji-display');
-        let colorsInBowl = { red: false, yellow: false, blue: false };
-
-        const mixResults = {
-            "red": { hex: "#ff5252", item: "🍎", phrase: "Red! Like an apple!" },
-            "yellow": { hex: "#ffda79", item: "☀️", phrase: "Yellow! Like the sun!" },
-            "blue": { hex: "#34ace0", item: "🐳", phrase: "Blue! Like a whale!" },
-            "red-yellow": { hex: "#ffb142", item: "🍊", phrase: "Orange! Like an orange!" },
-            "blue-yellow": { hex: "#33d9b2", item: "🐸", phrase: "Green! Like a frog!" },
-            "blue-red": { hex: "#706fd3", item: "🍇", phrase: "Purple! Like grapes!" },
-            "blue-red-yellow": { hex: "#84817a", item: "🐻", phrase: "Brown! Like a bear!" },
-            "clean": { hex: "#ecf0f1", item: "✨", phrase: "All clean!" }
-        };
-
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance);
-            }
-        }
+        const water = document.getElementById('water'); const emojiDisplay = document.getElementById('emoji-display'); let colorsInBowl = { red: false, yellow: false, blue: false };
+        const mixResults = { "red": { hex: "#ff5252", item: "🍎", phrase: "Red! Like an apple!" }, "yellow": { hex: "#ffda79", item: "☀️", phrase: "Yellow! Like the sun!" }, "blue": { hex: "#34ace0", item: "🐳", phrase: "Blue! Like a whale!" }, "red-yellow": { hex: "#ffb142", item: "🍊", phrase: "Orange! Like an orange!" }, "blue-yellow": { hex: "#33d9b2", item: "🐸", phrase: "Green! Like a frog!" }, "blue-red": { hex: "#706fd3", item: "🍇", phrase: "Purple! Like grapes!" }, "blue-red-yellow": { hex: "#84817a", item: "🐻", phrase: "Brown! Like a bear!" }, "clean": { hex: "#ecf0f1", item: "✨", phrase: "All clean!" } };
+        
+        let audioCtx; function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
+        function speak(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance); } }
         function playSplash() {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3);
-            gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            const ctx = getAudio(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3); gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
             osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.3);
         }
         function goHome() { window.location.href = 'index.html'; }
-        function resetBowl() {
-            colorsInBowl = { red: false, yellow: false, blue: false };
-            updateBowl("clean"); speak(mixResults["clean"].phrase);
-        }
-        function addPaint(color) {
-            playSplash(); colorsInBowl[color] = true;
-            let mixKey = "";
-            if (colorsInBowl.blue && colorsInBowl.red && colorsInBowl.yellow) mixKey = "blue-red-yellow";
-            else if (colorsInBowl.blue && colorsInBowl.red) mixKey = "blue-red";
-            else if (colorsInBowl.blue && colorsInBowl.yellow) mixKey = "blue-yellow";
-            else if (colorsInBowl.red && colorsInBowl.yellow) mixKey = "red-yellow";
-            else if (colorsInBowl.red) mixKey = "red";
-            else if (colorsInBowl.blue) mixKey = "blue";
-            else if (colorsInBowl.yellow) mixKey = "yellow";
-            updateBowl(mixKey);
+        function resetBowl() { colorsInBowl = { red: false, yellow: false, blue: false }; updateBowl("clean"); speak(mixResults["clean"].phrase); }
+        function addPaint(color) { playSplash(); colorsInBowl[color] = true; let mixKey = "";
+            if (colorsInBowl.blue && colorsInBowl.red && colorsInBowl.yellow) mixKey = "blue-red-yellow"; else if (colorsInBowl.blue && colorsInBowl.red) mixKey = "blue-red"; else if (colorsInBowl.blue && colorsInBowl.yellow) mixKey = "blue-yellow"; else if (colorsInBowl.red && colorsInBowl.yellow) mixKey = "red-yellow"; else if (colorsInBowl.red) mixKey = "red"; else if (colorsInBowl.blue) mixKey = "blue"; else if (colorsInBowl.yellow) mixKey = "yellow"; updateBowl(mixKey);
         }
         function updateBowl(mixKey) {
-            const result = mixResults[mixKey];
-            water.style.backgroundColor = result.hex;
-            emojiDisplay.classList.remove('show-emoji');
-            setTimeout(() => {
-                emojiDisplay.innerText = result.item;
-                emojiDisplay.classList.add('show-emoji');
-                speak(result.phrase);
-            }, 800);
+            const result = mixResults[mixKey]; water.style.backgroundColor = result.hex; emojiDisplay.classList.remove('show-emoji');
+            setTimeout(() => { emojiDisplay.innerText = result.item; emojiDisplay.classList.add('show-emoji'); speak(result.phrase); }, 800);
         }
     </script>
 </body>
