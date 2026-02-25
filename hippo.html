@@ -6,255 +6,146 @@
     <title>Hungry Hippo Subtraction</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Comic Sans MS', sans-serif;
+            margin: 0; padding: 0; font-family: 'Comic Sans MS', sans-serif;
             background-color: #e8f6f3;
-            /* Fun jungle leaf pattern background */
             background-image: radial-gradient(#55efc4 10%, transparent 10%), radial-gradient(#55efc4 10%, transparent 10%);
-            background-size: 60px 60px;
-            background-position: 0 0, 30px 30px;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            background-size: 60px 60px; background-position: 0 0, 30px 30px;
+            display: flex; flex-direction: column; 
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        /* Top Navigation */
+        /* Controls now wrap on small screens */
         #controls {
-            background-color: #00b894;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 100;
+            background-color: #00b894; padding: 10px 20px;
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100;
         }
 
         .btn {
-            background-color: #ff9f43;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 18px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.1s;
+            background-color: #ff9f43; color: white; border: none; border-radius: 8px;
+            padding: 10px 15px; font-size: clamp(1rem, 3vw, 1.2rem); cursor: pointer; font-weight: bold;
         }
-
         .btn:active { transform: scale(0.95); }
-        .reset-btn { background-color: #0984e3; margin-left: 10px; }
+        .reset-btn { background-color: #0984e3; }
 
-        /* Play Area */
+        /* Play Area stacks vertically on mobile, side-by-side on desktop */
         #play-area {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            padding: 20px;
-            position: relative;
+            flex-grow: 1; display: flex; flex-wrap: wrap; 
+            align-items: center; justify-content: space-evenly;
+            padding: 20px; position: relative; gap: 20px;
         }
 
-        /* The Counter */
         #counter-board {
-            position: absolute;
-            top: 20px;
-            font-size: 3rem;
-            font-weight: bold;
-            color: #2d3436;
-            background: white;
-            padding: 10px 30px;
-            border-radius: 20px;
-            border: 5px dashed #00b894;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            z-index: 50;
+            position: absolute; top: 10px; left: 10px;
+            font-size: clamp(1.5rem, 5vw, 3rem); font-weight: bold;
+            color: #2d3436; background: white; padding: 10px 20px;
+            border-radius: 20px; border: 5px dashed #00b894; z-index: 50;
         }
 
-        /* Apples Container */
         #apple-tree {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            width: 40%;
-            justify-content: center;
-            z-index: 10;
-            background: rgba(255,255,255,0.5);
-            padding: 20px;
-            border-radius: 30px;
-            border: 4px solid #55efc4;
+            display: flex; flex-wrap: wrap; gap: clamp(5px, 2vw, 15px);
+            width: 100%; max-width: 400px; justify-content: center;
+            z-index: 10; background: rgba(255,255,255,0.5);
+            padding: 20px; border-radius: 30px; border: 4px solid #55efc4;
+            margin-top: 80px; /* Leave space for counter */
         }
 
         .apple {
-            font-size: 5rem;
-            cursor: pointer;
-            transition: transform 0.2s;
-            user-select: none;
-            /* Keeps the apple above other things when it flies */
-            position: relative; 
-            z-index: 100;
+            font-size: clamp(3rem, 10vw, 5rem); cursor: pointer; transition: transform 0.2s;
+            user-select: none; position: relative; z-index: 100;
         }
-
         .apple:hover { transform: scale(1.1) rotate(-10deg); }
 
-        /* The Hippo */
         #hippo {
-            font-size: 12rem;
-            user-select: none;
+            font-size: clamp(8rem, 30vw, 12rem); user-select: none;
             filter: drop-shadow(0 15px 10px rgba(0,0,0,0.2));
-            /* Make sure the hippo is positioned so we can track it */
-            position: relative;
-            z-index: 20;
+            position: relative; z-index: 20;
         }
-
     </style>
 </head>
 <body>
-
     <div id="controls">
         <button class="btn" onclick="goHome()">🏠 Home</button>
-        <div>
-            <button class="btn reset-btn" onclick="spawnApples(5)">🍎 5 Apples</button>
-            <button class="btn reset-btn" onclick="spawnApples(10)">🍎 10 Apples</button>
-        </div>
+        <button class="btn reset-btn" onclick="spawnApples(5)">🍎 5 Apples</button>
+        <button class="btn reset-btn" onclick="spawnApples(10)">🍎 10 Apples</button>
     </div>
-
     <div id="play-area">
         <div id="counter-board">Apples: <span id="count">0</span></div>
         <div id="apple-tree"></div>
         <div id="hippo">🦛</div>
     </div>
-
     <script>
         let currentApples = 0;
         const tree = document.getElementById('apple-tree');
         const countDisplay = document.getElementById('count');
         const hippo = document.getElementById('hippo');
 
-        // Text-to-Speech
         function speak(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;
-                utterance.pitch = 1.2;
-                window.speechSynthesis.speak(utterance);
+                utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance);
             }
         }
-
-        // Sound Effects
         function playSound(type) {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
+            const ctx = new AudioContext(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
             if (type === 'bloop') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(300, ctx.currentTime);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-                gain.gain.setValueAtTime(1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
             } else if (type === 'chomp') {
-                // Lower, rougher sound for a hippo crunch
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.type = 'square'; osc.frequency.setValueAtTime(150, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.5, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
             }
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.15);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.15);
         }
-
         function goHome() {
-            playSound('bloop');
-            setTimeout(() => { window.location.href = 'index.html'; }, 250);
+            playSound('bloop'); setTimeout(() => { window.location.href = 'index.html'; }, 250);
         }
-
         function spawnApples(num) {
-            tree.innerHTML = '';
-            currentApples = num;
-            updateCounter();
-            speak(num + " apples");
-
+            tree.innerHTML = ''; currentApples = num; updateCounter(); speak(num + " apples");
             for (let i = 0; i < num; i++) {
                 const apple = document.createElement('div');
-                apple.classList.add('apple');
-                apple.innerText = '🍎';
+                apple.classList.add('apple'); apple.innerText = '🍎';
                 apple.onclick = () => eatApple(apple);
                 tree.appendChild(apple);
             }
         }
-
         function eatApple(appleElement) {
-            // Prevent double-clicking while it's already flying
             if (appleElement.classList.contains('flying')) return;
             appleElement.classList.add('flying');
-
-            // 1. Get the exact screen coordinates of the Apple
+            
             const appleRect = appleElement.getBoundingClientRect();
             const startX = appleRect.left + (appleRect.width / 2);
             const startY = appleRect.top + (appleRect.height / 2);
-
-            // 2. Get the exact screen coordinates of the Hippo's mouth
+            
             const hippoRect = hippo.getBoundingClientRect();
-            // We aim for the left side of the hippo emoji where the mouth is
             const endX = hippoRect.left + (hippoRect.width * 0.2); 
             const endY = hippoRect.top + (hippoRect.height * 0.6);
+            
+            const travelX = endX - startX; const travelY = endY - startY;
 
-            // 3. Calculate the distance it needs to travel
-            const travelX = endX - startX;
-            const travelY = endY - startY;
-
-            // 4. Animate the apple flying over
             const flight = appleElement.animate([
                 { transform: 'translate(0px, 0px) scale(1) rotate(0deg)' },
-                // It spins while it flies, shrinks to fit in the mouth, and fades out
                 { transform: `translate(${travelX}px, ${travelY}px) scale(0.2) rotate(360deg)`, opacity: 0 }
-            ], {
-                duration: 600, // Takes 0.6 seconds to fly
-                easing: 'cubic-bezier(0.25, 1, 0.5, 1)', // Starts fast, slows down at the mouth
-                fill: 'forwards'
-            });
+            ], { duration: 600, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', fill: 'forwards' });
 
-            // 5. What happens when the apple finally hits the hippo
             flight.onfinish = () => {
-                // Play the sound exactly when it lands
                 playSound('chomp');
-                
-                // Make the hippo do a chewing animation
                 hippo.animate([
-                    { transform: 'scale(1)' },
-                    { transform: 'scale(1.2) rotate(-10deg)' },
-                    { transform: 'scale(0.9) rotate(10deg)' },
-                    { transform: 'scale(1.1) rotate(-5deg)' },
+                    { transform: 'scale(1)' }, { transform: 'scale(1.2) rotate(-10deg)' },
+                    { transform: 'scale(0.9) rotate(10deg)' }, { transform: 'scale(1.1) rotate(-5deg)' },
                     { transform: 'scale(1)' }
                 ], { duration: 400 });
-
-                // Remove the apple from the page and do the math
-                appleElement.remove();
-                currentApples--;
-                updateCounter();
-                
-                // Announce the new number
-                if (currentApples === 0) {
-                    setTimeout(() => speak("All gone!"), 300);
-                } else {
-                    setTimeout(() => speak(currentApples), 300);
-                }
+                appleElement.remove(); currentApples--; updateCounter();
+                if (currentApples === 0) { setTimeout(() => speak("All gone!"), 300); } 
+                else { setTimeout(() => speak(currentApples), 300); }
             };
         }
-
-        function updateCounter() {
-            countDisplay.innerText = currentApples;
-        }
-
-        // Start with 5 apples
+        function updateCounter() { countDisplay.innerText = currentApples; }
         window.onload = () => spawnApples(5);
     </script>
 </body>
