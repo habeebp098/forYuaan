@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Monster Maker: Deluxe</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* The Control Panel */
+        #controls {
+            background-color: #2c3e50;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #toolbar {
+            background-color: #34495e;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        input[type="color"] {
+            cursor: pointer;
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        input[type="range"] {
+            cursor: pointer;
+            width: 150px;
+        }
+
+        button {
+            font-size: 18px;
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #ffeb3b;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .special-btn { background-color: #00d2d3; color: black; }
+        .danger-btn { background-color: #ff4757; color: white; margin-left: 20px; }
+
+        /* The Play Area */
+        #canvas {
+            flex-grow: 1;
+            position: relative;
+            background-color: #ffffff;
+            background-image: radial-gradient(#d1d8e0 2px, transparent 2px);
+            background-size: 30px 30px;
+            overflow: hidden;
+        }
+
+        /* Draggable Shapes */
+        .shape {
+            position: absolute;
+            cursor: grab;
+            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3));
+        }
+
+        .shape:active {
+            cursor: grabbing;
+        }
+
+        /* Base styles for shapes (dimensions set by JS) */
+        .circle { border-radius: 50%; }
+        .square { }
+        .triangle {
+            width: 0 !important;
+            height: 0 !important;
+            background-color: transparent !important;
+            border-style: solid;
+            border-color: transparent;
+        }
+        
+        /* The Googly Eye */
+        .eye {
+            border-radius: 50%;
+            background-color: white !important;
+            border: 3px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .pupil {
+            background-color: black;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <label for="shapeColor">🎨 Pick a Color:</label>
+        <input type="color" id="shapeColor" value="#ff4757">
+        
+        <label for="shapeSize">📏 Choose Size:</label>
+        <input type="range" id="shapeSize" min="40" max="300" value="120">
+    </div>
+
+    <div id="toolbar">
+        <button onclick="addShape('circle')">🔴 Circle</button>
+        <button onclick="addShape('square')">🟦 Square</button>
+        <button onclick="addShape('triangle')">🔺 Triangle</button>
+        <button class="special-btn" onclick="addShape('eye')">👀 Googly Eye</button>
+        <button class="danger-btn" onclick="clearCanvas()">🗑️ Clear All</button>
+    </div>
+
+    <div id="canvas"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        let activeShape = null;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function addShape(type) {
+            const color = document.getElementById('shapeColor').value;
+            const size = document.getElementById('shapeSize').value;
+            
+            const shape = document.createElement('div');
+            shape.classList.add('shape', type);
+            
+            // Apply Dynamic Size and Color
+            if (type === 'triangle') {
+                shape.style.borderLeftWidth = (size / 2) + 'px';
+                shape.style.borderRightWidth = (size / 2) + 'px';
+                shape.style.borderBottomWidth = size + 'px';
+                shape.style.borderBottomColor = color;
+            } else if (type === 'eye') {
+                shape.style.width = size + 'px';
+                shape.style.height = size + 'px';
+                
+                // Create the black pupil inside the eye
+                const pupil = document.createElement('div');
+                pupil.classList.add('pupil');
+                pupil.style.width = (size / 2.5) + 'px';
+                pupil.style.height = (size / 2.5) + 'px';
+                shape.appendChild(pupil);
+            } else {
+                shape.style.width = size + 'px';
+                shape.style.height = size + 'px';
+                shape.style.backgroundColor = color;
+            }
+
+            // Spawn in the center of the screen
+            shape.style.left = (window.innerWidth / 2 - (size/2)) + 'px';
+            shape.style.top = (window.innerHeight / 2 - (size/2)) + 'px';
+
+            // Events for dragging and deleting
+            shape.addEventListener('pointerdown', startDrag);
+            shape.addEventListener('dblclick', function() {
+                shape.remove(); // Double-click to delete a specific shape
+            });
+
+            canvas.appendChild(shape);
+        }
+
+        function clearCanvas() {
+            canvas.innerHTML = '';
+        }
+
+        // Drag and Drop Logic
+        function startDrag(e) {
+            activeShape = e.currentTarget;
+            const rect = activeShape.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            
+            // Bring shape to the very front when clicked
+            activeShape.style.zIndex = Date.now();
+        }
+
+        document.addEventListener('pointermove', (e) => {
+            if (!activeShape) return;
+            activeShape.style.left = (e.clientX - offsetX) + 'px';
+            activeShape.style.top = (e.clientY - offsetY) + 'px';
+        });
+
+        document.addEventListener('pointerup', () => {
+            activeShape = null; 
+        });
+    </script>
+
+</body>
+</html>
