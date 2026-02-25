@@ -3,179 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Light Lab</title>
+    <title>Magic Color Bowl</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', Courier, monospace; /* Changed to a 'coding' font */
-            background-color: #1e272e; /* Dark tech background */
-            color: #d2dae2;
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f7f1e3; /* Soft, warm background */
             display: flex;
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
 
+        /* Top Navigation */
         #controls {
-            background-color: #0fbbc9;
-            padding: 10px 20px;
+            background-color: #ffb142;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-family: 'Comic Sans MS', sans-serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 100;
         }
 
         .btn {
-            background-color: #1e272e;
-            color: white;
-            border: none;
-            border-radius: 8px;
+            background-color: white;
+            color: #ff5252;
+            border: 4px solid #ff5252;
+            border-radius: 12px;
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.1s;
+            transition: all 0.2s;
         }
 
         .btn:active { transform: scale(0.95); }
+        .reset-btn { border-color: #34ace0; color: #34ace0; }
 
+        /* Play Area */
         #play-area {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 30px;
-            position: relative;
+            gap: 60px;
         }
 
-        /* The Data Readout */
-        #readout-panel {
-            background-color: black;
-            border: 2px solid #0fbbc9;
-            padding: 10px 30px;
-            border-radius: 10px;
-            font-size: 1.5rem;
-            text-align: center;
-            box-shadow: 0 0 15px #0fbbc9;
-        }
-
-        #hex-code { color: #0fbbc9; font-weight: bold; }
-
-        /* The Glowing Light Orb */
-        #orb-container {
-            position: relative;
-            width: 250px;
+        /* The Elegant Glass Bowl */
+        #bowl-container {
+            width: 300px;
             height: 250px;
+            border: 8px solid #d1ccc0;
+            border-top: none;
+            border-radius: 0 0 150px 150px;
+            position: relative;
+            background-color: rgba(255,255,255,0.5);
+            box-shadow: 0 20px 20px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 10px;
         }
 
-        #light-orb {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background-color: rgb(0, 0, 0);
-            box-shadow: 0 0 50px rgb(0, 0, 0);
-            transition: background-color 0.1s, box-shadow 0.1s;
-            border: 4px solid #485460;
-        }
-
-        /* The Emoji Surprise */
-        #surprise-item {
+        /* Glass Rim */
+        #bowl-container::before {
+            content: '';
             position: absolute;
-            font-size: 8rem;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 50;
-        }
-
-        .show-surprise {
-            opacity: 1 !important;
-            transform: translate(-50%, -150%) scale(1) !important;
-        }
-
-        /* Professional RGB Sliders */
-        #sliders {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 80%;
-            max-width: 600px;
-            background: rgba(0,0,0,0.5);
-            padding: 20px;
-            border-radius: 15px;
-        }
-
-        .slider-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .slider-label {
-            font-size: 1.5rem;
-            font-weight: bold;
-            width: 40px;
-        }
-
-        /* Customizing the sliders to make them massive for screen sharing */
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 40px;
-            width: 40px;
+            top: -10px;
+            left: -8px;
+            right: -8px;
+            height: 16px;
             border-radius: 50%;
-            background: #ffffff;
-            cursor: pointer;
-            margin-top: -15px;
-            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            background-color: #d1ccc0;
         }
 
-        input[type=range]::-webkit-slider-runnable-track {
+        /* The Magic Water */
+        #water {
+            width: 95%;
+            height: 85%;
+            background-color: #ecf0f1; /* Clear/Cloudy water */
+            border-radius: 0 0 140px 140px;
+            transition: background-color 1.5s ease-in-out; /* Smooth, elegant color mixing */
+            position: relative;
+        }
+
+        /* The Big Emoji */
+        #emoji-display {
+            position: absolute;
+            top: -100px;
+            font-size: 7rem;
             width: 100%;
-            height: 10px;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .show-emoji {
+            opacity: 1 !important;
+            transform: scale(1) translateY(-20px) !important;
+        }
+
+        /* The Paint Drops (Buttons) */
+        #paint-drops {
+            display: flex;
+            gap: 40px;
+        }
+
+        .drop {
+            width: 100px;
+            height: 100px;
+            border-radius: 50% 50% 50% 10%; /* Makes it look like a teardrop/paint drop */
+            transform: rotate(45deg);
             cursor: pointer;
-            border-radius: 5px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        #r-slider::-webkit-slider-runnable-track { background: #ff4757; }
-        #g-slider::-webkit-slider-runnable-track { background: #2ed573; }
-        #b-slider::-webkit-slider-runnable-track { background: #1e90ff; }
+        .drop:hover { transform: rotate(45deg) scale(1.1); box-shadow: 8px 8px 20px rgba(0,0,0,0.15); }
+        .drop:active { transform: rotate(45deg) scale(0.9); }
 
-        .val-display {
-            font-size: 1.5rem;
-            width: 60px;
-            text-align: right;
-        }
-
-        /* The Big Scan Button */
-        #scan-btn {
-            background-color: #ffda79;
-            color: black;
-            border: none;
-            border-radius: 50px;
-            padding: 15px 40px;
-            font-size: 2rem;
-            font-weight: bold;
-            font-family: 'Comic Sans MS', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 5px 0px #ccae62;
-            transition: all 0.1s;
-        }
-
-        #scan-btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 0px 0px #ccae62;
-        }
+        #drop-red { background-color: #ff5252; }
+        #drop-yellow { background-color: #ffda79; }
+        #drop-blue { background-color: #34ace0; }
 
     </style>
 </head>
@@ -183,82 +137,63 @@
 
     <div id="controls">
         <button class="btn" onclick="goHome()">🏠 Home</button>
-        <span style="font-size: 1.2rem; font-weight:bold;">LAB: ADDITIVE LIGHT MIXING</span>
+        <button class="btn reset-btn" onclick="resetBowl()">🔄 Clean Bowl</button>
     </div>
 
     <div id="play-area">
         
-        <div id="readout-panel">
-            DATA: <span id="rgb-code">RGB(0, 0, 0)</span> | HEX: <span id="hex-code">#000000</span>
+        <div id="bowl-container">
+            <div id="emoji-display">✨</div>
+            <div id="water"></div>
         </div>
 
-        <div id="orb-container">
-            <div id="light-orb"></div>
-            <div id="surprise-item">✨</div>
-        </div>
-
-        <button id="scan-btn" onclick="scanColor()">🔍 SCAN LIGHT</button>
-
-        <div id="sliders">
-            <div class="slider-row">
-                <span class="slider-label" style="color: #ff4757;">R</span>
-                <input type="range" id="r-slider" min="0" max="255" value="0" oninput="updateLiveColor()">
-                <span class="val-display" id="r-val">0</span>
-            </div>
-            <div class="slider-row">
-                <span class="slider-label" style="color: #2ed573;">G</span>
-                <input type="range" id="g-slider" min="0" max="255" value="0" oninput="updateLiveColor()">
-                <span class="val-display" id="g-val">0</span>
-            </div>
-            <div class="slider-row">
-                <span class="slider-label" style="color: #1e90ff;">B</span>
-                <input type="range" id="b-slider" min="0" max="255" value="0" oninput="updateLiveColor()">
-                <span class="val-display" id="b-val">0</span>
-            </div>
+        <div id="paint-drops">
+            <div class="drop" id="drop-red" onclick="addPaint('red')"></div>
+            <div class="drop" id="drop-yellow" onclick="addPaint('yellow')"></div>
+            <div class="drop" id="drop-blue" onclick="addPaint('blue')"></div>
         </div>
 
     </div>
 
     <script>
-        const rSlider = document.getElementById('r-slider');
-        const gSlider = document.getElementById('g-slider');
-        const bSlider = document.getElementById('b-slider');
+        const water = document.getElementById('water');
+        const emojiDisplay = document.getElementById('emoji-display');
         
-        const rVal = document.getElementById('r-val');
-        const gVal = document.getElementById('g-val');
-        const bVal = document.getElementById('b-val');
-        
-        const lightOrb = document.getElementById('light-orb');
-        const rgbCodeDisplay = document.getElementById('rgb-code');
-        const hexCodeDisplay = document.getElementById('hex-code');
-        const surpriseEl = document.getElementById('surprise-item');
+        // Track what colors are in the bowl
+        let colorsInBowl = { red: false, yellow: false, blue: false };
 
-        // Professional Color Thresholds mapping RGB to recognizable toddler items
-        const targetColors = [
-            { r: 255, g: 0, b: 0, name: "Red", item: "🍎", phrase: "Maximum Red! Like an apple!" },
-            { r: 0, g: 255, b: 0, name: "Green", item: "🐸", phrase: "Maximum Green! Like a frog!" },
-            { r: 0, g: 0, b: 255, name: "Blue", item: "🐳", phrase: "Maximum Blue! Like a whale!" },
-            { r: 255, g: 255, b: 0, name: "Yellow", item: "☀️", phrase: "Red and Green make Yellow! Like the sun!" },
-            { r: 0, g: 255, b: 255, name: "Cyan", item: "🧊", phrase: "Green and Blue make Cyan! Like ice!" },
-            { r: 255, g: 0, b: 255, name: "Magenta", item: "🌸", phrase: "Red and Blue make Magenta! Like a flower!" },
-            { r: 255, g: 255, b: 255, name: "White", item: "☁️", phrase: "All colors on! That makes White light!" },
-            { r: 0, g: 0, b: 0, name: "Black", item: "🌌", phrase: "Lights off! Outer space." }
-        ];
+        // Dictionary for the color combinations
+        const mixResults = {
+            "red": { hex: "#ff5252", item: "🍎", phrase: "Red! Like an apple!" },
+            "yellow": { hex: "#ffda79", item: "☀️", phrase: "Yellow! Like the sun!" },
+            "blue": { hex: "#34ace0", item: "🐳", phrase: "Blue! Like a whale!" },
+            "red-yellow": { hex: "#ffb142", item: "🍊", phrase: "Orange! Like an orange!" },
+            "blue-yellow": { hex: "#33d9b2", item: "🐸", phrase: "Green! Like a frog!" },
+            "blue-red": { hex: "#706fd3", item: "🍇", phrase: "Purple! Like grapes!" },
+            "blue-red-yellow": { hex: "#84817a", item: "🐻", phrase: "Brown! Like a bear!" },
+            "clean": { hex: "#ecf0f1", item: "✨", phrase: "All clean!" }
+        };
 
-        function rgbToHex(r, g, b) {
-            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.2;
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
-        function playSciFiSound() {
+        function playSplash() {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
             const ctx = new AudioContext();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
 
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(200, ctx.currentTime);
-            osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.3);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3);
             gain.gain.setValueAtTime(0.5, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
 
@@ -268,70 +203,49 @@
             osc.stop(ctx.currentTime + 0.3);
         }
 
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.9;
-                utterance.pitch = 1.1; // Slightly more robotic pitch
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
         function goHome() {
             window.location.href = 'index.html';
         }
 
-        // Live update the orb as the sliders move (no sound/voice here to prevent lag)
-        function updateLiveColor() {
-            const r = parseInt(rSlider.value);
-            const g = parseInt(gSlider.value);
-            const b = parseInt(bSlider.value);
+        function resetBowl() {
+            colorsInBowl = { red: false, yellow: false, blue: false };
+            updateBowl("clean");
+            speak(mixResults["clean"].phrase);
+        }
 
-            rVal.innerText = r;
-            gVal.innerText = g;
-            bVal.innerText = b;
+        function addPaint(color) {
+            playSplash();
+            colorsInBowl[color] = true;
 
-            const rgbString = `rgb(${r}, ${g}, ${b})`;
-            const hexString = rgbToHex(r, g, b);
+            // Figure out the current combination
+            let mixKey = "";
+            if (colorsInBowl.blue && colorsInBowl.red && colorsInBowl.yellow) mixKey = "blue-red-yellow";
+            else if (colorsInBowl.blue && colorsInBowl.red) mixKey = "blue-red";
+            else if (colorsInBowl.blue && colorsInBowl.yellow) mixKey = "blue-yellow";
+            else if (colorsInBowl.red && colorsInBowl.yellow) mixKey = "red-yellow";
+            else if (colorsInBowl.red) mixKey = "red";
+            else if (colorsInBowl.blue) mixKey = "blue";
+            else if (colorsInBowl.yellow) mixKey = "yellow";
 
-            lightOrb.style.backgroundColor = rgbString;
-            lightOrb.style.boxShadow = `0 0 50px ${rgbString}`;
+            updateBowl(mixKey);
+        }
+
+        function updateBowl(mixKey) {
+            const result = mixResults[mixKey];
             
-            rgbCodeDisplay.innerText = `RGB(${r}, ${g}, ${b})`;
-            hexCodeDisplay.innerText = hexString;
-
-            // Hide the surprise if we move the sliders
-            surpriseEl.classList.remove('show-surprise');
-        }
-
-        // Triggered by the big yellow SCAN button
-        function scanColor() {
-            playSciFiSound();
-
-            const r = parseInt(rSlider.value);
-            const g = parseInt(gSlider.value);
-            const b = parseInt(bSlider.value);
-
-            // Check if they hit one of our exact target colors
-            let matchedColor = targetColors.find(c => c.r === r && c.g === g && c.b === b);
-
+            // Change water color elegantly
+            water.style.backgroundColor = result.hex;
+            
+            // Hide current emoji
+            emojiDisplay.classList.remove('show-emoji');
+            
+            // Wait for water transition, then show new emoji and speak
             setTimeout(() => {
-                if (matchedColor) {
-                    surpriseEl.innerText = matchedColor.item;
-                    surpriseEl.classList.add('show-surprise');
-                    speak(matchedColor.phrase);
-                } else {
-                    // For any random mix in between the major colors
-                    surpriseEl.innerText = "🎨";
-                    surpriseEl.classList.add('show-surprise');
-                    speak("Custom light mix detected!");
-                }
-            }, 300);
+                emojiDisplay.innerText = result.item;
+                emojiDisplay.classList.add('show-emoji');
+                speak(result.phrase);
+            }, 800);
         }
-
-        // Initialize
-        updateLiveColor();
     </script>
 </body>
 </html>
