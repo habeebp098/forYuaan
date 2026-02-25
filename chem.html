@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Magic Science</title>
+    <title>Professional Light Lab</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Comic Sans MS', sans-serif;
-            background-color: #2f3640; 
-            color: white;
+            font-family: 'Courier New', Courier, monospace; /* Changed to a 'coding' font */
+            background-color: #1e272e; /* Dark tech background */
+            color: #d2dae2;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -18,16 +18,16 @@
         }
 
         #controls {
-            background-color: #192a56;
+            background-color: #0fbbc9;
             padding: 10px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            z-index: 100;
+            font-family: 'Comic Sans MS', sans-serif;
         }
 
         .btn {
-            background-color: #ff9f43;
+            background-color: #1e272e;
             color: white;
             border: none;
             border-radius: 8px;
@@ -39,7 +39,6 @@
         }
 
         .btn:active { transform: scale(0.95); }
-        .reset-btn { background-color: #7f8fa6; }
 
         #play-area {
             flex-grow: 1;
@@ -47,112 +46,136 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 50px;
+            gap: 30px;
             position: relative;
         }
 
-        /* The Beaker / Bowl */
-        #bowl-container {
-            width: 300px;
-            height: 280px;
-            border: 10px solid rgba(255, 255, 255, 0.8);
-            border-top: none;
-            border-radius: 0 0 150px 150px;
+        /* The Data Readout */
+        #readout-panel {
+            background-color: black;
+            border: 2px solid #0fbbc9;
+            padding: 10px 30px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            text-align: center;
+            box-shadow: 0 0 15px #0fbbc9;
+        }
+
+        #hex-code { color: #0fbbc9; font-weight: bold; }
+
+        /* The Glowing Light Orb */
+        #orb-container {
             position: relative;
-            background-color: rgba(255,255,255,0.05);
-            /* A little glow effect */
-            box-shadow: 0 0 30px rgba(255,255,255,0.1);
+            width: 250px;
+            height: 250px;
         }
 
-        /* The rim of the glass */
-        #bowl-container::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            height: 20px;
-            border: 10px solid rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-        }
-
-        #water {
-            position: absolute;
-            bottom: 0;
+        #light-orb {
             width: 100%;
-            height: 75%;
-            background-color: #dcdde1; 
-            transition: background-color 1s ease-in-out;
-            border-radius: 0 0 140px 140px;
-            overflow: hidden;
-        }
-
-        /* Animated Bubbles */
-        .bubble {
-            position: absolute;
-            bottom: -20px;
-            background-color: rgba(255, 255, 255, 0.4);
+            height: 100%;
             border-radius: 50%;
-            animation: rise 2s infinite ease-in;
+            background-color: rgb(0, 0, 0);
+            box-shadow: 0 0 50px rgb(0, 0, 0);
+            transition: background-color 0.1s, box-shadow 0.1s;
+            border: 4px solid #485460;
         }
 
-        @keyframes rise {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
-        }
-
-        /* The pop-up surprise item */
+        /* The Emoji Surprise */
         #surprise-item {
             position: absolute;
             font-size: 8rem;
-            top: 50px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
             opacity: 0;
             pointer-events: none;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: translateY(50px) scale(0);
             z-index: 50;
         }
 
         .show-surprise {
             opacity: 1 !important;
-            transform: translateY(-120px) scale(1) !important;
+            transform: translate(-50%, -150%) scale(1) !important;
         }
 
-        /* Potion Buttons */
-        #potions {
-            display: flex;
-            gap: 30px;
-            z-index: 100;
-        }
-
-        .potion {
-            font-size: 4rem;
-            cursor: pointer;
-            transition: transform 0.2s;
-            user-select: none;
-            background: rgba(255,255,255,0.1);
-            padding: 15px 25px;
-            border-radius: 30px;
-            border: 5px solid transparent;
+        /* Professional RGB Sliders */
+        #sliders {
             display: flex;
             flex-direction: column;
+            gap: 20px;
+            width: 80%;
+            max-width: 600px;
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .slider-row {
+            display: flex;
             align-items: center;
+            gap: 15px;
         }
 
-        .potion-label {
-            font-size: 1.2rem;
-            font-family: sans-serif;
+        .slider-label {
+            font-size: 1.5rem;
             font-weight: bold;
-            margin-top: 10px;
+            width: 40px;
         }
 
-        .potion:hover { transform: scale(1.1) translateY(-10px); }
-        .potion:active { transform: scale(0.9); }
+        /* Customizing the sliders to make them massive for screen sharing */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
 
-        #btn-red { border-color: #e84118; color: #e84118; }
-        #btn-blue { border-color: #00a8ff; color: #00a8ff; }
-        #btn-yellow { border-color: #fbc531; color: #fbc531; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            margin-top: -15px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #r-slider::-webkit-slider-runnable-track { background: #ff4757; }
+        #g-slider::-webkit-slider-runnable-track { background: #2ed573; }
+        #b-slider::-webkit-slider-runnable-track { background: #1e90ff; }
+
+        .val-display {
+            font-size: 1.5rem;
+            width: 60px;
+            text-align: right;
+        }
+
+        /* The Big Scan Button */
+        #scan-btn {
+            background-color: #ffda79;
+            color: black;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 2rem;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 5px 0px #ccae62;
+            transition: all 0.1s;
+        }
+
+        #scan-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0px #ccae62;
+        }
 
     </style>
 </head>
@@ -160,89 +183,98 @@
 
     <div id="controls">
         <button class="btn" onclick="goHome()">🏠 Home</button>
-        <button class="btn reset-btn" onclick="resetWater()">🔄 Empty Bowl</button>
+        <span style="font-size: 1.2rem; font-weight:bold;">LAB: ADDITIVE LIGHT MIXING</span>
     </div>
 
     <div id="play-area">
-        <div id="surprise-item"></div>
         
-        <div id="bowl-container">
-            <div id="water">
-                </div>
+        <div id="readout-panel">
+            DATA: <span id="rgb-code">RGB(0, 0, 0)</span> | HEX: <span id="hex-code">#000000</span>
         </div>
 
-        <div id="potions">
-            <div class="potion" id="btn-red" onclick="addDrop('red')">🩸 <span class="potion-label">RED</span></div>
-            <div class="potion" id="btn-yellow" onclick="addDrop('yellow')">⚡ <span class="potion-label">YELLOW</span></div>
-            <div class="potion" id="btn-blue" onclick="addDrop('blue')">💧 <span class="potion-label">BLUE</span></div>
+        <div id="orb-container">
+            <div id="light-orb"></div>
+            <div id="surprise-item">✨</div>
         </div>
+
+        <button id="scan-btn" onclick="scanColor()">🔍 SCAN LIGHT</button>
+
+        <div id="sliders">
+            <div class="slider-row">
+                <span class="slider-label" style="color: #ff4757;">R</span>
+                <input type="range" id="r-slider" min="0" max="255" value="0" oninput="updateLiveColor()">
+                <span class="val-display" id="r-val">0</span>
+            </div>
+            <div class="slider-row">
+                <span class="slider-label" style="color: #2ed573;">G</span>
+                <input type="range" id="g-slider" min="0" max="255" value="0" oninput="updateLiveColor()">
+                <span class="val-display" id="g-val">0</span>
+            </div>
+            <div class="slider-row">
+                <span class="slider-label" style="color: #1e90ff;">B</span>
+                <input type="range" id="b-slider" min="0" max="255" value="0" oninput="updateLiveColor()">
+                <span class="val-display" id="b-val">0</span>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        const water = document.getElementById('water');
-        const surpriseEl = document.getElementById('surprise-item');
+        const rSlider = document.getElementById('r-slider');
+        const gSlider = document.getElementById('g-slider');
+        const bSlider = document.getElementById('b-slider');
         
-        let hasRed = false;
-        let hasBlue = false;
-        let hasYellow = false;
+        const rVal = document.getElementById('r-val');
+        const gVal = document.getElementById('g-val');
+        const bVal = document.getElementById('b-val');
+        
+        const lightOrb = document.getElementById('light-orb');
+        const rgbCodeDisplay = document.getElementById('rgb-code');
+        const hexCodeDisplay = document.getElementById('hex-code');
+        const surpriseEl = document.getElementById('surprise-item');
 
-        // Dictionary of colors and their real-world items
-        const colorData = {
-            "#e84118": { name: "Red", item: "🍎", phrase: "Red! Like an apple!" },
-            "#00a8ff": { name: "Blue", item: "🐳", phrase: "Blue! Like a whale!" },
-            "#fbc531": { name: "Yellow", item: "☀️", phrase: "Yellow! Like the sun!" },
-            "#4cd137": { name: "Green", item: "🐸", phrase: "Green! Like a frog!" },
-            "#ff9f43": { name: "Orange", item: "🍊", phrase: "Orange! Like an orange!" },
-            "#9c88ff": { name: "Purple", item: "🍇", phrase: "Purple! Like grapes!" },
-            "#8B4513": { name: "Brown", item: "🐻", phrase: "Brown! Like a bear!" },
-            "#dcdde1": { name: "Clean", item: "✨", phrase: "All clean!" }
-        };
+        // Professional Color Thresholds mapping RGB to recognizable toddler items
+        const targetColors = [
+            { r: 255, g: 0, b: 0, name: "Red", item: "🍎", phrase: "Maximum Red! Like an apple!" },
+            { r: 0, g: 255, b: 0, name: "Green", item: "🐸", phrase: "Maximum Green! Like a frog!" },
+            { r: 0, g: 0, b: 255, name: "Blue", item: "🐳", phrase: "Maximum Blue! Like a whale!" },
+            { r: 255, g: 255, b: 0, name: "Yellow", item: "☀️", phrase: "Red and Green make Yellow! Like the sun!" },
+            { r: 0, g: 255, b: 255, name: "Cyan", item: "🧊", phrase: "Green and Blue make Cyan! Like ice!" },
+            { r: 255, g: 0, b: 255, name: "Magenta", item: "🌸", phrase: "Red and Blue make Magenta! Like a flower!" },
+            { r: 255, g: 255, b: 255, name: "White", item: "☁️", phrase: "All colors on! That makes White light!" },
+            { r: 0, g: 0, b: 0, name: "Black", item: "🌌", phrase: "Lights off! Outer space." }
+        ];
 
-        // Initialize bubbles
-        function createBubbles() {
-            for(let i=0; i<8; i++) {
-                let bubble = document.createElement('div');
-                bubble.classList.add('bubble');
-                bubble.style.left = Math.random() * 100 + '%';
-                bubble.style.width = Math.random() * 20 + 10 + 'px';
-                bubble.style.height = bubble.style.width;
-                bubble.style.animationDuration = Math.random() * 2 + 2 + 's';
-                bubble.style.animationDelay = Math.random() * 2 + 's';
-                water.appendChild(bubble);
-            }
+        function rgbToHex(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
         }
-        createBubbles();
+
+        function playSciFiSound() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, ctx.currentTime);
+            osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.5, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
+        }
 
         function speak(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.rate = 0.9;
-                utterance.pitch = 1.2;
+                utterance.pitch = 1.1; // Slightly more robotic pitch
                 window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Bubbling synthesizer sound
-        function playBubbles() {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
-            
-            for(let i=0; i<3; i++) {
-                setTimeout(() => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400 + (Math.random()*400), ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.5, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.15);
-                }, i * 150);
             }
         }
 
@@ -250,49 +282,56 @@
             window.location.href = 'index.html';
         }
 
-        function resetWater() {
-            hasRed = false;
-            hasBlue = false;
-            hasYellow = false;
-            water.style.backgroundColor = '#dcdde1';
+        // Live update the orb as the sliders move (no sound/voice here to prevent lag)
+        function updateLiveColor() {
+            const r = parseInt(rSlider.value);
+            const g = parseInt(gSlider.value);
+            const b = parseInt(bSlider.value);
+
+            rVal.innerText = r;
+            gVal.innerText = g;
+            bVal.innerText = b;
+
+            const rgbString = `rgb(${r}, ${g}, ${b})`;
+            const hexString = rgbToHex(r, g, b);
+
+            lightOrb.style.backgroundColor = rgbString;
+            lightOrb.style.boxShadow = `0 0 50px ${rgbString}`;
             
-            surpriseEl.innerText = "✨";
-            surpriseEl.classList.add('show-surprise');
-            speak(colorData["#dcdde1"].phrase);
-            
-            setTimeout(() => { surpriseEl.classList.remove('show-surprise'); }, 2000);
-        }
+            rgbCodeDisplay.innerText = `RGB(${r}, ${g}, ${b})`;
+            hexCodeDisplay.innerText = hexString;
 
-        function addDrop(color) {
-            playBubbles();
-
-            if (color === 'red') hasRed = true;
-            if (color === 'blue') hasBlue = true;
-            if (color === 'yellow') hasYellow = true;
-
-            let hex = "";
-
-            if (hasRed && hasBlue && hasYellow) { hex = "#8B4513"; } 
-            else if (hasRed && hasBlue) { hex = "#9c88ff"; } // Purple
-            else if (hasRed && hasYellow) { hex = "#ff9f43"; } // Orange
-            else if (hasBlue && hasYellow) { hex = "#4cd137"; } // Green
-            else if (hasRed) { hex = "#e84118"; } 
-            else if (hasBlue) { hex = "#00a8ff"; } 
-            else if (hasYellow) { hex = "#fbc531"; }
-
-            // Change water color
-            water.style.backgroundColor = hex;
-            
-            // Hide previous surprise, then pop up the new one
+            // Hide the surprise if we move the sliders
             surpriseEl.classList.remove('show-surprise');
-            
-            setTimeout(() => {
-                const data = colorData[hex];
-                surpriseEl.innerText = data.item;
-                surpriseEl.classList.add('show-surprise');
-                speak(data.phrase);
-            }, 800); // Wait for the water to change color before popping the surprise
         }
+
+        // Triggered by the big yellow SCAN button
+        function scanColor() {
+            playSciFiSound();
+
+            const r = parseInt(rSlider.value);
+            const g = parseInt(gSlider.value);
+            const b = parseInt(bSlider.value);
+
+            // Check if they hit one of our exact target colors
+            let matchedColor = targetColors.find(c => c.r === r && c.g === g && c.b === b);
+
+            setTimeout(() => {
+                if (matchedColor) {
+                    surpriseEl.innerText = matchedColor.item;
+                    surpriseEl.classList.add('show-surprise');
+                    speak(matchedColor.phrase);
+                } else {
+                    // For any random mix in between the major colors
+                    surpriseEl.innerText = "🎨";
+                    surpriseEl.classList.add('show-surprise');
+                    speak("Custom light mix detected!");
+                }
+            }, 300);
+        }
+
+        // Initialize
+        updateLiveColor();
     </script>
 </body>
 </html>
