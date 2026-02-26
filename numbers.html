@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuaan's 123s</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
+            background-color: #e8f8f5; display: flex; flex-direction: column; 
+            min-height: 100vh; overflow-x: hidden; 
+        }
+
+        /* Top Navigation */
+        #controls { 
+            background-color: #2ed573; padding: 10px 20px; display: flex; 
+            align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; position: sticky; top: 0;
+        }
+
+        .home-btn { 
+            background-color: white; color: #2ed573; border: none; border-radius: 12px; 
+            padding: 10px 20px; font-size: clamp(1rem, 4vw, 1.5rem); cursor: pointer; 
+            font-weight: bold; text-decoration: none; display: inline-block;
+            box-shadow: 0 4px 0px #1e8449; transition: transform 0.1s;
+        }
+        .home-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #1e8449; }
+
+        .title-text { color: white; font-size: clamp(1.2rem, 5vw, 2rem); font-weight: bold; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+
+        /* The 1-10 Grid */
+        #number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: clamp(15px, 4vw, 25px); padding: clamp(20px, 5vw, 40px);
+            width: 100%; max-width: 900px; box-sizing: border-box; margin: 0 auto;
+        }
+
+        .number-btn {
+            background-color: white; border-radius: 25px;
+            aspect-ratio: 1 / 1; 
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(3.5rem, 10vw, 5rem); font-weight: bold;
+            color: white; cursor: pointer; border: none;
+            box-shadow: 0 8px 0px rgba(0,0,0,0.1); transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .number-btn:active { transform: translateY(8px); box-shadow: 0 0px 0px rgba(0,0,0,0.1); }
+
+        /* Full Screen Popup Overlay */
+        #popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .show-popup { opacity: 1 !important; pointer-events: auto !important; }
+
+        #popup-content {
+            background-color: white; border-radius: 40px; padding: 30px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transform: scale(0.5); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 10px solid #2ed573; text-align: center;
+            width: 85%; max-width: 500px; min-height: 300px;
+        }
+
+        .show-popup #popup-content { transform: scale(1); }
+
+        #popup-number { font-size: clamp(4rem, 15vw, 6rem); font-weight: bold; line-height: 1; margin: 0; color: #ff4757; }
+        
+        #popup-emoji-container {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+            margin: 20px 0; min-height: 100px; align-items: center;
+        }
+        
+        .bouncing-emoji {
+            font-size: clamp(3rem, 12vw, 5rem); line-height: 1; 
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        /* Stagger the bounces so they look alive! */
+        .bouncing-emoji:nth-child(even) { animation-delay: 0.2s; }
+        .bouncing-emoji:nth-child(3n) { animation-delay: 0.4s; }
+
+        #popup-word { font-size: clamp(1.8rem, 6vw, 2.5rem); font-weight: bold; color: #2f3542; margin: 0; }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <a href="index.html" class="home-btn">🏠 Home</a>
+        <div class="title-text">Yuaan's 123s</div>
+    </div>
+
+    <div id="number-grid">
+        </div>
+
+    <div id="popup-overlay" onclick="closePopup()">
+        <div id="popup-content">
+            <div id="popup-number">1</div>
+            <div id="popup-emoji-container"></div>
+            <div id="popup-word">One Sun</div>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('number-grid');
+        const overlay = document.getElementById('popup-overlay');
+        const popupNumber = document.getElementById('popup-number');
+        const popupEmojiContainer = document.getElementById('popup-emoji-container');
+        const popupWord = document.getElementById('popup-word');
+        
+        let popupTimer;
+
+        // The Number Dictionary for Yuaan
+        const numberData = [
+            { num: 1, word: 'One', item: 'Sun', emoji: '☀️', color: '#ff4757' },
+            { num: 2, word: 'Two', item: 'Shoes', emoji: '👟', color: '#1e90ff' },
+            { num: 3, word: 'Three', item: 'Cars', emoji: '🚗', color: '#2ed573' },
+            { num: 4, word: 'Four', item: 'Dogs', emoji: '🐶', color: '#ffa502' },
+            { num: 5, word: 'Five', item: 'Stars', emoji: '⭐', color: '#9c88ff' },
+            { num: 6, word: 'Six', item: 'Balloons', emoji: '🎈', color: '#ff4757' },
+            { num: 7, word: 'Seven', item: 'Strawberries', emoji: '🍓', color: '#1e90ff' },
+            { num: 8, word: 'Eight', item: 'Butterflies', emoji: '🦋', color: '#2ed573' },
+            { num: 9, word: 'Nine', item: 'Fish', emoji: '🐟', color: '#ffa502' },
+            { num: 10, word: 'Ten', item: 'Dinosaurs!', emoji: '🦖', color: '#9c88ff' }
+        ];
+
+        // 1. Build the Grid Automatically
+        numberData.forEach(data => {
+            const btn = document.createElement('button');
+            btn.classList.add('number-btn');
+            btn.innerText = data.num;
+            btn.style.backgroundColor = data.color;
+            
+            btn.onclick = () => openPopup(data);
+            grid.appendChild(btn);
+        });
+
+        // 2. Safe Robot Voice
+        function speak(text) {
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.85; 
+                    utterance.pitch = 1.3; // High, happy pitch for numbers
+                    window.speechSynthesis.speak(utterance);
+                }
+            } catch(e) {}
+        }
+
+        // 3. Handle the Popup
+        function openPopup(data) {
+            // Fill in the text
+            popupNumber.innerText = data.num;
+            popupNumber.style.color = data.color;
+            document.getElementById('popup-content').style.borderColor = data.color;
+            popupWord.innerText = `${data.word} ${data.item}`;
+            
+            // Clear out old emojis
+            popupEmojiContainer.innerHTML = '';
+            
+            // Create the exact amount of emojis!
+            for(let i = 0; i < data.num; i++) {
+                const span = document.createElement('span');
+                span.classList.add('bouncing-emoji');
+                span.innerText = data.emoji;
+                popupEmojiContainer.appendChild(span);
+            }
+            
+            // Show it visually
+            overlay.classList.add('show-popup');
+            
+            // Make it talk! "Three! Three Cars."
+            speak(`${data.word}! ${data.word} ${data.item}.`);
+
+            // Clear any old timers
+            clearTimeout(popupTimer);
+            
+            // Give him slightly more time to look at the screen for bigger numbers
+            const timeToWait = data.num <= 5 ? 3500 : 5000; 
+            
+            popupTimer = setTimeout(() => {
+                closePopup();
+            }, timeToWait);
+        }
+
+        function closePopup() {
+            overlay.classList.remove('show-popup');
+            window.speechSynthesis.cancel(); 
+        }
+    </script>
+</body>
+</html>

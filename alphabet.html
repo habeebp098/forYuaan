@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuaan's ABCs</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
+            background-color: #fff9c4; display: flex; flex-direction: column; 
+            min-height: 100vh; overflow-x: hidden; 
+        }
+
+        /* Top Navigation */
+        #controls { 
+            background-color: #ff9f43; padding: 10px 20px; display: flex; 
+            align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100; position: sticky; top: 0;
+        }
+
+        .home-btn { 
+            background-color: white; color: #ff9f43; border: none; border-radius: 12px; 
+            padding: 10px 20px; font-size: clamp(1rem, 4vw, 1.5rem); cursor: pointer; 
+            font-weight: bold; text-decoration: none; display: inline-block;
+            box-shadow: 0 4px 0px #d35400; transition: transform 0.1s;
+        }
+        .home-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #d35400; }
+
+        .title-text { color: white; font-size: clamp(1.2rem, 5vw, 2rem); font-weight: bold; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+
+        /* The A-Z Grid */
+        #alphabet-grid {
+            display: grid;
+            /* Automatically creates as many columns as will fit, making it perfectly responsive */
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: clamp(10px, 3vw, 20px); padding: clamp(15px, 5vw, 30px);
+            width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto;
+        }
+
+        .letter-btn {
+            background-color: white; border-radius: 20px;
+            aspect-ratio: 1 / 1; /* Keeps them perfectly square */
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(2.5rem, 8vw, 4rem); font-weight: bold;
+            color: white; cursor: pointer; border: none;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.1); transition: transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .letter-btn:active { transform: translateY(6px); box-shadow: 0 0px 0px rgba(0,0,0,0.1); }
+
+        /* Full Screen Popup Overlay */
+        #popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .show-popup { opacity: 1 !important; pointer-events: auto !important; }
+
+        #popup-content {
+            background-color: white; border-radius: 40px; padding: 40px;
+            display: flex; flex-direction: column; align-items: center;
+            transform: scale(0.5); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 10px solid #ff9f43; text-align: center;
+            width: 80%; max-width: 400px;
+        }
+
+        .show-popup #popup-content { transform: scale(1); }
+
+        #popup-letter { font-size: clamp(5rem, 20vw, 8rem); font-weight: bold; line-height: 1; margin: 0; color: #ff4757; }
+        #popup-image { font-size: clamp(6rem, 25vw, 10rem); line-height: 1; margin: 20px 0; animation: bounce 2s infinite ease-in-out; }
+        #popup-word { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: bold; color: #2f3542; margin: 0; }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <a href="index.html" class="home-btn">🏠 Home</a>
+        <div class="title-text">Yuaan's ABCs</div>
+    </div>
+
+    <div id="alphabet-grid">
+        </div>
+
+    <div id="popup-overlay" onclick="closePopup()">
+        <div id="popup-content">
+            <div id="popup-letter">A</div>
+            <div id="popup-image">🍎</div>
+            <div id="popup-word">Apple</div>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('alphabet-grid');
+        const overlay = document.getElementById('popup-overlay');
+        const popupLetter = document.getElementById('popup-letter');
+        const popupImage = document.getElementById('popup-image');
+        const popupWord = document.getElementById('popup-word');
+        
+        let popupTimer;
+
+        // The Master Alphabet Dictionary for Yuaan
+        const alphabetData = [
+            { letter: 'A', word: 'Apple', emoji: '🍎', color: '#ff4757' },
+            { letter: 'B', word: 'Bear', emoji: '🐻', color: '#1e90ff' },
+            { letter: 'C', word: 'Cat', emoji: '🐱', color: '#2ed573' },
+            { letter: 'D', word: 'Dog', emoji: '🐶', color: '#ffa502' },
+            { letter: 'E', word: 'Elephant', emoji: '🐘', color: '#9c88ff' },
+            { letter: 'F', word: 'Frog', emoji: '🐸', color: '#ff4757' },
+            { letter: 'G', word: 'Gorilla', emoji: '🦍', color: '#1e90ff' },
+            { letter: 'H', word: 'Horse', emoji: '🐴', color: '#2ed573' },
+            { letter: 'I', word: 'Ice Cream', emoji: '🍦', color: '#ffa502' },
+            { letter: 'J', word: 'Juice', emoji: '🧃', color: '#9c88ff' },
+            { letter: 'K', word: 'Kangaroo', emoji: '🦘', color: '#ff4757' },
+            { letter: 'L', word: 'Lion', emoji: '🦁', color: '#1e90ff' },
+            { letter: 'M', word: 'Monkey', emoji: '🐵', color: '#2ed573' },
+            { letter: 'N', word: 'Nurse', emoji: '🧑‍⚕️', color: '#ffa502' },
+            { letter: 'O', word: 'Octopus', emoji: '🐙', color: '#9c88ff' },
+            { letter: 'P', word: 'Pig', emoji: '🐷', color: '#ff4757' },
+            { letter: 'Q', word: 'Queen', emoji: '👑', color: '#1e90ff' },
+            { letter: 'R', word: 'Rocket', emoji: '🚀', color: '#2ed573' },
+            { letter: 'S', word: 'Sun', emoji: '☀️', color: '#ffa502' },
+            { letter: 'T', word: 'Tiger', emoji: '🐯', color: '#9c88ff' },
+            { letter: 'U', word: 'Umbrella', emoji: '☂️', color: '#ff4757' },
+            { letter: 'V', word: 'Volcano', emoji: '🌋', color: '#1e90ff' },
+            { letter: 'W', word: 'Whale', emoji: '🐳', color: '#2ed573' },
+            { letter: 'X', word: 'X-Ray', emoji: '🩻', color: '#ffa502' },
+            { letter: 'Y', word: 'Yuaan!', emoji: '👦🏻', color: '#9c88ff' }, // Custom for him!
+            { letter: 'Z', word: 'Zebra', emoji: '🦓', color: '#ff4757' }
+        ];
+
+        // 1. Build the Grid Automatically
+        alphabetData.forEach(item => {
+            const btn = document.createElement('button');
+            btn.classList.add('letter-btn');
+            btn.innerText = item.letter;
+            btn.style.backgroundColor = item.color; // Give it the fun color
+            
+            btn.onclick = () => openPopup(item);
+            grid.appendChild(btn);
+        });
+
+        // 2. Safe Robot Voice
+        function speak(text) {
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.85; // Slightly slower for a 3 year old
+                    utterance.pitch = 1.2;
+                    window.speechSynthesis.speak(utterance);
+                }
+            } catch(e) {}
+        }
+
+        // 3. Handle the Popup
+        function openPopup(item) {
+            // Fill in the data
+            popupLetter.innerText = item.letter;
+            popupLetter.style.color = item.color;
+            popupImage.innerText = item.emoji;
+            popupWord.innerText = item.word;
+            
+            // Show it visually
+            overlay.classList.add('show-popup');
+            
+            // Make it talk! "A... for Apple!"
+            if (item.letter === 'Y') {
+                speak("Y...  for Yuaan!");
+            } else {
+                speak(`${item.letter}... for ${item.word}!`);
+            }
+
+            // Clear any old timers, and set a new one to close the popup automatically after 3 seconds
+            clearTimeout(popupTimer);
+            popupTimer = setTimeout(() => {
+                closePopup();
+            }, 3000);
+        }
+
+        // Allow clicking the dark background to close it early
+        function closePopup() {
+            overlay.classList.remove('show-popup');
+            window.speechSynthesis.cancel(); // Stop talking if they close it early
+        }
+    </script>
+</body>
+</html>
