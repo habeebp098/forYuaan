@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuaan's Rainbow Chalkboard</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
+            background-color: #2f3640; /* Dark chalkboard color */
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
+        }
+
+        /* Top Navigation */
+        #controls { 
+            background-color: #ffa502; padding: 10px 20px; display: flex; 
+            align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 200; position: relative;
+        }
+
+        .home-btn { 
+            background-color: white; color: #ffa502; border: none; border-radius: 12px; 
+            padding: 10px 20px; font-size: clamp(1rem, 4vw, 1.5rem); cursor: pointer; 
+            font-weight: bold; text-decoration: none; display: inline-block;
+            box-shadow: 0 4px 0px #e67e22; transition: transform 0.1s;
+        }
+        .home-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #e67e22; }
+        
+        .toolbar { display: flex; gap: 10px; align-items: center; }
+
+        .tool-btn {
+            background-color: white; border: 3px solid #2f3640; border-radius: 12px;
+            padding: 10px 15px; font-size: clamp(1rem, 4vw, 1.5rem); font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 0px #2f3640; transition: transform 0.1s;
+        }
+        .tool-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #2f3640; }
+        #btn-trash { color: #ff4757; }
+
+        /* The Drawing Area */
+        #board-container {
+            flex-grow: 1; position: relative; margin: 20px; 
+            background-color: #353b48; border-radius: 20px; 
+            border: 8px solid #718093; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* The Ghost Letter Behind the Canvas */
+        #ghost-letter {
+            position: absolute; font-size: clamp(15rem, 50vw, 30rem);
+            font-family: Arial, Helvetica, sans-serif; /* Clean font for tracing */
+            font-weight: bold; color: rgba(255, 255, 255, 0.1); /* Very faint white */
+            user-select: none; pointer-events: none; z-index: 10;
+        }
+
+        /* The Ghost Emoji */
+        #ghost-emoji {
+            position: absolute; top: 20px; right: 20px;
+            font-size: clamp(3rem, 10vw, 6rem); opacity: 0.5;
+            user-select: none; pointer-events: none; z-index: 10;
+        }
+
+        /* The Actual Canvas */
+        #draw-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 20; cursor: crosshair; touch-action: none; /* Crucial for mobile drawing */
+        }
+
+        /* Bottom Controls (Next/Prev Letter) */
+        #letter-controls {
+            padding: 15px; display: flex; justify-content: center; gap: 20px;
+            background-color: #2f3640; z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: #7bed9f; color: #2f3542; border: 4px solid #2ed573;
+            border-radius: 20px; padding: 10px 30px; font-size: clamp(1.5rem, 6vw, 2.5rem);
+            font-weight: bold; cursor: pointer; box-shadow: 0 6px 0px #2ed573;
+            transition: transform 0.1s; display: flex; align-items: center; justify-content: center;
+        }
+        .nav-btn:active { transform: translateY(6px); box-shadow: 0 0px 0px #2ed573; }
+
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <a href="index.html" class="home-btn">🏠 Home</a>
+        <div class="toolbar">
+            <button class="tool-btn" id="btn-trash" onclick="clearCanvas()">🗑️ Clean Board</button>
+        </div>
+    </div>
+
+    <div id="board-container">
+        <div id="ghost-letter">A</div>
+        <div id="ghost-emoji">🍎</div>
+        <canvas id="draw-canvas"></canvas>
+    </div>
+
+    <div id="letter-controls">
+        <button class="nav-btn" onclick="changeLetter(-1)">⬅️</button>
+        <button class="nav-btn" onclick="changeLetter(1)">➡️</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        const ghostLetter = document.getElementById('ghost-letter');
+        const ghostEmoji = document.getElementById('ghost-emoji');
+        const container = document.getElementById('board-container');
+
+        // The Alphabet Dictionary
+        const alphabetData = [
+            { letter: 'A', word: 'Apple', emoji: '🍎' }, { letter: 'B', word: 'Bear', emoji: '🐻' },
+            { letter: 'C', word: 'Cat', emoji: '🐱' }, { letter: 'D', word: 'Dog', emoji: '🐶' },
+            { letter: 'E', word: 'Elephant', emoji: '🐘' }, { letter: 'F', word: 'Frog', emoji: '🐸' },
+            { letter: 'G', word: 'Gorilla', emoji: '🦍' }, { letter: 'H', word: 'Horse', emoji: '🐴' },
+            { letter: 'I', word: 'Ice Cream', emoji: '🍦' }, { letter: 'J', word: 'Juice', emoji: '🧃' },
+            { letter: 'K', word: 'Kangaroo', emoji: '🦘' }, { letter: 'L', word: 'Lion', emoji: '🦁' },
+            { letter: 'M', word: 'Monkey', emoji: '🐵' }, { letter: 'N', word: 'Nurse', emoji: '🧑‍⚕️' },
+            { letter: 'O', word: 'Octopus', emoji: '🐙' }, { letter: 'P', word: 'Pig', emoji: '🐷' },
+            { letter: 'Q', word: 'Queen', emoji: '👑' }, { letter: 'R', word: 'Rocket', emoji: '🚀' },
+            { letter: 'S', word: 'Sun', emoji: '☀️' }, { letter: 'T', word: 'Tiger', emoji: '🐯' },
+            { letter: 'U', word: 'Umbrella', emoji: '☂️' }, { letter: 'V', word: 'Volcano', emoji: '🌋' },
+            { letter: 'W', word: 'Whale', emoji: '🐳' }, { letter: 'X', word: 'X-Ray', emoji: '🩻' },
+            { letter: 'Y', word: 'Yuaan!', emoji: '👦🏻' }, { letter: 'Z', word: 'Zebra', emoji: '🦓' }
+        ];
+
+        let currentIndex = 0;
+
+        // Drawing Variables
+        let isDrawing = false;
+        let lastX = 0; let lastY = 0;
+        let hue = 0; // Starts at red, will cycle through rainbow
+
+        // Safe Audio Engine
+        let audioCtx; 
+        function getAudio() { 
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) audioCtx = new AudioContext(); 
+                }
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); 
+                return audioCtx; 
+            } catch (e) { return null; }
+        }
+
+        function speak(text) { 
+            try {
+                if ('speechSynthesis' in window) { 
+                    window.speechSynthesis.cancel(); 
+                    const utterance = new SpeechSynthesisUtterance(text); 
+                    utterance.rate = 0.85; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance); 
+                } 
+            } catch (e) {} 
+        }
+
+        function playWipeSound() {
+            try {
+                const ctx = getAudio(); if (!ctx) return;
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(400, ctx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.3); 
+                gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3); 
+                osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.3);
+            } catch (e) {}
+        }
+
+        // Setup Canvas Resolution to match screen size
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            // Setup brush style
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 20; // Thick line for toddlers
+        }
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Navigation Logic
+        function changeLetter(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = alphabetData.length - 1;
+            if (currentIndex >= alphabetData.length) currentIndex = 0;
+
+            const item = alphabetData[currentIndex];
+            ghostLetter.innerText = item.letter;
+            ghostEmoji.innerText = item.emoji;
+
+            clearCanvas(false); // Clear board without playing sound
+            
+            // Announce the new letter
+            if (item.letter === 'Y') {
+                speak("Y... is for Yuaan!");
+            } else {
+                speak(`${item.letter}... for ${item.word}!`);
+            }
+        }
+
+        function clearCanvas(playSound = true) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (playSound) playWipeSound();
+        }
+
+        // --- Drawing Logic ---
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            // Check if it's a touch event or a mouse event
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const coords = getCoordinates(e);
+            lastX = coords.x; lastY = coords.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); // Stop mobile scrolling
+
+            const coords = getCoordinates(e);
+            
+            // Magic Rainbow Ink!
+            ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(coords.x, coords.y);
+            ctx.stroke();
+
+            // Update coordinates and color
+            lastX = coords.x;
+            lastY = coords.y;
+            hue += 5; // Change color rapidly
+            if (hue >= 360) hue = 0;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // Mouse Events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch Events for Mobile/Tablet
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchcancel', stopDrawing);
+
+        // Initialize
+        setTimeout(() => {
+            resizeCanvas();
+            changeLetter(0); // Load first letter
+        }, 100);
+
+    </script>
+</body>
+</html>
