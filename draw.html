@@ -7,8 +7,10 @@
     <style>
         body { 
             margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
-            background-color: #2f3640; display: flex; flex-direction: column; 
-            height: 100dvh; overflow: hidden; 
+            background-color: #2f3640; 
+            display: flex; flex-direction: column; 
+            height: 100dvh; 
+            overflow: hidden; 
         }
 
         /* Top Navigation */
@@ -46,14 +48,13 @@
             overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
 
-        /* The Tracing Guide Letter (Hollow Outline) */
+        /* The Tracing Guide Letter (Faint Chalk Dust) */
         #ghost-letter {
-            position: absolute; font-size: clamp(15rem, 50vw, 30rem);
+            position: absolute; 
+            font-size: clamp(12rem, 50vw, 25rem);
             font-family: Arial, sans-serif; font-weight: bold;
-            color: transparent; /* Makes the inside clear */
-            -webkit-text-stroke: 4px rgba(255, 255, 255, 0.3); /* Hollow white dashed look */
-            border-bottom: 4px dashed rgba(255, 255, 255, 0.2); /* The writing line */
-            line-height: 0.8; padding-bottom: 20px;
+            color: rgba(255, 255, 255, 0.15); /* Solid, very faint white. No strokes! */
+            line-height: 1; 
             user-select: none; pointer-events: none; z-index: 10;
         }
 
@@ -177,7 +178,7 @@
             // Set up the Neon Brush style!
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
-            ctx.lineWidth = 12; // Much thinner so you can trace properly
+            ctx.lineWidth = 12; // Thin enough to trace properly
             ctx.shadowBlur = 15; // Gives it a magic neon glow
         }
         window.addEventListener('resize', resizeCanvas);
@@ -229,7 +230,7 @@
             // Magic Glowing Rainbow Ink
             const color = `hsl(${hue}, 100%, 65%)`;
             ctx.strokeStyle = color;
-            ctx.shadowColor = color; // The glow matches the ink
+            ctx.shadowColor = color; 
             
             ctx.beginPath();
             ctx.moveTo(lastX, lastY);
