@@ -7,20 +7,20 @@
     <style>
         body { 
             margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
-            background-color: #2f3640; /* Dark chalkboard color */
-            display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
+            background-color: #2f3640; display: flex; flex-direction: column; 
+            height: 100dvh; overflow: hidden; 
         }
 
         /* Top Navigation */
         #controls { 
-            background-color: #ffa502; padding: 10px 20px; display: flex; 
-            align-items: center; justify-content: space-between; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 200; position: relative;
+            background-color: #ffa502; padding: clamp(5px, 2vw, 10px) 20px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 200; flex-shrink: 0;
         }
 
         .home-btn { 
             background-color: white; color: #ffa502; border: none; border-radius: 12px; 
-            padding: 10px 20px; font-size: clamp(1rem, 4vw, 1.5rem); cursor: pointer; 
+            padding: 8px 15px; font-size: clamp(1rem, 4vw, 1.5rem); cursor: pointer; 
             font-weight: bold; text-decoration: none; display: inline-block;
             box-shadow: 0 4px 0px #e67e22; transition: transform 0.1s;
         }
@@ -30,7 +30,7 @@
 
         .tool-btn {
             background-color: white; border: 3px solid #2f3640; border-radius: 12px;
-            padding: 10px 15px; font-size: clamp(1rem, 4vw, 1.5rem); font-weight: bold;
+            padding: 8px 12px; font-size: clamp(0.9rem, 3vw, 1.2rem); font-weight: bold;
             cursor: pointer; box-shadow: 0 4px 0px #2f3640; transition: transform 0.1s;
         }
         .tool-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #2f3640; }
@@ -38,44 +38,50 @@
 
         /* The Drawing Area */
         #board-container {
-            flex-grow: 1; position: relative; margin: 20px; 
+            flex-grow: 1; flex-shrink: 1; min-height: 0; 
+            position: relative; margin: clamp(10px, 3vw, 20px); 
             background-color: #353b48; border-radius: 20px; 
-            border: 8px solid #718093; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            border: clamp(4px, 1vw, 8px) solid #718093; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
             overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
 
-        /* The Ghost Letter Behind the Canvas */
+        /* The Tracing Guide Letter (Hollow Outline) */
         #ghost-letter {
             position: absolute; font-size: clamp(15rem, 50vw, 30rem);
-            font-family: Arial, Helvetica, sans-serif; /* Clean font for tracing */
-            font-weight: bold; color: rgba(255, 255, 255, 0.1); /* Very faint white */
+            font-family: Arial, sans-serif; font-weight: bold;
+            color: transparent; /* Makes the inside clear */
+            -webkit-text-stroke: 4px rgba(255, 255, 255, 0.3); /* Hollow white dashed look */
+            border-bottom: 4px dashed rgba(255, 255, 255, 0.2); /* The writing line */
+            line-height: 0.8; padding-bottom: 20px;
             user-select: none; pointer-events: none; z-index: 10;
         }
 
         /* The Ghost Emoji */
         #ghost-emoji {
-            position: absolute; top: 20px; right: 20px;
-            font-size: clamp(3rem, 10vw, 6rem); opacity: 0.5;
+            position: absolute; top: clamp(10px, 3vw, 20px); right: clamp(10px, 3vw, 20px);
+            font-size: clamp(2.5rem, 8vw, 5rem); opacity: 0.5;
             user-select: none; pointer-events: none; z-index: 10;
         }
 
         /* The Actual Canvas */
         #draw-canvas {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 20; cursor: crosshair; touch-action: none; /* Crucial for mobile drawing */
+            z-index: 20; cursor: crosshair; touch-action: none; 
         }
 
         /* Bottom Controls (Next/Prev Letter) */
         #letter-controls {
-            padding: 15px; display: flex; justify-content: center; gap: 20px;
-            background-color: #2f3640; z-index: 100;
+            padding: clamp(10px, 3vw, 15px); display: flex; justify-content: center; gap: 20px;
+            background-color: #2f3640; z-index: 100; flex-shrink: 0;
         }
 
         .nav-btn {
             background-color: #7bed9f; color: #2f3542; border: 4px solid #2ed573;
-            border-radius: 20px; padding: 10px 30px; font-size: clamp(1.5rem, 6vw, 2.5rem);
+            border-radius: 20px; padding: 10px clamp(20px, 5vw, 40px); font-size: clamp(1.2rem, 5vw, 2rem);
             font-weight: bold; cursor: pointer; box-shadow: 0 6px 0px #2ed573;
             transition: transform 0.1s; display: flex; align-items: center; justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
         .nav-btn:active { transform: translateY(6px); box-shadow: 0 0px 0px #2ed573; }
 
@@ -86,7 +92,7 @@
     <div id="controls">
         <a href="index.html" class="home-btn">🏠 Home</a>
         <div class="toolbar">
-            <button class="tool-btn" id="btn-trash" onclick="clearCanvas()">🗑️ Clean Board</button>
+            <button class="tool-btn" id="btn-trash" onclick="clearBoard(true)">🗑️ Clean Board</button>
         </div>
     </div>
 
@@ -126,11 +132,9 @@
         ];
 
         let currentIndex = 0;
-
-        // Drawing Variables
         let isDrawing = false;
         let lastX = 0; let lastY = 0;
-        let hue = 0; // Starts at red, will cycle through rainbow
+        let hue = 0; 
 
         // Safe Audio Engine
         let audioCtx; 
@@ -166,18 +170,18 @@
             } catch (e) {}
         }
 
-        // Setup Canvas Resolution to match screen size
         function resizeCanvas() {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
-            // Setup brush style
+            
+            // Set up the Neon Brush style!
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
-            ctx.lineWidth = 20; // Thick line for toddlers
+            ctx.lineWidth = 12; // Much thinner so you can trace properly
+            ctx.shadowBlur = 15; // Gives it a magic neon glow
         }
         window.addEventListener('resize', resizeCanvas);
         
-        // Navigation Logic
         function changeLetter(direction) {
             currentIndex += direction;
             if (currentIndex < 0) currentIndex = alphabetData.length - 1;
@@ -187,9 +191,8 @@
             ghostLetter.innerText = item.letter;
             ghostEmoji.innerText = item.emoji;
 
-            clearCanvas(false); // Clear board without playing sound
+            clearBoard(false);
             
-            // Announce the new letter
             if (item.letter === 'Y') {
                 speak("Y... is for Yuaan!");
             } else {
@@ -197,7 +200,7 @@
             }
         }
 
-        function clearCanvas(playSound = true) {
+        function clearBoard(playSound = false) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (playSound) playWipeSound();
         }
@@ -205,52 +208,47 @@
         // --- Drawing Logic ---
         function getCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
-            // Check if it's a touch event or a mouse event
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
+            return { x: clientX - rect.left, y: clientY - rect.top };
         }
 
         function startDrawing(e) {
             isDrawing = true;
             const coords = getCoordinates(e);
             lastX = coords.x; lastY = coords.y;
+            draw(e); 
         }
 
         function draw(e) {
             if (!isDrawing) return;
-            e.preventDefault(); // Stop mobile scrolling
+            e.preventDefault(); 
 
             const coords = getCoordinates(e);
             
-            // Magic Rainbow Ink!
-            ctx.strokeStyle = `hsl(${hue}, 100%, 60%)`;
+            // Magic Glowing Rainbow Ink
+            const color = `hsl(${hue}, 100%, 65%)`;
+            ctx.strokeStyle = color;
+            ctx.shadowColor = color; // The glow matches the ink
+            
             ctx.beginPath();
             ctx.moveTo(lastX, lastY);
             ctx.lineTo(coords.x, coords.y);
             ctx.stroke();
 
-            // Update coordinates and color
             lastX = coords.x;
             lastY = coords.y;
-            hue += 5; // Change color rapidly
+            hue += 4; 
             if (hue >= 360) hue = 0;
         }
 
-        function stopDrawing() {
-            isDrawing = false;
-        }
+        function stopDrawing() { isDrawing = false; }
 
-        // Mouse Events
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
 
-        // Touch Events for Mobile/Tablet
         canvas.addEventListener('touchstart', startDrawing, { passive: false });
         canvas.addEventListener('touchmove', draw, { passive: false });
         canvas.addEventListener('touchend', stopDrawing);
@@ -259,7 +257,7 @@
         // Initialize
         setTimeout(() => {
             resizeCanvas();
-            changeLetter(0); // Load first letter
+            changeLetter(0); 
         }, 100);
 
     </script>
