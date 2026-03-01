@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fix the Clock! ⏰</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(160deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* Stars */
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.tstar{position:absolute;background:white;border-radius:50%;animation:tw var(--d) ease-in-out infinite var(--dl);}
+@keyframes tw{0%,100%{opacity:.1}50%{opacity:.9}}
+
+header{position:relative;z-index:10;display:flex;align-items:center;justify-content:center;padding:14px 20px 8px;}
+.back-btn{position:absolute;left:16px;background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.25);border-radius:50px;padding:9px 16px;font-family:'Boogaloo',cursive;font-size:.95rem;color:white;text-decoration:none;transition:all .2s;}
+.back-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.05);}
+h1{font-family:'Boogaloo',cursive;font-size:clamp(1.8rem,6vw,3rem);color:white;text-shadow:0 0 20px rgba(255,220,100,.7),3px 3px 0 rgba(0,0,0,.3);letter-spacing:2px;}
+
+.badge-row{position:relative;z-index:10;display:flex;justify-content:center;gap:12px;padding:0 20px 10px;}
+.badge{background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.2);border-radius:50px;padding:8px 18px;font-family:'Boogaloo',cursive;font-size:1.05rem;color:white;}
+.badge .v{font-size:1.3rem;color:#ffe066;}
+
+/* Task card */
+.task-card{position:relative;z-index:10;max-width:440px;margin:0 auto 16px;padding:0 16px;}
+.task-inner{background:rgba(255,255,255,.08);backdrop-filter:blur(12px);border-radius:28px;padding:18px 20px;text-align:center;border:2px solid rgba(255,255,255,.15);box-shadow:0 8px 30px rgba(0,0,0,.3);}
+.task-label{font-family:'Boogaloo',cursive;font-size:.9rem;color:rgba(255,255,255,.5);letter-spacing:2px;margin-bottom:8px;}
+.target-time{font-family:'Boogaloo',cursive;font-size:clamp(2.5rem,10vw,4.5rem);color:#ffe066;text-shadow:3px 3px 0 rgba(200,140,0,.4);letter-spacing:3px;}
+.time-context{font-family:'Nunito',sans-serif;font-size:1rem;color:rgba(255,255,255,.7);margin-top:6px;font-weight:700;}
+.time-emoji{font-size:1.8rem;margin-top:6px;display:block;}
+
+/* Clock */
+.clock-section{position:relative;z-index:10;display:flex;justify-content:center;margin-bottom:16px;}
+.clock-wrap{position:relative;width:220px;height:220px;}
+.clock-face{
+  width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#2d2d4e,#1a1a35);
+  border:6px solid rgba(255,220,100,.6);
+  box-shadow:0 0 40px rgba(255,220,100,.2),inset 0 0 30px rgba(0,0,0,.3);
+  position:relative;cursor:pointer;
+}
+/* Hour marks */
+.hour-mark{position:absolute;width:4px;height:14px;background:rgba(255,255,255,.5);border-radius:2px;left:50%;top:6px;transform-origin:center 104px;}
+/* Numbers */
+.clock-num{position:absolute;font-family:'Boogaloo',cursive;font-size:1.1rem;color:rgba(255,255,255,.8);text-shadow:0 0 6px rgba(255,220,100,.4);}
+
+/* Hands */
+.hand{position:absolute;bottom:50%;left:50%;transform-origin:bottom center;border-radius:4px 4px 0 0;transition:none;}
+.hour-hand{width:8px;height:58px;background:linear-gradient(180deg,#ffe066,#f0932b);margin-left:-4px;box-shadow:0 0 8px rgba(255,220,100,.5);}
+.minute-hand{width:5px;height:82px;background:linear-gradient(180deg,#48dbfb,#0abde3);margin-left:-2.5px;box-shadow:0 0 8px rgba(72,219,251,.5);}
+.center-dot{position:absolute;width:14px;height:14px;background:#ffe066;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;box-shadow:0 0 10px rgba(255,220,100,.7);}
+
+/* Angle buttons */
+.controls{position:relative;z-index:10;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:0 16px;margin-bottom:12px;}
+.ctrl-group{background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.15);border-radius:20px;padding:12px 16px;text-align:center;}
+.ctrl-label{font-family:'Boogaloo',cursive;font-size:.9rem;color:rgba(255,255,255,.6);margin-bottom:8px;}
+.ctrl-btns{display:flex;gap:8px;}
+.ctrl-btn{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 14px;font-family:'Boogaloo',cursive;font-size:1.2rem;color:white;cursor:pointer;transition:all .15s;}
+.ctrl-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.08);}
+.ctrl-btn:active{transform:scale(.92);}
+
+/* Check button */
+.check-btn{display:block;margin:0 auto;background:linear-gradient(135deg,#ffe066,#f0932b);border:none;border-radius:50px;padding:14px 44px;font-family:'Boogaloo',cursive;font-size:1.3rem;color:#7a3500;cursor:pointer;box-shadow:0 6px 20px rgba(240,147,43,.4);transition:transform .2s;position:relative;z-index:10;}
+.check-btn:hover{transform:scale(1.04);}
+
+/* Feedback */
+.feedback{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);z-index:100;background:white;border-radius:50px;padding:14px 28px;font-family:'Boogaloo',cursive;font-size:1.2rem;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;transition:all .35s cubic-bezier(.175,.885,.32,1.275);max-width:320px;text-align:center;}
+.feedback.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.feedback.good{color:#2d9b55;border:3px solid #2ed573;}
+.feedback.bad{color:#c0392b;border:3px solid #ff6b6b;}
+
+.next-btn{display:block;margin:12px auto 0;background:linear-gradient(135deg,#48dbfb,#0abde3);border:none;border-radius:50px;padding:14px 40px;font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;cursor:pointer;box-shadow:0 6px 20px rgba(72,219,251,.4);transition:transform .2s;position:relative;z-index:10;visibility:hidden;}
+.next-btn.show{visibility:visible;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.win{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;}
+.win.show{display:flex;}
+.win-box{background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid rgba(255,220,100,.4);border-radius:30px;padding:50px 45px;text-align:center;max-width:360px;width:90%;box-shadow:0 0 60px rgba(255,220,100,.2);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.win-box h2{font-family:'Boogaloo',cursive;font-size:2.5rem;color:#ffe066;}
+.win-box p{color:rgba(255,255,255,.75);font-size:1.1rem;margin:10px 0 22px;}
+.win-box button{background:linear-gradient(135deg,#ffe066,#f0932b);border:none;border-radius:50px;padding:14px 36px;font-family:'Boogaloo',cursive;font-size:1.3rem;color:#7a3500;cursor:pointer;transition:transform .2s;}
+</style>
+</head>
+<body>
+
+<div class="stars" id="starsEl"></div>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>⏰ Fix the Clock!</h1>
+</header>
+
+<div class="badge-row">
+  <div class="badge">✅ <span class="v" id="scoreEl">0</span> set</div>
+  <div class="badge">Clock <span class="v" id="numEl">1</span></div>
+</div>
+
+<div class="task-card">
+  <div class="task-inner">
+    <div class="task-label">SET THE CLOCK TO:</div>
+    <div class="target-time" id="targetTime"></div>
+    <div class="time-context" id="timeContext"></div>
+    <span class="time-emoji" id="timeEmoji"></span>
+  </div>
+</div>
+
+<div class="clock-section">
+  <div class="clock-wrap">
+    <div class="clock-face" id="clockFace">
+      <div class="hand hour-hand" id="hourHand" style="transform:rotate(0deg) translateX(-50%)"></div>
+      <div class="hand minute-hand" id="minuteHand" style="transform:rotate(0deg) translateX(-50%)"></div>
+      <div class="center-dot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <div class="ctrl-label" style="color:#ffe066">🟡 Hour hand</div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="rotateHour(-30)">◀</button>
+      <button class="ctrl-btn" onclick="rotateHour(30)">▶</button>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-label" style="color:#48dbfb">🔵 Minute hand</div>
+    <div class="ctrl-btns">
+      <button class="ctrl-btn" onclick="rotateMinute(-30)">◀</button>
+      <button class="ctrl-btn" onclick="rotateMinute(30)">▶</button>
+    </div>
+  </div>
+</div>
+
+<button class="check-btn" id="checkBtn" onclick="checkTime()">✅ Check my clock!</button>
+<button class="next-btn" id="nextBtn" onclick="loadNext()">Next Clock ➡</button>
+
+<div class="feedback" id="feedback"></div>
+
+<div class="win" id="win">
+  <div class="win-box">
+    <div style="font-size:4rem">⏰</div>
+    <h2>Time Master!</h2>
+    <p id="winMsg">You can read the clock! Amazing Yuaan!</p>
+    <button onclick="restart()">More Clocks! 🔄</button>
+  </div>
+</div>
+
+<script>
+// Stars
+for(let i=0;i<60;i++){const s=document.createElement('div');s.className='tstar';const sz=Math.random()*2.5+.5;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*2+1).toFixed(1)}s;--dl:${(Math.random()*4).toFixed(1)}s`;document.getElementById('starsEl').appendChild(s);}
+
+// Draw clock numbers and marks
+const face=document.getElementById('clockFace');
+for(let i=1;i<=12;i++){
+  const angle=(i/12)*360-90;
+  const r=82;
+  const x=110+r*Math.cos(angle*Math.PI/180);
+  const y=110+r*Math.sin(angle*Math.PI/180);
+  const num=document.createElement('div');
+  num.className='clock-num';
+  num.style.cssText=`left:${x}px;top:${y}px;transform:translate(-50%,-50%)`;
+  num.textContent=i;
+  face.appendChild(num);
+}
+for(let i=0;i<12;i++){
+  const mark=document.createElement('div');
+  mark.className='hour-mark';
+  mark.style.transform=`rotate(${i*30}deg)`;
+  face.insertBefore(mark,face.firstChild);
+}
+
+// Times to learn — only o'clock for 3.5 year old, with some half-hours as stretch
+const TIMES = [
+  {display:'1 o\'clock',hour:1,minute:0,context:'Time for lunch!',emoji:'🍱'},
+  {display:'2 o\'clock',hour:2,minute:0,context:'Nap time!',emoji:'😴'},
+  {display:'3 o\'clock',hour:3,minute:0,context:'Snack time!',emoji:'🍌'},
+  {display:'4 o\'clock',hour:4,minute:0,context:'Play outside!',emoji:'⚽'},
+  {display:'5 o\'clock',hour:5,minute:0,context:'Baba comes home!',emoji:'🏠'},
+  {display:'6 o\'clock',hour:6,minute:0,context:'Dinner time!',emoji:'🍽️'},
+  {display:'7 o\'clock',hour:7,minute:0,context:'Bath time!',emoji:'🛁'},
+  {display:'8 o\'clock',hour:8,minute:0,context:'Bedtime!',emoji:'🌙'},
+  {display:'9 o\'clock',hour:9,minute:0,context:'Wake up!',emoji:'☀️'},
+  {display:'10 o\'clock',hour:10,minute:0,context:'Storytime!',emoji:'📖'},
+  {display:'11 o\'clock',hour:11,minute:0,context:'Drawing time!',emoji:'🎨'},
+  {display:'12 o\'clock',hour:12,minute:0,context:'Midday!',emoji:'🌞'},
+];
+
+let pool=[...TIMES].sort(()=>Math.random()-.5).slice(0,8);
+let idx=0,score=0,currentTime=null;
+let hourDeg=0,minuteDeg=0;
+
+function loadNext(){
+  if(idx>=pool.length){showWin();return;}
+  const t=pool[idx];
+  currentTime=t;
+  document.getElementById('numEl').textContent=idx+1;
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('checkBtn').style.display='block';
+  hideFeedback();
+
+  // Reset hands to 12
+  hourDeg=0; minuteDeg=0;
+  updateHands();
+
+  document.getElementById('targetTime').textContent=t.display;
+  document.getElementById('timeContext').textContent=t.context;
+  document.getElementById('timeEmoji').textContent=t.emoji;
+
+  speak(`Set the clock to ${t.display}. ${t.context}`);
+}
+
+function rotateHour(deg){ hourDeg=(hourDeg+deg+360)%360; updateHands(); playClick(); }
+function rotateMinute(deg){ minuteDeg=(minuteDeg+deg+360)%360; updateHands(); playClick(); }
+
+function updateHands(){
+  document.getElementById('hourHand').style.transform=`rotate(${hourDeg}deg) translateX(-50%)`;
+  document.getElementById('minuteHand').style.transform=`rotate(${minuteDeg}deg) translateX(-50%)`;
+}
+
+function checkTime(){
+  const t=currentTime;
+  // Expected angles
+  const expectedHourDeg=((t.hour%12)/12)*360;
+  const expectedMinDeg=(t.minute/60)*360; // 0 for o'clock
+
+  // Check with tolerance of 20 degrees
+  const hourOk=Math.abs(normalizeAngle(hourDeg)-normalizeAngle(expectedHourDeg))<=20||Math.abs(normalizeAngle(hourDeg)-normalizeAngle(expectedHourDeg))>=340;
+  const minOk=Math.abs(normalizeAngle(minuteDeg)-normalizeAngle(expectedMinDeg))<=20||Math.abs(normalizeAngle(minuteDeg)-normalizeAngle(expectedMinDeg))>=340;
+
+  if(hourOk&&minOk){
+    score++;
+    document.getElementById('scoreEl').textContent=score;
+    showFeedback(true,`🎉 Yes! ${t.display}! ${t.emoji}`);
+    playTone(true);
+    speak(`Perfect! That is ${t.display}! ${t.context}`);
+    document.getElementById('checkBtn').style.display='none';
+    idx++;
+    setTimeout(()=>document.getElementById('nextBtn').classList.add('show'),800);
+  } else if(hourOk&&!minOk){
+    showFeedback(false,`Almost! The hour hand is right! Move the BLUE minute hand to 12 for o\'clock!`);
+    playTone(false);
+    speak(`Good try! The hour hand is right! But the blue minute hand should point to 12!`);
+  } else if(!hourOk&&minOk){
+    showFeedback(false,`The minute hand is right! Move the YELLOW hour hand!`);
+    playTone(false);
+    speak(`The minute hand is right! Now move the yellow hour hand!`);
+  } else {
+    showFeedback(false,`Keep trying! The yellow hand shows hours, blue shows minutes!`);
+    playTone(false);
+    speak(`Keep trying! Think about where the hour hand should point for ${t.display}!`);
+  }
+}
+
+function normalizeAngle(deg){return((deg%360)+360)%360;}
+
+let fbTimer;
+function showFeedback(good,msg){
+  clearTimeout(fbTimer);
+  const fb=document.getElementById('feedback');
+  fb.textContent=msg;
+  fb.className='feedback show '+(good?'good':'bad');
+  fbTimer=setTimeout(hideFeedback,3000);
+}
+function hideFeedback(){document.getElementById('feedback').className='feedback';}
+
+function showWin(){
+  document.getElementById('winMsg').textContent=`You set ${score} clocks correctly! You can tell the time, Yuaan! Amazing!`;
+  document.getElementById('win').classList.add('show');
+  speak(`Wonderful! You can read the clock! That is a very important skill!`);
+}
+function restart(){pool=[...TIMES].sort(()=>Math.random()-.5).slice(0,8);idx=0;score=0;document.getElementById('scoreEl').textContent=0;document.getElementById('win').classList.remove('show');loadNext();}
+
+function playClick(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=600;g.gain.setValueAtTime(.1,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.08);o.start();o.stop(c.currentTime+.08);}catch(e){}}
+function playTone(good){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);if(good){o.frequency.setValueAtTime(440,c.currentTime);o.frequency.setValueAtTime(880,c.currentTime+.12);g.gain.setValueAtTime(.25,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);o.start();o.stop(c.currentTime+.4);}else{o.type='sawtooth';o.frequency.value=180;g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);o.start();o.stop(c.currentTime+.25);}}catch(e){}}
+function speak(txt){if('speechSynthesis' in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.rate=.85;u.pitch=1.3;speechSynthesis.speak(u);}}
+
+loadNext();
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big or Small? 🐘🐜</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Baloo+2:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Baloo 2',cursive;
+  background:linear-gradient(160deg,#e0f7fa 0%,#b2ebf2 40%,#80deea 100%);
+  min-height:100vh; overflow-x:hidden;
+}
+
+/* Grass ground */
+.ground{position:fixed;bottom:0;left:0;right:0;height:90px;background:linear-gradient(180deg,#66bb6a,#388e3c);border-radius:80% 80% 0 0/40px 40px 0 0;z-index:1;pointer-events:none;}
+.ground::before{content:'';position:absolute;top:-10px;left:0;right:0;height:20px;background:radial-gradient(ellipse 6px 10px at 50% 100%,#81c784 40%,transparent 41%) repeat-x;background-size:24px 20px;}
+
+/* Clouds */
+.cloud{position:fixed;z-index:1;pointer-events:none;}
+@keyframes cloudDrift{from{transform:translateX(-300px)}to{transform:translateX(110vw)}}
+
+header{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px 20px 6px;
+}
+.back-btn{
+  position:absolute;left:16px;
+  background:rgba(255,255,255,.8);border:2px solid rgba(255,255,255,.95);
+  border-radius:50px;padding:9px 16px;
+  font-family:'Boogaloo',cursive;font-size:.95rem;color:#00695c;
+  text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.1);transition:transform .2s;
+}
+.back-btn:hover{transform:scale(1.05);}
+h1{font-family:'Boogaloo',cursive;font-size:clamp(1.8rem,6vw,3rem);color:#004d40;text-shadow:2px 2px 0 rgba(255,255,255,.5);letter-spacing:1px;}
+
+.badge-row{position:relative;z-index:10;display:flex;justify-content:center;gap:12px;padding:0 20px 10px;}
+.badge{background:rgba(255,255,255,.75);border-radius:50px;padding:8px 18px;font-family:'Boogaloo',cursive;font-size:1.05rem;color:#004d40;border:2px solid rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(0,0,0,.08);}
+.badge .v{font-size:1.3rem;color:#00897b;}
+
+/* Question */
+.question-card{
+  position:relative;z-index:10;
+  max-width:580px;margin:0 auto 16px;padding:0 16px;
+}
+.q-inner{
+  background:rgba(255,255,255,.82);backdrop-filter:blur(10px);
+  border-radius:28px;padding:20px 18px;
+  border:3px solid rgba(255,255,255,.95);box-shadow:0 8px 30px rgba(0,0,0,.1);
+}
+.q-label{font-family:'Boogaloo',cursive;font-size:.95rem;color:#888;letter-spacing:1px;margin-bottom:8px;text-align:center;}
+.q-text{font-family:'Boogaloo',cursive;font-size:clamp(1.1rem,4vw,1.5rem);color:#004d40;text-align:center;line-height:1.4;}
+.q-subtext{text-align:center;color:#777;font-size:.95rem;margin-top:6px;}
+
+/* The two choices - displayed with actual size difference */
+.choices-area{
+  position:relative;z-index:10;
+  max-width:580px;margin:0 auto;padding:0 16px 100px;
+  display:flex;align-items:flex-end;justify-content:center;gap:20px;
+}
+.choice{
+  flex:1;max-width:220px;
+  background:rgba(255,255,255,.82);backdrop-filter:blur(8px);
+  border-radius:28px;padding:20px 14px 16px;
+  text-align:center;cursor:pointer;
+  border:3px solid rgba(255,255,255,.9);
+  box-shadow:0 8px 24px rgba(0,0,0,.1);
+  transition:transform .15s,border-color .2s,background .2s;
+  position:relative;
+}
+.choice:hover{transform:scale(1.04) translateY(-4px);}
+.choice:active{transform:scale(.96);}
+.choice-emoji{display:block;transition:font-size .4s cubic-bezier(.175,.885,.32,1.275);}
+.choice-label{font-family:'Boogaloo',cursive;font-size:1rem;color:#555;margin-top:8px;}
+.choice.correct{border-color:#2ed573;background:rgba(46,213,115,.15);animation:correctPop .5s ease;}
+.choice.wrong{border-color:#ff6b6b;background:rgba(255,107,107,.1);animation:wrongShake .4s ease;}
+@keyframes correctPop{0%{transform:scale(1)}50%{transform:scale(1.1) translateY(-8px)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+
+.vs-badge{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translateY(-10px);
+  background:#ff8a65;border-radius:50%;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Boogaloo',cursive;font-size:1rem;color:white;
+  box-shadow:0 4px 12px rgba(255,138,101,.4);z-index:5;
+  pointer-events:none;
+}
+
+/* Fact bubble */
+.fact-bubble{
+  position:fixed;bottom:110px;left:50%;transform:translateX(-50%) scale(0);
+  z-index:50;
+  background:white;border-radius:24px;padding:16px 24px;
+  max-width:320px;width:90%;text-align:center;
+  box-shadow:0 8px 30px rgba(0,0,0,.15);
+  border:3px solid #b2ebf2;
+  transition:transform .3s cubic-bezier(.175,.885,.32,1.275);
+  font-family:'Boogaloo',cursive;font-size:1.1rem;color:#004d40;
+}
+.fact-bubble.show{transform:translateX(-50%) scale(1);}
+.fact-bubble .fact-emoji{font-size:2rem;display:block;margin-bottom:6px;}
+
+/* Next btn */
+.next-btn{
+  position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(100px);
+  z-index:60;
+  background:linear-gradient(135deg,#26c6da,#00897b);
+  border:none;border-radius:50px;padding:14px 40px;
+  font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,137,123,.4);transition:transform .3s cubic-bezier(.175,.885,.32,1.275),bottom .3s;
+  opacity:0;
+}
+.next-btn.show{transform:translateX(-50%) translateY(0);opacity:1;bottom:120px;}
+.next-btn:hover{filter:brightness(1.08);}
+
+/* Win */
+.win{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;}
+.win.show{display:flex;}
+.win-box{background:linear-gradient(135deg,#e0f7fa,#b2ebf2);border-radius:30px;padding:50px 45px;text-align:center;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2);border:3px solid rgba(100,200,210,.5);animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.win-box h2{font-family:'Boogaloo',cursive;font-size:2.5rem;color:#00695c;}
+.win-box p{color:#777;font-size:1.1rem;margin:10px 0 22px;}
+.win-box button{background:linear-gradient(135deg,#26c6da,#00897b);border:none;border-radius:50px;padding:14px 36px;font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;cursor:pointer;transition:transform .2s;}
+.win-box button:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+
+<div class="ground"></div>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🐘 Big or Small? 🐜</h1>
+</header>
+
+<div class="badge-row">
+  <div class="badge">✅ <span class="v" id="scoreEl">0</span> right</div>
+  <div class="badge">Question <span class="v" id="qnumEl">1</span></div>
+</div>
+
+<div class="question-card">
+  <div class="q-inner">
+    <div class="q-label">THINK CAREFULLY!</div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-subtext" id="qSub"></div>
+  </div>
+</div>
+
+<div class="choices-area" id="choicesArea">
+  <div class="vs-badge" id="vsBadge">VS</div>
+</div>
+
+<div class="fact-bubble" id="factBubble">
+  <span class="fact-emoji" id="factEmoji"></span>
+  <span id="factText"></span>
+</div>
+
+<button class="next-btn" id="nextBtn" onclick="loadNext()">Next! ➡</button>
+
+<div class="win" id="win">
+  <div class="win-box">
+    <div style="font-size:4rem">🏆</div>
+    <h2>Big Brain Yuaan!</h2>
+    <p id="winMsg">You know about big and small! Amazing!</p>
+    <button onclick="restart()">Play Again! 🔄</button>
+  </div>
+</div>
+
+<script>
+// Each question: ask which is BIGGER or SMALLER (alternated)
+// "ask" = 'bigger' or 'smaller', a & b are the two items, correct = which key answers correctly
+const QUESTIONS = [
+  // BIGGER questions
+  {ask:'bigger',a:{emoji:'🐘',label:'Elephant',size:100},b:{emoji:'🐜',label:'Ant',size:22},correct:'a',fact:'🐘 An elephant is HUGE! Up to 4 meters tall!'},
+  {ask:'bigger',a:{emoji:'🌊',label:'Ocean',size:95},b:{emoji:'🪣',label:'Bucket',size:24},correct:'a',fact:'🌊 The ocean covers most of our whole planet!'},
+  {ask:'bigger',a:{emoji:'🦒',label:'Giraffe',size:95},b:{emoji:'🐭',label:'Mouse',size:22},correct:'a',fact:'🦒 Giraffes are the tallest animals on earth!'},
+  {ask:'bigger',a:{emoji:'🏔️',label:'Mountain',size:95},b:{emoji:'🪨',label:'Pebble',size:22},correct:'a',fact:'🏔️ Mountains are so tall they touch the clouds!'},
+  {ask:'bigger',a:{emoji:'🌍',label:'Earth',size:95},b:{emoji:'🏠',label:'House',size:26},correct:'a',fact:'🌍 The Earth is so big, billions of people live on it!'},
+  {ask:'bigger',a:{emoji:'🚢',label:'Ship',size:90},b:{emoji:'🛶',label:'Boat',size:28},correct:'a',fact:'🚢 Big ships are longer than 10 houses in a row!'},
+  {ask:'bigger',a:{emoji:'☀️',label:'The Sun',size:95},b:{emoji:'🌙',label:'The Moon',size:28},correct:'a',fact:'☀️ The Sun is so big, a million Earths could fit inside!'},
+  {ask:'bigger',a:{emoji:'🦁',label:'Lion',size:82},b:{emoji:'🐱',label:'Cat',size:30},correct:'a',fact:'🦁 A lion is about 10 times bigger than a pet cat!'},
+  // SMALLER questions
+  {ask:'smaller',a:{emoji:'🐝',label:'Bee',size:28},b:{emoji:'🐘',label:'Elephant',size:90},correct:'a',fact:'🐝 Bees are tiny but they make all our honey!'},
+  {ask:'smaller',a:{emoji:'🍇',label:'Grape',size:28},b:{emoji:'🍉',label:'Watermelon',size:88},correct:'a',fact:'🍇 Grapes are small but taste so sweet!'},
+  {ask:'smaller',a:{emoji:'🐣',label:'Chick',size:28},b:{emoji:'🐓',label:'Chicken',size:82},correct:'a',fact:'🐣 A chick grows up to become a big chicken!'},
+  {ask:'smaller',a:{emoji:'🌱',label:'Seedling',size:24},b:{emoji:'🌳',label:'Tree',size:90},correct:'a',fact:'🌱 Every big tree started as a tiny little seed!'},
+  {ask:'smaller',a:{emoji:'🐜',label:'Ant',size:22},b:{emoji:'🦅',label:'Eagle',size:85},correct:'a',fact:'🐜 An ant can carry 50 times its own body weight!'},
+  {ask:'smaller',a:{emoji:'⭐',label:'Star (how it looks)',size:24},b:{emoji:'☀️',label:'The Sun',size:88},correct:'a',fact:'⭐ Stars look tiny but they are actually HUGE suns far away!'},
+  // COMPARISON questions
+  {ask:'bigger',a:{emoji:'🐋',label:'Blue Whale',size:95},b:{emoji:'🦈',label:'Shark',size:38},correct:'a',fact:'🐋 A blue whale is the BIGGEST animal that ever lived!'},
+  {ask:'bigger',a:{emoji:'🏟️',label:'Stadium',size:90},b:{emoji:'🏠',label:'House',size:30},correct:'a',fact:'🏟️ A stadium can fit 100,000 people inside!'},
+];
+
+let questions=[...QUESTIONS].sort(()=>Math.random()-.5);
+let idx=0,score=0,answered=false;
+
+function loadNext(){
+  if(idx>=questions.length){showWin();return;}
+  const q=questions[idx];
+  answered=false;
+  document.getElementById('qnumEl').textContent=idx+1;
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('factBubble').classList.remove('show');
+
+  const verb=q.ask==='bigger'?'BIGGER':'SMALLER';
+  const emoji=q.ask==='bigger'?'🔍':'🔬';
+  document.getElementById('qText').textContent=`${emoji} Which one is ${verb}?`;
+  document.getElementById('qSub').textContent=q.ask==='bigger'?'Tap the largest one!':'Tap the smallest one!';
+
+  const area=document.getElementById('choicesArea');
+  // Remove old choices but keep vs badge
+  area.querySelectorAll('.choice').forEach(c=>c.remove());
+
+  // Shuffle left/right
+  const items=[{key:'a',...q.a},{key:'b',...q.b}].sort(()=>Math.random()-.5);
+  items.forEach(item=>{
+    const div=document.createElement('div');
+    div.className='choice';
+    const sz=item.size;
+    div.innerHTML=`<span class="choice-emoji" style="font-size:${sz}px">${item.emoji}</span><span class="choice-label">${item.label}</span>`;
+    div.addEventListener('click',()=>checkAnswer(item.key,q,div));
+    area.insertBefore(div,document.getElementById('vsBadge'));
+  });
+
+  const qLabel=q.ask==='bigger'?'Which one is BIGGER?':'Which one is SMALLER?';
+  speak(`${qLabel} ${q.a.label} or ${q.b.label}?`);
+}
+
+function checkAnswer(key,q,div){
+  if(answered)return;
+  answered=true;
+  if(key===q.correct){
+    div.classList.add('correct');
+    score++;
+    document.getElementById('scoreEl').textContent=score;
+    document.getElementById('factEmoji').textContent=q.fact.slice(0,2);
+    document.getElementById('factText').textContent=q.fact.slice(2).trim();
+    document.getElementById('factBubble').classList.add('show');
+    playTone(true);
+    speak(q.fact.replace(/^../, ''));
+    setTimeout(()=>document.getElementById('nextBtn').classList.add('show'),600);
+  } else {
+    div.classList.add('wrong');
+    playTone(false);
+    speak(`Hmm! Look carefully — which one is ${q.ask}?`);
+    setTimeout(()=>{div.classList.remove('wrong');answered=false;},600);
+  }
+  idx++;
+}
+
+function showWin(){
+  const msgs=[`You got ${score} right! You know all about sizes!`,`${score} correct answers! Great thinking Yuaan!`];
+  document.getElementById('winMsg').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  document.getElementById('win').classList.add('show');
+  speak(`Amazing! You know all about big and small!`);
+}
+function restart(){idx=0;score=0;questions=[...QUESTIONS].sort(()=>Math.random()-.5);document.getElementById('scoreEl').textContent=0;document.getElementById('win').classList.remove('show');loadNext();}
+
+function playTone(good){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);if(good){o.frequency.setValueAtTime(440,c.currentTime);o.frequency.setValueAtTime(880,c.currentTime+.12);g.gain.setValueAtTime(.25,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);o.start();o.stop(c.currentTime+.4);}else{o.type='sawtooth';o.frequency.value=180;g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);o.start();o.stop(c.currentTime+.25);}}catch(e){}}
+function speak(txt){if('speechSynthesis' in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.rate=.88;u.pitch=1.3;speechSynthesis.speak(u);}}
+
+// Generate clouds
+for(let i=0;i<4;i++){
+  const c=document.createElement('div');c.className='cloud';
+  const w=100+Math.random()*120,h=50+Math.random()*30;
+  c.style.cssText=`top:${8+Math.random()*20}%;width:${w}px;height:${h}px;background:white;border-radius:50px;animation:cloudDrift ${15+Math.random()*20}s linear ${-Math.random()*20}s infinite;`;
+  document.body.appendChild(c);
+}
+
+loadNext();
+</script>
+</body>
+</html>

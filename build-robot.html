@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Your Robot! 🤖</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a1a;
+  --panel:#111128;
+  --border:rgba(0,220,255,.25);
+  --glow:rgba(0,220,255,.15);
+  --accent:#00dcff;
+  --accent2:#ff6bff;
+  --yellow:#ffe066;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Boogaloo',cursive;
+  background:var(--bg);
+  min-height:100vh;
+  overflow-x:hidden;
+  user-select:none;
+}
+
+/* Animated grid floor */
+.grid-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,220,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,220,255,.04) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+
+/* Floating particles */
+.particle{position:fixed;border-radius:50%;pointer-events:none;z-index:0;animation:floatP var(--d) ease-in-out infinite var(--dl) alternate;}
+@keyframes floatP{from{transform:translateY(0) scale(1);opacity:.4}to{transform:translateY(-30px) scale(1.3);opacity:.8}}
+
+/* Header */
+header{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px 20px 8px;
+}
+.back-btn{
+  position:absolute;left:16px;
+  background:rgba(0,220,255,.1);backdrop-filter:blur(8px);
+  border:1.5px solid var(--border);border-radius:50px;
+  padding:9px 16px;font-family:'Boogaloo',cursive;font-size:.95rem;
+  color:var(--accent);text-decoration:none;transition:all .2s;
+}
+.back-btn:hover{background:rgba(0,220,255,.2);transform:scale(1.05);}
+h1{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(1.4rem,5vw,2.4rem);
+  color:var(--accent);
+  text-shadow:0 0 20px rgba(0,220,255,.8),0 0 40px rgba(0,220,255,.4);
+  letter-spacing:3px;
+}
+
+/* Step indicator */
+.steps-row{
+  position:relative;z-index:10;
+  display:flex;justify-content:center;align-items:center;
+  gap:6px;padding:0 20px 12px;flex-wrap:wrap;
+}
+.step-dot{
+  width:32px;height:32px;border-radius:50%;
+  border:2px solid rgba(0,220,255,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;color:rgba(255,255,255,.3);
+  transition:all .4s;position:relative;
+}
+.step-dot.active{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(0,220,255,.5);background:rgba(0,220,255,.1);}
+.step-dot.done{border-color:#2ed573;color:#2ed573;background:rgba(46,213,115,.15);}
+.step-line{width:20px;height:2px;background:rgba(0,220,255,.2);border-radius:1px;}
+.step-line.done{background:rgba(46,213,115,.5);}
+
+/* Main layout */
+.main{
+  position:relative;z-index:10;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:16px;
+  max-width:900px;margin:0 auto;
+  padding:0 16px 30px;
+}
+@media(max-width:600px){.main{grid-template-columns:1fr;}}
+
+/* Robot preview */
+.robot-preview{
+  background:var(--panel);
+  border:2px solid var(--border);
+  border-radius:28px;
+  padding:20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:380px;
+  box-shadow:0 0 40px var(--glow);
+  position:relative;overflow:hidden;
+}
+.robot-preview::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 30%, rgba(0,220,255,.06), transparent 60%);
+  pointer-events:none;
+}
+.preview-label{
+  font-family:'Orbitron',monospace;font-size:.75rem;
+  color:rgba(0,220,255,.5);letter-spacing:3px;margin-bottom:16px;
+}
+
+/* THE ROBOT — pure CSS/SVG drawn robot */
+.robot-stage{
+  position:relative;
+  width:180px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;
+}
+.robot-part{transition:all .5s cubic-bezier(.175,.885,.32,1.275);}
+.robot-part.hidden{opacity:0;transform:scale(0) translateY(-20px);}
+.robot-part.visible{opacity:1;transform:scale(1) translateY(0);}
+
+/* Robot SVG parts rendered with divs */
+.r-antenna{
+  width:8px;height:24px;
+  background:linear-gradient(180deg,var(--accent),#0088aa);
+  border-radius:4px 4px 0 0;
+  margin-bottom:-2px;position:relative;
+  box-shadow:0 0 8px var(--accent);
+}
+.r-antenna::before{
+  content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 12px var(--accent),0 0 24px var(--accent);
+  animation:antennaBlink 1.5s ease-in-out infinite;
+}
+@keyframes antennaBlink{0%,100%{opacity:1;transform:translateX(-50%) scale(1)}50%{opacity:.4;transform:translateX(-50%) scale(.7)}}
+
+.r-head{
+  width:110px;height:80px;border-radius:18px;
+  position:relative;display:flex;align-items:center;justify-content:center;
+  border:3px solid rgba(255,255,255,.2);
+  box-shadow:0 0 20px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.15);
+  overflow:hidden;
+}
+.r-eyes{display:flex;gap:16px;align-items:center;justify-content:center;}
+.r-eye{
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.r-eye::before{content:'';position:absolute;inset:0;border-radius:50%;animation:eyeGlow 2s ease-in-out infinite;}
+.r-pupil{width:10px;height:10px;border-radius:50%;background:white;position:relative;z-index:1;animation:eyeLook 4s ease-in-out infinite;}
+@keyframes eyeGlow{0%,100%{box-shadow:0 0 8px currentColor,0 0 16px currentColor}50%{box-shadow:0 0 14px currentColor,0 0 28px currentColor}}
+@keyframes eyeLook{0%,100%{transform:translate(0,0)}25%{transform:translate(3px,-2px)}50%{transform:translate(-3px,0)}75%{transform:translate(0,3px)}}
+
+.r-mouth{
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  width:36px;height:10px;
+  border-bottom:3px solid rgba(255,255,255,.6);
+  border-radius:0 0 20px 20px;
+}
+.r-mouth.happy{border-radius:0 0 20px 20px;}
+.r-mouth.cool{border-radius:20px;height:4px;border-bottom:0;background:rgba(255,255,255,.6);}
+
+.r-neck{
+  width:30px;height:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
+  border-left:2px solid rgba(255,255,255,.1);
+  border-right:2px solid rgba(255,255,255,.1);
+  margin:0;
+}
+
+.r-body-row{display:flex;align-items:flex-start;justify-content:center;gap:4px;}
+.r-arm{
+  width:28px;height:80px;border-radius:14px;
+  position:relative;border:2px solid rgba(255,255,255,.15);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.1);
+  margin-top:10px;
+  animation:armSwing 3s ease-in-out infinite;
+}
+.r-arm.left{animation-delay:0s;transform-origin:top center;}
+.r-arm.right{animation-delay:1.5s;transform-origin:top center;}
+@keyframes armSwing{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+
+.r-hand{
+  width:22px;height:22px;border-radius:50%;
+  position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  border:2px solid rgba(255,255,255,.2);
+  box-shadow:0 0 8px rgba(0,0,0,.3);
+}
+
+.r-body{
+  flex:1;min-width:0;
+  height:100px;border-radius:18px;
+  position:relative;
+  border:3px solid rgba(255,255,255,.15);
+  box-shadow:0 0 20px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.1);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  overflow:hidden;
+}
+.r-chest-panel{
+  width:60%;height:32px;
+  background:rgba(0,0,0,.3);
+  border-radius:8px;
+  border:1.5px solid rgba(0,220,255,.3);
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:0 8px;
+}
+.chest-light{
+  width:8px;height:8px;border-radius:50%;
+  animation:lightBlink var(--lb) ease-in-out infinite;
+}
+@keyframes lightBlink{0%,100%{opacity:1}50%{opacity:.2}}
+.r-belly{
+  width:40%;height:18px;
+  background:rgba(0,0,0,.2);
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,.1);
+}
+
+.r-waist{
+  width:80px;height:14px;
+  background:rgba(0,0,0,.3);
+  border-radius:4px;
+  border:1.5px solid rgba(255,255,255,.1);
+}
+
+.r-legs-row{display:flex;gap:12px;justify-content:center;}
+.r-leg{
+  width:32px;height:70px;border-radius:10px;
+  position:relative;
+  border:2px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.08);
+  animation:legWalk 1.2s ease-in-out infinite;
+}
+.r-leg.left{transform-origin:top center;animation-delay:0s;}
+.r-leg.right{transform-origin:top center;animation-delay:.6s;}
+@keyframes legWalk{0%,100%{transform:rotate(0deg)}50%{transform:rotate(3deg)}}
+
+.r-foot{
+  width:38px;height:16px;border-radius:0 0 10px 10px;
+  position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);
+  border:2px solid rgba(255,255,255,.12);
+  border-top:0;
+}
+
+/* Robot name display */
+.robot-name-display{
+  font-family:'Orbitron',monospace;
+  font-size:1rem;color:var(--accent);
+  text-shadow:0 0 10px var(--accent);
+  margin-top:14px;letter-spacing:2px;
+  min-height:24px;text-align:center;
+}
+
+/* Power bar */
+.power-bar{
+  width:120px;height:8px;background:rgba(255,255,255,.1);
+  border-radius:4px;margin-top:8px;overflow:hidden;
+}
+.power-fill{
+  height:100%;border-radius:4px;
+  background:linear-gradient(90deg,#2ed573,var(--accent),var(--accent2));
+  width:0%;transition:width .8s ease;
+  box-shadow:0 0 8px var(--accent);
+}
+
+/* Selection panel */
+.select-panel{
+  width:280px;
+  background:var(--panel);
+  border:2px solid var(--border);
+  border-radius:28px;
+  padding:16px;
+  box-shadow:0 0 30px var(--glow);
+  display:flex;flex-direction:column;gap:12px;
+  max-height:620px;overflow-y:auto;
+}
+@media(max-width:600px){.select-panel{width:100%;max-height:none;}}
+.select-panel::-webkit-scrollbar{width:4px;}
+.select-panel::-webkit-scrollbar-track{background:transparent;}
+.select-panel::-webkit-scrollbar-thumb{background:rgba(0,220,255,.3);border-radius:2px;}
+
+.step-title{
+  font-family:'Orbitron',monospace;font-size:.85rem;
+  color:var(--accent);letter-spacing:2px;text-align:center;
+  text-shadow:0 0 8px rgba(0,220,255,.5);
+}
+.step-subtitle{font-size:.85rem;color:rgba(255,255,255,.5);text-align:center;margin-top:2px;}
+
+/* Options grid */
+.options-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.option{
+  background:rgba(255,255,255,.04);
+  border:2px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:10px 6px;
+  text-align:center;cursor:pointer;
+  transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.option:hover{background:rgba(0,220,255,.08);border-color:rgba(0,220,255,.4);transform:translateY(-2px);}
+.option.selected{background:rgba(0,220,255,.15);border-color:var(--accent);box-shadow:0 0 12px rgba(0,220,255,.3);}
+.option-emoji{font-size:1.8rem;}
+.option-label{font-family:'Boogaloo',cursive;font-size:.75rem;color:rgba(255,255,255,.6);}
+.option.selected .option-label{color:var(--accent);}
+
+/* Color picker */
+.color-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.color-swatch{
+  width:100%;aspect-ratio:1;border-radius:12px;cursor:pointer;
+  border:3px solid transparent;transition:all .2s;
+  box-shadow:0 4px 10px rgba(0,0,0,.3);
+  position:relative;
+}
+.color-swatch:hover{transform:scale(1.1);border-color:rgba(255,255,255,.5);}
+.color-swatch.selected{border-color:white;transform:scale(1.12);box-shadow:0 0 14px rgba(255,255,255,.4);}
+.color-swatch.selected::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:1rem;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+
+/* Name input */
+.name-input-wrap{display:flex;flex-direction:column;gap:8px;}
+.name-hint{font-size:.85rem;color:rgba(255,255,255,.5);text-align:center;}
+.name-choices{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.name-chip{
+  background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:8px 6px;cursor:pointer;text-align:center;
+  font-family:'Boogaloo',cursive;font-size:.85rem;color:rgba(255,255,255,.7);
+  transition:all .2s;
+}
+.name-chip:hover{background:rgba(255,107,255,.1);border-color:var(--accent2);}
+.name-chip.selected{background:rgba(255,107,255,.2);border-color:var(--accent2);color:var(--accent2);}
+.custom-name-input{
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);
+  border-radius:12px;padding:10px;
+  font-family:'Orbitron',monospace;font-size:.9rem;color:white;width:100%;
+  outline:none;text-align:center;letter-spacing:2px;
+  transition:border-color .2s;
+}
+.custom-name-input:focus{border-color:var(--accent2);box-shadow:0 0 10px rgba(255,107,255,.2);}
+.custom-name-input::placeholder{color:rgba(255,255,255,.2);letter-spacing:1px;}
+
+/* Action button */
+.action-btn{
+  background:linear-gradient(135deg,var(--accent),#0088aa);
+  border:none;border-radius:50px;padding:13px 20px;
+  font-family:'Boogaloo',cursive;font-size:1.1rem;color:#001a22;
+  cursor:pointer;width:100%;
+  box-shadow:0 6px 20px rgba(0,220,255,.3);
+  transition:all .2s;font-weight:bold;
+  letter-spacing:1px;
+}
+.action-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,220,255,.4);}
+.action-btn:active{transform:scale(.97);}
+.action-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.action-btn.pink{background:linear-gradient(135deg,var(--accent2),#aa00aa);color:white;box-shadow:0 6px 20px rgba(255,107,255,.3);}
+.action-btn.green{background:linear-gradient(135deg,#2ed573,#10ac84);color:#001a10;box-shadow:0 6px 20px rgba(46,213,115,.3);}
+
+/* ACTIVATE overlay */
+.activate-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:20px;
+}
+.activate-overlay.show{display:flex;}
+.activate-robot-big{
+  font-size:8rem;
+  animation:robotActivate 0.8s cubic-bezier(.175,.885,.32,1.275);
+  filter:drop-shadow(0 0 30px var(--accent));
+}
+@keyframes robotActivate{from{transform:scale(0) rotate(-180deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.activate-text{
+  font-family:'Orbitron',monospace;font-size:clamp(1.5rem,6vw,2.5rem);
+  color:var(--accent);text-shadow:0 0 30px var(--accent),0 0 60px rgba(0,220,255,.4);
+  text-align:center;
+  animation:textGlow 1s ease-in-out infinite alternate;
+}
+@keyframes textGlow{from{text-shadow:0 0 20px var(--accent)}to{text-shadow:0 0 40px var(--accent),0 0 80px rgba(0,220,255,.4)}}
+.activate-sub{font-family:'Boogaloo',cursive;font-size:1.3rem;color:rgba(255,255,255,.7);text-align:center;}
+.activate-specs{
+  display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+}
+.spec-chip{
+  background:rgba(0,220,255,.1);border:1px solid rgba(0,220,255,.3);
+  border-radius:50px;padding:6px 14px;
+  font-family:'Orbitron',monospace;font-size:.75rem;color:var(--accent);
+  letter-spacing:1px;
+}
+.activate-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.act-btn{
+  background:linear-gradient(135deg,var(--accent),#0088aa);
+  border:none;border-radius:50px;padding:14px 32px;
+  font-family:'Boogaloo',cursive;font-size:1.2rem;color:#001a22;
+  cursor:pointer;box-shadow:0 6px 20px rgba(0,220,255,.35);
+  transition:transform .2s;
+}
+.act-btn:hover{transform:scale(1.05);}
+.act-btn.rebuild{background:rgba(255,255,255,.1);color:white;box-shadow:none;border:1.5px solid rgba(255,255,255,.2);}
+
+/* Scanline effect on activated robot */
+.scanline{
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,220,255,.03) 3px,rgba(0,220,255,.03) 4px);
+  border-radius:28px;
+}
+
+/* Reveal animation */
+@keyframes revealPart{
+  0%{opacity:0;transform:scale(0.3) translateY(-30px) rotate(-15deg)}
+  60%{transform:scale(1.1) translateY(4px) rotate(3deg)}
+  100%{opacity:1;transform:scale(1) translateY(0) rotate(0)}
+}
+.part-reveal{animation:revealPart .6s cubic-bezier(.175,.885,.32,1.275) forwards;}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>BUILD YOUR ROBOT!</h1>
+</header>
+
+<!-- Step dots -->
+<div class="steps-row" id="stepsRow"></div>
+
+<div class="main">
+
+  <!-- Robot Preview (left/top) -->
+  <div class="robot-preview">
+    <div class="scanline"></div>
+    <div class="preview-label">⚡ YOUR ROBOT ⚡</div>
+
+    <div class="robot-stage" id="robotStage">
+      <!-- Antenna -->
+      <div class="robot-part hidden" id="partAntenna" style="display:flex;justify-content:center;">
+        <div class="r-antenna"></div>
+      </div>
+      <!-- Head -->
+      <div class="robot-part hidden" id="partHead">
+        <div class="r-head" id="rHead">
+          <div class="r-eyes" id="rEyes">
+            <div class="r-eye" id="rEye1"><div class="r-pupil"></div></div>
+            <div class="r-eye" id="rEye2"><div class="r-pupil"></div></div>
+          </div>
+          <div class="r-mouth happy" id="rMouth"></div>
+        </div>
+      </div>
+      <!-- Neck -->
+      <div class="robot-part hidden" id="partNeck">
+        <div class="r-neck" style="margin:0 auto;"></div>
+      </div>
+      <!-- Body row with arms -->
+      <div class="robot-part hidden" id="partBody">
+        <div class="r-body-row">
+          <div class="r-arm left" id="rArmL">
+            <div class="r-hand" id="rHandL"></div>
+          </div>
+          <div class="r-body" id="rBody" style="width:100px;">
+            <div class="r-chest-panel">
+              <div class="chest-light" style="background:#ff6b6b;--lb:0.8s;"></div>
+              <div class="chest-light" style="background:#ffe066;--lb:1.2s;"></div>
+              <div class="chest-light" style="background:#2ed573;--lb:0.6s;"></div>
+            </div>
+            <div class="r-belly"></div>
+          </div>
+          <div class="r-arm right" id="rArmR">
+            <div class="r-hand" id="rHandR"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Waist -->
+      <div class="robot-part hidden" id="partWaist">
+        <div class="r-waist" style="margin:0 auto;"></div>
+      </div>
+      <!-- Legs -->
+      <div class="robot-part hidden" id="partLegs">
+        <div class="r-legs-row" id="rLegsRow">
+          <div class="r-leg left" id="rLegL"><div class="r-foot" id="rFootL"></div></div>
+          <div class="r-leg right" id="rLegR"><div class="r-foot" id="rFootR"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="robot-name-display" id="robotNameDisplay">???</div>
+    <div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
+  </div>
+
+  <!-- Selection Panel (right/bottom) -->
+  <div class="select-panel" id="selectPanel">
+    <div class="step-title" id="stepTitle">STEP 1</div>
+    <div class="step-subtitle" id="stepSubtitle">Choose your robot's head!</div>
+    <div id="optionsContainer"></div>
+    <button class="action-btn" id="actionBtn" onclick="nextStep()" disabled>Choose Something! ➡</button>
+  </div>
+
+</div>
+
+<!-- ACTIVATION overlay -->
+<div class="activate-overlay" id="activateOverlay">
+  <div class="activate-robot-big" id="actRobotEmoji">🤖</div>
+  <div class="activate-text" id="actName">ROBO-X</div>
+  <div class="activate-sub" id="actSub">IS ALIVE!</div>
+  <div class="activate-specs" id="actSpecs"></div>
+  <div class="activate-btns">
+    <button class="act-btn" onclick="playAgain()">Build Another! 🔧</button>
+    <button class="act-btn" onclick="makeSpeech()">Make it Talk! 🗣️</button>
+    <button class="act-btn rebuild" onclick="document.getElementById('activateOverlay').classList.remove('show')">See My Robot! 👀</button>
+  </div>
+</div>
+
+<script>
+// ─── STEP DEFINITIONS ───────────────────────────────────────────────────────
+const STEPS = [
+  {
+    id:'head',
+    title:'STEP 1: HEAD',
+    subtitle:'What kind of head should your robot have?',
+    speak:'Pick a head for your robot!',
+    options:[
+      {id:'square',  label:'Square',   desc:'Strong & classic'},
+      {id:'round',   label:'Round',    desc:'Friendly & cute'},
+      {id:'diamond', label:'Diamond',  desc:'Smart & cool'},
+      {id:'wide',    label:'Wide',     desc:'Big & powerful'},
+      {id:'small',   label:'Tiny',     desc:'Quick & sneaky'},
+      {id:'hexagon', label:'Hex',      desc:'Super advanced'},
+    ]
+  },
+  {
+    id:'eyes',
+    title:'STEP 2: EYES',
+    subtitle:'What eyes does your robot have?',
+    speak:'Now pick the eyes!',
+    options:[
+      {id:'circle',   label:'Round',   desc:'Friendly eyes'},
+      {id:'visor',    label:'Visor',   desc:'Cool visor'},
+      {id:'angry',    label:'Fierce',  desc:'Strong eyes'},
+      {id:'happy',    label:'Happy',   desc:'Smiling eyes'},
+      {id:'laser',    label:'Laser',   desc:'Laser eyes!'},
+      {id:'wide',     label:'Wide',    desc:'Surprised eyes'},
+    ]
+  },
+  {
+    id:'body',
+    title:'STEP 3: BODY',
+    subtitle:'Choose the robot\'s body shape!',
+    speak:'What body will your robot have?',
+    options:[
+      {id:'box',      label:'Box',     desc:'Strong body'},
+      {id:'barrel',   label:'Barrel',  desc:'Round body'},
+      {id:'slim',     label:'Slim',    desc:'Fast body'},
+      {id:'tank',     label:'Tank',    desc:'Big & tough'},
+      {id:'jetpack',  label:'Jetpack', desc:'Fly in the sky!'},
+      {id:'armoured', label:'Armour',  desc:'Super protected'},
+    ]
+  },
+  {
+    id:'arms',
+    title:'STEP 4: ARMS',
+    subtitle:'What kind of arms and hands?',
+    speak:'Choose the arms for your robot!',
+    options:[
+      {id:'claw',     label:'Claws',   desc:'Grabs things'},
+      {id:'blaster',  label:'Blaster', desc:'Shoots beams!'},
+      {id:'magnet',   label:'Magnet',  desc:'Picks up metal'},
+      {id:'hook',     label:'Hook',    desc:'Super strong'},
+      {id:'wings',    label:'Wings',   desc:'Can fly!'},
+      {id:'normal',   label:'Hands',   desc:'Just like ours'},
+    ]
+  },
+  {
+    id:'legs',
+    title:'STEP 5: LEGS',
+    subtitle:'How will your robot move?',
+    speak:'Now choose how your robot will move!',
+    options:[
+      {id:'walk',     label:'Walk',    desc:'Regular legs'},
+      {id:'wheel',    label:'Wheels',  desc:'Rolls fast!'},
+      {id:'spring',   label:'Spring',  desc:'Jumps high!'},
+      {id:'rocket',   label:'Rocket',  desc:'Flies everywhere!'},
+      {id:'track',    label:'Tracks',  desc:'Like a tank!'},
+      {id:'hover',    label:'Hover',   desc:'Floats in air!'},
+    ]
+  },
+  {
+    id:'color',
+    title:'STEP 6: COLOUR',
+    subtitle:'Paint your robot!',
+    speak:'Choose the colour for your robot!',
+    type:'color',
+    colors:[
+      {id:'steel',    hex:'#7ecbce', hex2:'#4a9da0', label:'Ocean Blue'},
+      {id:'fire',     hex:'#ff6348', hex2:'#c0392b', label:'Fire Red'},
+      {id:'electric', hex:'#ffe066', hex2:'#f0932b', label:'Electric'},
+      {id:'jungle',   hex:'#2ed573', hex2:'#10ac84', label:'Jungle'},
+      {id:'galaxy',   hex:'#a29bfe', hex2:'#6c5ce7', label:'Galaxy'},
+      {id:'rose',     hex:'#fd79a8', hex2:'#e84393', label:'Rose'},
+      {id:'midnight', hex:'#636e72', hex2:'#2d3436', label:'Midnight'},
+      {id:'gold',     hex:'#f9ca24', hex2:'#e67e22', label:'Gold'},
+    ]
+  },
+  {
+    id:'name',
+    title:'STEP 7: NAME',
+    subtitle:'Give your robot a name!',
+    speak:'What is your robot\'s name?',
+    type:'name',
+    names:['ROBO-X','ZAPPER','SPARKY','BOLT','GIZMO','CLANK','BEEP-BOOP','ZAP-3000','TURBO','MEGA-BOT','CHOMPY','BLAZE']
+  }
+];
+
+const STEP_EMOJIS = ['🤖','👀','💪','🦾','🦿','🎨','✏️'];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let currentStep = 0;
+let choices = {}; // {head, eyes, body, arms, legs, color, name}
+let selectedOption = null;
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+function init(){
+  // Build step dots
+  const row = document.getElementById('stepsRow');
+  row.innerHTML='';
+  STEPS.forEach((s,i)=>{
+    if(i>0){const line=document.createElement('div');line.className='step-line';line.id='sline'+i;row.appendChild(line);}
+    const dot=document.createElement('div');
+    dot.className='step-dot'+(i===0?' active':'');
+    dot.id='sdot'+i;
+    dot.textContent=STEP_EMOJIS[i];
+    row.appendChild(dot);
+  });
+
+  // Particles
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');p.className='particle';
+    const sz=3+Math.random()*6;
+    const colors=['#00dcff','#ff6bff','#ffe066','#2ed573'];
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:${colors[i%4]};--d:${(2+Math.random()*3).toFixed(1)}s;--dl:${(Math.random()*3).toFixed(1)}s`;
+    document.body.appendChild(p);
+  }
+
+  loadStep(0);
+}
+
+function loadStep(idx){
+  currentStep = idx;
+  selectedOption = choices[STEPS[idx].id] || null;
+  const step = STEPS[idx];
+
+  // Update dots
+  STEPS.forEach((_,i)=>{
+    const dot=document.getElementById('sdot'+i);
+    const line=document.getElementById('sline'+i);
+    dot.className='step-dot'+(i<idx?' done':i===idx?' active':'');
+    if(line) line.className='step-line'+(i<=idx?' done':'');
+  });
+
+  document.getElementById('stepTitle').textContent=step.title;
+  document.getElementById('stepSubtitle').textContent=step.subtitle;
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML='';
+
+  if(step.type==='color'){
+    const grid=document.createElement('div');grid.className='color-grid';
+    step.colors.forEach(c=>{
+      const sw=document.createElement('div');
+      sw.className='color-swatch'+(selectedOption===c.id?' selected':'');
+      sw.style.background=`linear-gradient(135deg,${c.hex},${c.hex2})`;
+      sw.title=c.label;
+      sw.dataset.id=c.id;
+      sw.addEventListener('click',()=>selectColor(c));
+      grid.appendChild(sw);
+    });
+    // Color label
+    const lbl=document.createElement('div');lbl.id='colorLabel';lbl.style.cssText='text-align:center;font-family:Boogaloo,cursive;font-size:.9rem;color:rgba(255,255,255,.5);margin-top:4px;';
+    if(selectedOption){const found=step.colors.find(c=>c.id===selectedOption);if(found)lbl.textContent=found.label;}
+    container.appendChild(grid);
+    container.appendChild(lbl);
+  } else if(step.type==='name'){
+    const wrap=document.createElement('div');wrap.className='name-input-wrap';
+    const hint=document.createElement('div');hint.className='name-hint';hint.textContent='Tap a name or type your own!';
+    const grid=document.createElement('div');grid.className='name-choices';
+    step.names.forEach(n=>{
+      const chip=document.createElement('div');
+      chip.className='name-chip'+(selectedOption===n?' selected':'');
+      chip.textContent=n;
+      chip.addEventListener('click',()=>selectName(n));
+      grid.appendChild(chip);
+    });
+    const inp=document.createElement('input');
+    inp.className='custom-name-input';
+    inp.type='text';inp.maxLength=12;inp.placeholder='TYPE A NAME...';
+    inp.value=(selectedOption&&!step.names.includes(selectedOption))?selectedOption:'';
+    inp.addEventListener('input',()=>{
+      selectedOption=inp.value.toUpperCase().trim()||null;
+      grid.querySelectorAll('.name-chip').forEach(c=>c.classList.remove('selected'));
+      updateActionBtn();
+    });
+    wrap.appendChild(hint);wrap.appendChild(grid);wrap.appendChild(inp);
+    container.appendChild(wrap);
+  } else {
+    const grid=document.createElement('div');grid.className='options-grid';
+    step.options.forEach(opt=>{
+      const div=document.createElement('div');
+      div.className='option'+(selectedOption===opt.id?' selected':'');
+      div.dataset.id=opt.id;
+      div.innerHTML=`<span class="option-emoji">${getOptionEmoji(step.id,opt.id)}</span><span class="option-label">${opt.label}</span>`;
+      div.addEventListener('click',()=>selectOption(opt.id,step.id,div,opt.label));
+      grid.appendChild(div);
+    });
+    container.appendChild(grid);
+  }
+
+  updateActionBtn();
+  speak(step.speak);
+}
+
+function getOptionEmoji(stepId, optId){
+  const map={
+    head:{square:'⬛',round:'⭕',diamond:'♦️',wide:'📺',small:'🔵',hexagon:'⬡'},
+    eyes:{circle:'👀',visor:'🕶️',angry:'😠',happy:'😊',laser:'🔴',wide:'😲'},
+    body:{box:'📦',barrel:'🛢️',slim:'🏃',tank:'🦣',jetpack:'🚀',armoured:'🛡️'},
+    arms:{claw:'🦀',blaster:'🔫',magnet:'🧲',hook:'🪝',wings:'🦋',normal:'🤚'},
+    legs:{walk:'🦵',wheel:'🛞',spring:'🪃',rocket:'🚀',track:'🔩',hover:'🌀'},
+  };
+  return map[stepId]?.[optId] || '⚙️';
+}
+
+function selectOption(id, stepId, el, label){
+  selectedOption=id;
+  el.closest('.options-grid').querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  updateActionBtn();
+  updateRobotPreview(stepId, id);
+  playClick();
+  speak(`${label}!`);
+}
+
+function selectColor(c){
+  selectedOption=c.id;
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  document.querySelector(`.color-swatch[data-id="${c.id}"]`).classList.add('selected');
+  const lbl=document.getElementById('colorLabel');if(lbl)lbl.textContent=c.label;
+  updateActionBtn();
+  applyColor(c.hex,c.hex2);
+  playClick();
+  speak(`${c.label}!`);
+}
+
+function selectName(n){
+  selectedOption=n;
+  document.querySelectorAll('.name-chip').forEach(c=>c.classList.remove('selected'));
+  document.querySelector(`.name-chip`)?.parentElement.querySelectorAll('.name-chip').forEach(c=>{if(c.textContent===n)c.classList.add('selected');});
+  const inp=document.querySelector('.custom-name-input');if(inp)inp.value='';
+  updateActionBtn();
+  updateNameDisplay(n);
+  playClick();
+  speak(`${n}!`);
+}
+
+function updateActionBtn(){
+  const btn=document.getElementById('actionBtn');
+  const isLast=currentStep===STEPS.length-1;
+  btn.disabled=!selectedOption;
+  if(selectedOption){
+    btn.textContent=isLast?'⚡ ACTIVATE ROBOT! ⚡':'Next Step! ➡';
+    btn.className='action-btn'+(isLast?' pink':'');
+  } else {
+    btn.textContent='Choose Something! ➡';
+    btn.className='action-btn';
+  }
+}
+
+function nextStep(){
+  if(!selectedOption)return;
+  choices[STEPS[currentStep].id]=selectedOption;
+
+  // Power up
+  const pct=((currentStep+1)/STEPS.length)*100;
+  document.getElementById('powerFill').style.width=pct+'%';
+
+  if(currentStep===STEPS.length-1){
+    activateRobot();
+  } else {
+    currentStep++;
+    loadStep(currentStep);
+  }
+}
+
+// ─── ROBOT VISUAL UPDATE ──────────────────────────────────────────────────
+function showPart(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.remove('hidden');
+  el.classList.add('visible','part-reveal');
+  setTimeout(()=>el.classList.remove('part-reveal'),700);
+}
+
+function updateRobotPreview(stepId, optId){
+  if(stepId==='head'){
+    showPart('partAntenna');
+    showPart('partHead');
+    showPart('partNeck');
+    // Head shape
+    const h=document.getElementById('rHead');
+    const shapes={square:'14px',round:'50px',diamond:'18px',wide:'10px',small:'24px',hexagon:'14px'};
+    h.style.borderRadius=shapes[optId]||'18px';
+    // Eyes style
+    const eyeStyles={
+      circle:{w:'22px',h:'22px',bg:'#00dcff',r:'50%'},
+      visor:{w:'60px',h:'14px',bg:'#ff6bff',r:'4px'},
+      angry:{w:'22px',h:'16px',bg:'#ff4444',r:'4px',skew:'skewX(-15deg)'},
+      happy:{w:'22px',h:'22px',bg:'#ffe066',r:'50%'},
+      laser:{w:'20px',h:'20px',bg:'#ff0000',r:'50%'},
+      wide:{w:'28px',h:'28px',bg:'#2ed573',r:'50%'},
+    };
+    const es=eyeStyles[optId]||eyeStyles.circle;
+    [document.getElementById('rEye1'),document.getElementById('rEye2')].forEach(e=>{
+      e.style.width=es.w;e.style.height=es.h;
+      e.style.background=es.bg;e.style.borderRadius=es.r;
+      e.style.transform=es.skew||'';
+      e.style.setProperty('color',es.bg);
+    });
+    if(optId==='visor'){
+      document.getElementById('rEyes').style.flexDirection='column';
+      document.getElementById('rEyes').style.gap='4px';
+      document.getElementById('rEye2').style.display='none';
+    } else {
+      document.getElementById('rEyes').style.flexDirection='row';
+      document.getElementById('rEyes').style.gap='16px';
+      document.getElementById('rEye2').style.display='flex';
+    }
+  }
+  if(stepId==='body'){
+    showPart('partBody');
+    const b=document.getElementById('rBody');
+    const bstyles={box:'10px',barrel:'50px',slim:'8px',tank:'6px',jetpack:'16px',armoured:'4px'};
+    b.style.borderRadius=bstyles[optId]||'18px';
+    const bwidth={box:'100px',barrel:'90px',slim:'70px',tank:'120px',jetpack:'80px',armoured:'110px'};
+    b.style.width=bwidth[optId]||'100px';
+    showPart('partWaist');
+  }
+  if(stepId==='arms'){
+    const handEmojis={claw:'🦀',blaster:'💥',magnet:'🧲',hook:'🪝',wings:'🦋',normal:'✋'};
+    [document.getElementById('rHandL'),document.getElementById('rHandR')].forEach(h=>{
+      h.style.background='transparent';
+      h.style.border='none';
+      h.style.fontSize='1.1rem';
+      h.style.textAlign='center';
+      h.style.lineHeight='1';
+      h.style.width='auto';h.style.height='auto';
+      h.textContent=handEmojis[optId]||'✋';
+    });
+  }
+  if(stepId==='legs'){
+    showPart('partLegs');
+    const legEmojis={walk:'',wheel:'🛞',spring:'🌀',rocket:'🚀',track:'🔩',hover:'✨'};
+    const emoji=legEmojis[optId];
+    if(emoji){
+      [document.getElementById('rFootL'),document.getElementById('rFootR')].forEach(f=>{
+        f.style.background='transparent';f.style.border='none';
+        f.style.fontSize='1rem';f.style.textAlign='center';f.style.lineHeight='1';
+        f.style.width='auto';f.style.height='auto';f.style.bottom='-14px';
+        f.textContent=emoji;
+      });
+    }
+    // Leg walk animation for hover/rocket
+    if(optId==='hover'||optId==='rocket'){
+      document.getElementById('rLegL').style.animation='none';
+      document.getElementById('rLegR').style.animation='none';
+      document.getElementById('robotStage').style.animation='robotHover 2s ease-in-out infinite';
+      addHoverStyle();
+    }
+  }
+  if(stepId==='eyes'){/* handled in head step refine */}
+}
+
+function addHoverStyle(){
+  if(document.getElementById('hoverStyle'))return;
+  const s=document.createElement('style');
+  s.id='hoverStyle';
+  s.textContent='@keyframes robotHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}';
+  document.head.appendChild(s);
+}
+
+function applyColor(hex, hex2){
+  const parts=[
+    'rHead','rBody','rArmL','rArmR','rLegL','rLegR'
+  ];
+  parts.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      el.style.background=`linear-gradient(135deg,${hex},${hex2})`;
+      el.style.borderColor=hex+'88';
+    }
+  });
+  document.getElementById('rHead').style.boxShadow=`0 0 20px ${hex}44,inset 0 2px 0 rgba(255,255,255,.15)`;
+  document.getElementById('rBody').style.boxShadow=`0 0 20px ${hex}44,inset 0 2px 0 rgba(255,255,255,.1)`;
+  // Antenna glow
+  const ant=document.querySelector('.r-antenna');
+  if(ant){ant.style.background=`linear-gradient(180deg,${hex},${hex2})`;ant.style.boxShadow=`0 0 8px ${hex}`;}
+  const ball=document.querySelector('.r-antenna::before');
+}
+
+function updateNameDisplay(name){
+  document.getElementById('robotNameDisplay').textContent=name;
+  document.getElementById('robotNameDisplay').style.textShadow=`0 0 10px ${getColor()},0 0 20px ${getColor()}`;
+}
+
+function getColor(){
+  const step=STEPS.find(s=>s.id==='color');
+  const colorId=choices.color||selectedOption;
+  if(step&&colorId){const c=step.colors.find(c=>c.id===colorId);if(c)return c.hex;}
+  return 'var(--accent)';
+}
+
+// ─── ACTIVATE ──────────────────────────────────────────────────────────────
+function activateRobot(){
+  choices.name=selectedOption;
+  updateNameDisplay(choices.name);
+
+  // Build specs
+  const specs=[
+    `HEAD: ${getLabel('head',choices.head)}`,
+    `EYES: ${getLabel('eyes',choices.eyes)}`,
+    `BODY: ${getLabel('body',choices.body)}`,
+    `ARMS: ${getLabel('arms',choices.arms)}`,
+    `LEGS: ${getLabel('legs',choices.legs)}`,
+  ];
+
+  document.getElementById('actName').textContent=choices.name||'ROBO-X';
+  document.getElementById('actSub').textContent='IS ALIVE! 🌟';
+
+  const specsEl=document.getElementById('actSpecs');
+  specsEl.innerHTML='';
+  specs.forEach(s=>{
+    const chip=document.createElement('div');chip.className='spec-chip';chip.textContent=s;
+    specsEl.appendChild(chip);
+  });
+
+  document.getElementById('activateOverlay').classList.add('show');
+  playActivate();
+
+  const name=choices.name||'robot';
+  speak(`Amazing! Your robot ${name} is ALIVE! It has ${getLabel('legs',choices.legs)} legs and ${getLabel('arms',choices.arms)} arms! You built it! Great job Yuaan!`);
+}
+
+function getLabel(stepId, optId){
+  const step=STEPS.find(s=>s.id===stepId);
+  if(!step||!step.options)return optId;
+  const opt=step.options.find(o=>o.id===optId);
+  return opt?opt.label:optId;
+}
+
+function makeSpeech(){
+  const name=choices.name||'Robot';
+  const legs=getLabel('legs',choices.legs);
+  const arms=getLabel('arms',choices.arms);
+  const msgs=[
+    `Hello! I am ${name}! I have ${arms} arms and ${legs} legs! Yuaan built me!`,
+    `Beep boop! I am ${name}! I am the best robot ever! Thank you Yuaan!`,
+    `${name} online! Systems ready! I love my builder Yuaan very much!`,
+    `Greetings human! I am ${name}! Yuaan gave me ${legs} to move around! Yay!`,
+  ];
+  speak(msgs[Math.floor(Math.random()*msgs.length)]);
+}
+
+function playAgain(){
+  document.getElementById('activateOverlay').classList.remove('show');
+  choices={};
+  selectedOption=null;
+  // Reset robot parts
+  ['partAntenna','partHead','partNeck','partBody','partWaist','partLegs'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.className='robot-part hidden';}
+  });
+  document.getElementById('robotNameDisplay').textContent='???';
+  document.getElementById('powerFill').style.width='0%';
+  document.getElementById('robotStage').style.animation='';
+  // Reset colors to default
+  ['rHead','rBody','rArmL','rArmR','rLegL','rLegR'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.background='';el.style.borderColor='';}
+  });
+  init();
+}
+
+// ─── SOUNDS ────────────────────────────────────────────────────────────────
+function playClick(){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.frequency.value=600+Math.random()*200;
+    g.gain.setValueAtTime(.15,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.1);
+    o.start();o.stop(c.currentTime+.1);
+  }catch(e){}
+}
+
+function playActivate(){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    // Rising sweep
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type='sine';
+    o.frequency.setValueAtTime(100,c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1200,c.currentTime+1.2);
+    g.gain.setValueAtTime(.4,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.5);
+    o.start();o.stop(c.currentTime+1.5);
+    // Chord
+    [523,659,784,1047].forEach((f,i)=>{
+      const o2=c.createOscillator(),g2=c.createGain();
+      o2.connect(g2);g2.connect(c.destination);
+      o2.frequency.value=f;
+      g2.gain.setValueAtTime(0,c.currentTime+.8+i*.08);
+      g2.gain.linearRampToValueAtTime(.25,c.currentTime+.8+i*.08+.05);
+      g2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.8+i*.08+.6);
+      o2.start(c.currentTime+.8+i*.08);o2.stop(c.currentTime+.8+i*.08+.7);
+    });
+  }catch(e){}
+}
+
+function speak(txt){
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.rate=.88;u.pitch=1.3;speechSynthesis.speak(u);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
