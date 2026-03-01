@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yuaan's Shapes! 🔷</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fef0ff; font-family: 'Nunito', sans-serif; min-height: 100vh; }
+  header {
+    background: linear-gradient(135deg, #fd79a8, #e84393, #d63031);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+  }
+  header h1 { font-family: 'Fredoka One', cursive; font-size: clamp(2rem,6vw,3.5rem); color: white; text-shadow: 3px 3px 0 rgba(0,0,0,0.15); }
+  .back-btn {
+    position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+    background: white; border: none; border-radius: 50px; padding: 10px 20px;
+    font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+    text-decoration: none; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+  }
+  .back-btn:hover { transform: translateY(-50%) scale(1.05); }
+  .subtitle { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: rgba(255,255,255,0.95); margin-top: 5px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+    padding: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .shape-card {
+    background: white;
+    border-radius: 28px;
+    padding: 35px 20px 25px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .shape-card:hover { transform: translateY(-8px); box-shadow: 0 16px 35px rgba(0,0,0,0.13); }
+  .shape-card:active { transform: scale(0.95); }
+  .shape-svg { margin: 0 auto 15px; display: block; }
+  .shape-name { font-family: 'Fredoka One', cursive; font-size: 1.8rem; margin-bottom: 5px; }
+  .shape-desc { font-size: 0.95rem; color: #636e72; font-weight: 700; }
+  .shape-eg { font-size: 1.8rem; margin-top: 8px; }
+  .spin { animation: spin 0.6s ease; }
+  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🔷 Shapes!</h1>
+  <div class="subtitle">Tap a shape to learn it! 🎓</div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const shapes = [
+  {
+    name: "Circle", color: "#ff6b6b", desc: "Round & round!", eg: "🌕 🍕 🎡",
+    svg: `<svg width="100" height="100" class="shape-svg"><circle cx="50" cy="50" r="45" fill="#ff6b6b"/></svg>`,
+    say: "A circle is perfectly round! Like the sun, a pizza, and a wheel!"
+  },
+  {
+    name: "Square", color: "#feca57", desc: "4 equal sides!", eg: "📦 🧱 🎁",
+    svg: `<svg width="100" height="100" class="shape-svg"><rect x="5" y="5" width="90" height="90" fill="#feca57" rx="4"/></svg>`,
+    say: "A square has 4 equal sides! Like a box, a window, and a tile!"
+  },
+  {
+    name: "Triangle", color: "#48dbfb", desc: "3 pointy sides!", eg: "🏔️ 🍕 ⚠️",
+    svg: `<svg width="100" height="100" class="shape-svg"><polygon points="50,5 95,95 5,95" fill="#48dbfb"/></svg>`,
+    say: "A triangle has 3 sides! Like a mountain, a slice of pizza, and a road sign!"
+  },
+  {
+    name: "Rectangle", color: "#2ed573", desc: "2 long, 2 short!", eg: "📱 📺 🚪",
+    svg: `<svg width="100" height="100" class="shape-svg"><rect x="5" y="20" width="90" height="60" fill="#2ed573" rx="4"/></svg>`,
+    say: "A rectangle has 2 long sides and 2 short sides! Like a phone, a TV, and a door!"
+  },
+  {
+    name: "Star", color: "#f9ca24", desc: "Twinkle twinkle!", eg: "⭐ 🌟 🌠",
+    svg: `<svg width="100" height="100" class="shape-svg"><polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="#f9ca24"/></svg>`,
+    say: "A star has 5 points! Twinkle twinkle little star!"
+  },
+  {
+    name: "Heart", color: "#ff4757", desc: "I love you!", eg: "❤️ 💝 💕",
+    svg: `<svg width="100" height="100" class="shape-svg"><path d="M50 85 C10 60 5 25 25 15 C35 10 45 15 50 25 C55 15 65 10 75 15 C95 25 90 60 50 85Z" fill="#ff4757"/></svg>`,
+    say: "A heart shape means love! I love you Yuaan!"
+  },
+  {
+    name: "Diamond", color: "#a29bfe", desc: "Like a gem!", eg: "💎 🃏 ♦️",
+    svg: `<svg width="100" height="100" class="shape-svg"><polygon points="50,5 95,50 50,95 5,50" fill="#a29bfe"/></svg>`,
+    say: "A diamond is like a square turned sideways! Sparkly like a gem!"
+  },
+  {
+    name: "Oval", color: "#fd79a8", desc: "Stretched circle!", eg: "🥚 🥏 🏉",
+    svg: `<svg width="100" height="100" class="shape-svg"><ellipse cx="50" cy="50" rx="45" ry="30" fill="#fd79a8"/></svg>`,
+    say: "An oval is like a stretched circle! Like an egg and a rugby ball!"
+  },
+];
+
+const grid = document.getElementById('grid');
+shapes.forEach(s => {
+  const div = document.createElement('div');
+  div.className = 'shape-card';
+  div.style.borderTop = `5px solid ${s.color}`;
+  div.innerHTML = `${s.svg}<div class="shape-name" style="color:${s.color}">${s.name}</div><div class="shape-desc">${s.desc}</div><div class="shape-eg">${s.eg}</div>`;
+  div.onclick = () => {
+    const svg = div.querySelector('svg');
+    svg.classList.remove('spin');
+    void svg.offsetWidth;
+    svg.classList.add('spin');
+    speak(s.say);
+  };
+  grid.appendChild(div);
+});
+
+function speak(text) {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.85; u.pitch = 1.3;
+    speechSynthesis.speak(u);
+  }
+}
+</script>
+</body>
+</html>

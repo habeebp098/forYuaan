@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Where Does It Go? 🏡</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--warm1:#fff8f0;--warm2:#ffe4cc;--accent:#ff6b35;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(160deg,#fff8f0,#ffe4cc 50%,#ffd1a0);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* Floating shapes BG */
+.bg-shape{position:fixed;opacity:.07;pointer-events:none;z-index:0;animation:shapeFloat var(--d) ease-in-out infinite var(--dl) alternate;font-size:var(--s);}
+@keyframes shapeFloat{from{transform:translateY(0) rotate(0)}to{transform:translateY(-20px) rotate(10deg)}}
+
+header{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px 20px 8px;
+}
+.back-btn{
+  position:absolute;left:16px;
+  background:rgba(255,255,255,.8);border:2px solid rgba(255,255,255,.95);
+  border-radius:50px;padding:9px 16px;
+  font-family:'Boogaloo',cursive;font-size:.95rem;color:#7a3500;
+  text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.1);transition:transform .2s;
+}
+.back-btn:hover{transform:scale(1.05);}
+h1{
+  font-family:'Boogaloo',cursive;
+  font-size:clamp(1.8rem,6vw,3rem);
+  color:#7a3500;text-shadow:2px 2px 0 rgba(255,255,255,.5);
+  letter-spacing:1px;
+}
+.subtitle{
+  text-align:center;font-family:'Boogaloo',cursive;font-size:1.05rem;
+  color:#c0571a;margin-bottom:12px;position:relative;z-index:10;
+}
+
+/* Score */
+.score-row{
+  position:relative;z-index:10;
+  display:flex;justify-content:center;gap:12px;padding:0 20px 12px;
+}
+.badge{
+  background:rgba(255,255,255,.75);border-radius:50px;
+  padding:8px 18px;font-family:'Boogaloo',cursive;font-size:1.05rem;color:#7a3500;
+  border:2px solid rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+.badge .v{font-size:1.3rem;color:#ff6b35;}
+
+/* Item to sort */
+.item-card{
+  position:relative;z-index:10;
+  max-width:340px;margin:0 auto 18px;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+  border-radius:28px;padding:24px 20px;text-align:center;
+  border:3px solid rgba(255,255,255,.95);
+  box-shadow:0 8px 30px rgba(0,0,0,.1);
+}
+.item-label{font-family:'Boogaloo',cursive;font-size:.9rem;color:#aaa;margin-bottom:8px;letter-spacing:1px;}
+.big-item{font-size:clamp(4.5rem,15vw,7rem);display:inline-block;animation:itemBounce 2.5s ease-in-out infinite;}
+@keyframes itemBounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.05)}}
+.item-name{font-family:'Boogaloo',cursive;font-size:1.3rem;color:#555;margin-top:8px;}
+
+/* Category bins */
+.bins-label{
+  position:relative;z-index:10;
+  text-align:center;font-family:'Boogaloo',cursive;font-size:1.05rem;
+  color:#c0571a;margin-bottom:10px;
+}
+.bins-grid{
+  position:relative;z-index:10;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+  max-width:600px;margin:0 auto;padding:0 16px 24px;
+}
+@media(min-width:560px){.bins-grid{grid-template-columns:repeat(3,1fr);}}
+
+.bin{
+  background:rgba(255,255,255,.75);backdrop-filter:blur(6px);
+  border:3px dashed rgba(200,100,50,.3);border-radius:22px;
+  padding:16px 10px;text-align:center;cursor:pointer;
+  transition:transform .15s,border-color .15s,background .15s;
+  box-shadow:0 4px 16px rgba(0,0,0,.08);
+  min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;
+}
+.bin:hover,.bin:focus{transform:scale(1.04);border-color:var(--accent);background:rgba(255,255,255,.92);}
+.bin:active{transform:scale(.96);}
+.bin-emoji{font-size:2.5rem;}
+.bin-name{font-family:'Boogaloo',cursive;font-size:1rem;color:#7a3500;}
+.bin.correct{
+  border-color:#2ed573;border-style:solid;
+  background:rgba(46,213,115,.15);
+  animation:correctBin .5s ease;
+}
+.bin.wrong{border-color:#ff6b6b;border-style:solid;animation:wrongBin .4s ease;}
+@keyframes correctBin{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes wrongBin{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* Feedback overlay */
+.feedback-toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);
+  z-index:200;background:white;border-radius:50px;
+  padding:14px 28px;font-family:'Boogaloo',cursive;font-size:1.2rem;
+  box-shadow:0 8px 30px rgba(0,0,0,.2);
+  transition:transform .3s cubic-bezier(.175,.885,.32,1.275),opacity .3s;
+  opacity:0;white-space:nowrap;
+}
+.feedback-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.feedback-toast.good{color:#2d9b55;border:2px solid #2ed573;}
+.feedback-toast.bad{color:#c0392b;border:2px solid #ff6b6b;}
+
+/* Progress dots */
+.progress-dots{
+  display:flex;justify-content:center;gap:8px;
+  position:relative;z-index:10;margin-bottom:12px;
+}
+.dot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.6);transition:background .3s;}
+.dot.done{background:#2ed573;border-color:#2ed573;}
+.dot.fail{background:#ff6b6b;border-color:#ff6b6b;}
+
+/* Completion */
+.complete{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;
+}
+.complete.show{display:flex;}
+.complete-box{
+  background:linear-gradient(135deg,#fff9f0,#ffe4cc);
+  border-radius:30px;padding:50px 45px;text-align:center;
+  max-width:360px;width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,.2);border:3px solid rgba(255,180,100,.5);
+  animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.complete-box h2{font-family:'Boogaloo',cursive;font-size:2.5rem;color:#ff6b35;}
+.complete-box p{color:#888;font-size:1.1rem;margin:10px 0 22px;}
+.complete-box button{
+  background:linear-gradient(135deg,#ff6b35,#e84318);
+  border:none;border-radius:50px;padding:14px 36px;
+  font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;cursor:pointer;transition:transform .2s;
+}
+.complete-box button:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🏡 Where Does It Go?</h1>
+</header>
+<p class="subtitle">Sort each thing into the right place!</p>
+
+<div class="score-row">
+  <div class="badge">✅ <span class="v" id="scoreEl">0</span></div>
+  <div class="badge">Set <span class="v" id="setEl">1</span></div>
+</div>
+
+<div class="progress-dots" id="progressDots"></div>
+
+<div class="item-card">
+  <div class="item-label">WHERE DOES THIS GO?</div>
+  <div class="big-item" id="bigItem"></div>
+  <div class="item-name" id="itemName"></div>
+</div>
+
+<div class="bins-label">👆 Tap the right place!</div>
+<div class="bins-grid" id="binsGrid"></div>
+
+<div class="feedback-toast" id="toast"></div>
+
+<div class="complete" id="complete">
+  <div class="complete-box">
+    <div style="font-size:4rem">🏆</div>
+    <h2>Super Sorter!</h2>
+    <p id="completeMsg">You sorted everything perfectly! Yuaan is so clever!</p>
+    <button onclick="nextSet()">New Set! ➡</button>
+  </div>
+</div>
+
+<script>
+// Each SET has a theme with bins and items
+const SETS = [
+  {
+    theme:'Where do these live?',
+    bins:[
+      {emoji:'🌊',name:'Ocean',key:'ocean'},
+      {emoji:'🌳',name:'Forest',key:'forest'},
+      {emoji:'🏜️',name:'Desert',key:'desert'},
+      {emoji:'❄️',name:'Arctic',key:'arctic'},
+    ],
+    items:[
+      {emoji:'🐬',name:'Dolphin',bin:'ocean',fact:'Dolphins love the ocean!'},
+      {emoji:'🐻',name:'Bear',bin:'forest',fact:'Bears live in forests!'},
+      {emoji:'🦁',name:'Lion',bin:'desert',fact:'Lions live in hot places!'},
+      {emoji:'🐧',name:'Penguin',bin:'arctic',fact:'Penguins love the cold!'},
+      {emoji:'🐠',name:'Clownfish',bin:'ocean',fact:'Clownfish live underwater!'},
+      {emoji:'🦊',name:'Fox',bin:'forest',fact:'Foxes live in forests!'},
+      {emoji:'🦒',name:'Giraffe',bin:'desert',fact:'Giraffes love warm places!'},
+      {emoji:'🐻‍❄️',name:'Polar Bear',bin:'arctic',fact:'Polar bears love ice!'},
+    ]
+  },
+  {
+    theme:'Which room does this belong in?',
+    bins:[
+      {emoji:'🛏️',name:'Bedroom',key:'bedroom'},
+      {emoji:'🍳',name:'Kitchen',key:'kitchen'},
+      {emoji:'🛁',name:'Bathroom',key:'bathroom'},
+      {emoji:'🛋️',name:'Living Room',key:'living'},
+    ],
+    items:[
+      {emoji:'🧸',name:'Teddy Bear',bin:'bedroom',fact:'Teddy bears sleep in the bedroom!'},
+      {emoji:'🍴',name:'Fork',bin:'kitchen',fact:'Forks are used in the kitchen!'},
+      {emoji:'🪥',name:'Toothbrush',bin:'bathroom',fact:'We brush teeth in the bathroom!'},
+      {emoji:'📺',name:'Television',bin:'living',fact:'We watch TV in the living room!'},
+      {emoji:'🛌',name:'Pillow',bin:'bedroom',fact:'Pillows go on the bed!'},
+      {emoji:'🥄',name:'Spoon',bin:'kitchen',fact:'Spoons are kitchen tools!'},
+      {emoji:'🧼',name:'Soap',bin:'bathroom',fact:'We use soap in the bathroom!'},
+      {emoji:'📚',name:'Book',bin:'living',fact:'We read books in the living room!'},
+    ]
+  },
+  {
+    theme:'Is it a fruit, vegetable, or something else?',
+    bins:[
+      {emoji:'🍓',name:'Fruit',key:'fruit'},
+      {emoji:'🥦',name:'Vegetable',key:'veg'},
+      {emoji:'🍞',name:'Grain',key:'grain'},
+      {emoji:'🥛',name:'Drink',key:'drink'},
+    ],
+    items:[
+      {emoji:'🍎',name:'Apple',bin:'fruit',fact:'Apple is a sweet fruit!'},
+      {emoji:'🥕',name:'Carrot',bin:'veg',fact:'Carrots grow in the ground!'},
+      {emoji:'🍊',name:'Orange',bin:'fruit',fact:'Oranges are juicy fruits!'},
+      {emoji:'🥬',name:'Lettuce',bin:'veg',fact:'Lettuce is a green vegetable!'},
+      {emoji:'🍞',name:'Bread',bin:'grain',fact:'Bread is made from wheat!'},
+      {emoji:'🥤',name:'Juice',bin:'drink',fact:'Juice is something we drink!'},
+      {emoji:'🍇',name:'Grapes',bin:'fruit',fact:'Grapes are small sweet fruits!'},
+      {emoji:'🌽',name:'Corn',bin:'veg',fact:'Corn grows on a cob!'},
+    ]
+  },
+  {
+    theme:'What kind of vehicle is it?',
+    bins:[
+      {emoji:'✈️',name:'Flies',key:'air'},
+      {emoji:'🚂',name:'On Land',key:'land'},
+      {emoji:'⛵',name:'On Water',key:'water'},
+      {emoji:'🚀',name:'In Space',key:'space'},
+    ],
+    items:[
+      {emoji:'🚁',name:'Helicopter',bin:'air',fact:'Helicopters fly in the air!'},
+      {emoji:'🚗',name:'Car',bin:'land',fact:'Cars drive on roads!'},
+      {emoji:'⛴️',name:'Ship',bin:'water',fact:'Ships sail on the ocean!'},
+      {emoji:'🛸',name:'UFO',bin:'space',fact:'UFOs zoom through space!'},
+      {emoji:'🛩️',name:'Plane',bin:'air',fact:'Planes fly high in the sky!'},
+      {emoji:'🚌',name:'Bus',bin:'land',fact:'Buses drive on roads!'},
+      {emoji:'🛶',name:'Boat',bin:'water',fact:'Boats float on water!'},
+      {emoji:'🌕',name:'Moon Rocket',bin:'space',fact:'Rockets go to the moon!'},
+    ]
+  },
+];
+
+let setIdx=0, items=[], itemIdx=0, score=0, answers=[], answered=false;
+
+function startSet(){
+  const set=SETS[setIdx%SETS.length];
+  items=[...set.items].sort(()=>Math.random()-.5);
+  itemIdx=0; answers=[];
+  document.getElementById('setEl').textContent=setIdx+1;
+
+  // Build bins
+  const grid=document.getElementById('binsGrid');
+  grid.innerHTML='';
+  set.bins.forEach(b=>{
+    const btn=document.createElement('div');
+    btn.className='bin';btn.tabIndex=0;
+    btn.innerHTML=`<span class="bin-emoji">${b.emoji}</span><span class="bin-name">${b.name}</span>`;
+    btn.addEventListener('click',()=>checkBin(b.key));
+    btn.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')checkBin(b.key);});
+    btn.dataset.key=b.key;
+    grid.appendChild(btn);
+  });
+
+  // Build progress dots
+  buildDots();
+  loadItem();
+}
+
+function buildDots(){
+  const d=document.getElementById('progressDots');
+  d.innerHTML='';
+  items.forEach((_,i)=>{
+    const dot=document.createElement('div');
+    dot.className='dot';dot.id='dot'+i;
+    d.appendChild(dot);
+  });
+}
+
+function loadItem(){
+  if(itemIdx>=items.length){showComplete();return;}
+  const item=items[itemIdx];
+  answered=false;
+  document.getElementById('bigItem').textContent=item.emoji;
+  document.getElementById('itemName').textContent=item.name;
+  // Remove previous highlights
+  document.querySelectorAll('.bin').forEach(b=>{b.classList.remove('correct','wrong');});
+  speak(`Where does ${item.name} go?`);
+}
+
+function checkBin(key){
+  if(answered) return;
+  const item=items[itemIdx];
+  if(key===item.bin){
+    answered=true;
+    // Find btn
+    const btn=document.querySelector(`.bin[data-key="${key}"]`);
+    btn.classList.add('correct');
+    score++;answers.push('✅');
+    document.getElementById('scoreEl').textContent=score;
+    document.getElementById('dot'+itemIdx).classList.add('done');
+    showToast(true,`✅ ${item.fact}`);
+    playTone(true);
+    speak(item.fact);
+    itemIdx++;
+    setTimeout(loadItem,1400);
+  } else {
+    const btn=document.querySelector(`.bin[data-key="${key}"]`);
+    btn.classList.add('wrong');
+    answers.push('❌');
+    document.getElementById('dot'+itemIdx).classList.add('fail');
+    showToast(false,`🤔 Think again! Where does a ${item.name} belong?`);
+    playTone(false);
+    speak(`Hmm, think! Where does the ${item.name} belong?`);
+    setTimeout(()=>btn.classList.remove('wrong'),500);
+  }
+}
+
+let toastTimer;
+function showToast(good,msg){
+  clearTimeout(toastTimer);
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='feedback-toast show '+(good?'good':'bad');
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1300);
+}
+
+function showComplete(){
+  const correct=answers.filter(a=>a==='✅').length;
+  const msgs=[
+    `You sorted ${correct} out of ${items.length}! Great thinking Yuaan!`,
+    `${correct}/${items.length} correct! You really know where things go!`,
+    `Amazing! ${correct} perfect answers! You are so smart!`,
+  ];
+  document.getElementById('completeMsg').textContent=msgs[setIdx%msgs.length];
+  document.getElementById('complete').classList.add('show');
+  speak(`Well done! You sorted everything!`);
+}
+
+function nextSet(){
+  setIdx++;
+  document.getElementById('complete').classList.remove('show');
+  startSet();
+}
+
+function playTone(good){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    if(good){o.frequency.setValueAtTime(440,c.currentTime);o.frequency.setValueAtTime(880,c.currentTime+.12);g.gain.setValueAtTime(.25,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.4);o.start();o.stop(c.currentTime+.4);}
+    else{o.type='sawtooth';o.frequency.value=180;g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);o.start();o.stop(c.currentTime+.25);}
+  }catch(e){}
+}
+
+function speak(txt){
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.rate=.88;u.pitch=1.25;speechSynthesis.speak(u);
+  }
+}
+
+// BG shapes
+const shapes=['🏠','🌳','🌈','⭐','🎈','🌸'];
+for(let i=0;i<12;i++){
+  const el=document.createElement('div');el.className='bg-shape';
+  el.textContent=shapes[i%shapes.length];
+  el.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--s:${(1.5+Math.random()*2).toFixed(1)}rem;--d:${(2+Math.random()*3).toFixed(1)}s;--dl:${(Math.random()*3).toFixed(1)}s`;
+  document.body.appendChild(el);
+}
+
+startSet();
+</script>
+</body>
+</html>

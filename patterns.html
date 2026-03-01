@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Comes Next? 🔮</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#1a0845;
+  --bg2:#3b1b8f;
+  --card:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Patrick Hand',cursive;
+  background:linear-gradient(160deg,var(--bg1),var(--bg2) 60%,#6b2fa0);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* Twinkling stars */
+.starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.tstar{position:absolute;background:white;border-radius:50%;animation:tw var(--d) ease-in-out infinite var(--dl);}
+@keyframes tw{0%,100%{opacity:.1;transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}
+
+header{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  padding:18px 20px 8px;
+}
+.back-btn{
+  position:absolute;left:16px;
+  background:rgba(255,255,255,.12);backdrop-filter:blur(8px);
+  border:1.5px solid rgba(255,255,255,.3);border-radius:50px;
+  padding:10px 16px;font-family:'Boogaloo',cursive;font-size:.95rem;
+  color:white;text-decoration:none;transition:all .2s;
+}
+.back-btn:hover{background:rgba(255,255,255,.22);transform:scale(1.05);}
+h1{
+  font-family:'Boogaloo',cursive;
+  font-size:clamp(1.8rem,6vw,3rem);color:white;
+  text-shadow:0 0 30px rgba(180,100,255,.9),3px 3px 0 rgba(0,0,0,.3);
+  letter-spacing:2px;
+}
+
+/* Score row */
+.score-row{
+  position:relative;z-index:10;
+  display:flex;justify-content:center;align-items:center;gap:12px;
+  padding:0 20px 14px;flex-wrap:wrap;
+}
+.badge{
+  background:rgba(255,255,255,.12);backdrop-filter:blur(8px);
+  border:1.5px solid rgba(255,255,255,.25);border-radius:50px;
+  padding:9px 20px;font-family:'Boogaloo',cursive;font-size:1.1rem;color:white;
+}
+.badge .num{color:#ffe066;font-size:1.4rem;}
+
+/* Pattern display */
+.puzzle-wrap{
+  position:relative;z-index:10;max-width:680px;margin:0 auto;padding:0 16px;
+}
+.level-tag{
+  text-align:center;font-family:'Boogaloo',cursive;font-size:1rem;
+  color:rgba(255,255,255,.6);margin-bottom:8px;letter-spacing:2px;text-transform:uppercase;
+}
+.pattern-card{
+  background:rgba(255,255,255,.08);backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,.15);border-radius:28px;
+  padding:24px 16px;margin-bottom:18px;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.pattern-row{
+  display:flex;align-items:center;justify-content:center;
+  flex-wrap:wrap;gap:10px;
+}
+.p-item{
+  width:72px;height:72px;border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;
+  background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.15);
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  position:relative;
+}
+.p-item.blank{
+  background:rgba(255,255,255,.05);
+  border:3px dashed rgba(255,255,255,.4);
+  animation:blinkBorder 1.5s ease-in-out infinite;
+}
+@keyframes blinkBorder{0%,100%{border-color:rgba(255,220,100,.4)}50%{border-color:rgba(255,220,100,1)}}
+.question-mark{font-size:2rem;color:#ffe066;animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+.arrow{font-size:1.4rem;opacity:.5;color:white;}
+
+/* Choices */
+.choices-label{
+  text-align:center;font-family:'Boogaloo',cursive;font-size:1.1rem;
+  color:rgba(255,255,255,.75);margin-bottom:12px;
+}
+.choices-row{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:14px;
+}
+.choice-btn{
+  width:86px;height:86px;border-radius:22px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.8rem;
+  background:rgba(255,255,255,.1);backdrop-filter:blur(6px);
+  border:2px solid rgba(255,255,255,.2);
+  cursor:pointer;
+  box-shadow:0 6px 20px rgba(0,0,0,.25);
+  transition:transform .15s,background .15s,border-color .15s;
+}
+.choice-btn:hover{transform:scale(1.1);background:rgba(255,255,255,.2);}
+.choice-btn:active{transform:scale(.93);}
+.choice-btn.correct-ans{
+  background:rgba(46,213,115,.3)!important;
+  border-color:#2ed573!important;
+  animation:correctChoice .5s ease;
+}
+.choice-btn.wrong-ans{
+  background:rgba(255,107,107,.3)!important;
+  border-color:#ff6b6b!important;
+  animation:wrongChoice .4s ease;
+}
+@keyframes correctChoice{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes wrongChoice{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* Hint text */
+.hint-text{
+  text-align:center;font-family:'Patrick Hand',cursive;font-size:1.1rem;
+  color:rgba(255,255,255,.7);margin:14px 0 0;min-height:24px;
+  transition:opacity .3s;
+}
+
+/* Reveal animation for blank */
+.p-item.blank.filled{
+  animation:fillReveal .5s cubic-bezier(.175,.885,.32,1.275) forwards;
+  background:rgba(46,213,115,.25);
+  border-color:#2ed573;border-style:solid;
+}
+@keyframes fillReveal{
+  0%{transform:scale(0) rotate(-180deg)}
+  60%{transform:scale(1.2) rotate(10deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+
+/* Next btn */
+.next-row{display:flex;justify-content:center;margin-top:20px;}
+.next-btn{
+  background:linear-gradient(135deg,#f9ca24,#f0932b);
+  border:none;border-radius:50px;padding:14px 40px;
+  font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;cursor:pointer;
+  box-shadow:0 6px 20px rgba(240,147,43,.45);
+  display:none;transition:transform .2s;
+}
+.next-btn:hover{transform:scale(1.05);}
+.next-btn.show{display:block;animation:fadeUp .4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+
+/* Celebration */
+.celebrate{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;
+}
+.celebrate.show{display:flex;}
+.cel-box{
+  background:linear-gradient(135deg,#1a0845,#3b1b8f);
+  border:2px solid rgba(255,200,100,.5);
+  border-radius:30px;padding:50px 50px;text-align:center;
+  max-width:380px;width:90%;
+  box-shadow:0 0 60px rgba(180,100,255,.4);
+  animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.cel-box h2{font-family:'Boogaloo',cursive;font-size:2.5rem;color:#ffe066;}
+.cel-box p{color:rgba(255,255,255,.8);font-size:1.1rem;margin:10px 0 24px;}
+.cel-btn{
+  background:linear-gradient(135deg,#6c5ce7,#a29bfe);
+  border:none;border-radius:50px;padding:14px 36px;
+  font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;cursor:pointer;transition:transform .2s;
+}
+.cel-btn:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+
+<div class="starfield" id="sf"></div>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🔮 What Comes Next?</h1>
+</header>
+
+<div class="score-row">
+  <div class="badge">Score <span class="num" id="scoreEl">0</span></div>
+  <div class="badge">Streak 🔥 <span class="num" id="streakEl">0</span></div>
+</div>
+
+<div class="puzzle-wrap">
+  <div class="level-tag" id="levelTag">Level 1</div>
+  <div class="pattern-card">
+    <div class="pattern-row" id="patternRow"></div>
+  </div>
+  <div class="choices-label">👇 Which one comes next?</div>
+  <div class="choices-row" id="choicesRow"></div>
+  <div class="hint-text" id="hintText"></div>
+  <div class="next-row"><button class="next-btn" id="nextBtn" onclick="loadNext()">Next Pattern ➡</button></div>
+</div>
+
+<div class="celebrate" id="celebrate">
+  <div class="cel-box">
+    <div style="font-size:5rem;margin-bottom:12px">🌟</div>
+    <h2>Brain Power!</h2>
+    <p id="celMsg">You solved 5 patterns! You are so smart Yuaan!</p>
+    <button class="cel-btn" onclick="continueGame()">Keep Going! 🧠</button>
+  </div>
+</div>
+
+<script>
+// Star field
+const sf=document.getElementById('sf');
+for(let i=0;i<80;i++){
+  const s=document.createElement('div');s.className='tstar';
+  const sz=Math.random()*2.5+.5;
+  s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*2+1).toFixed(1)}s;--dl:${(Math.random()*4).toFixed(1)}s`;
+  sf.appendChild(s);
+}
+
+// Patterns: {sequence, blank index (always last shown), choices, correct, hint, category}
+// AB, ABB, ABC, ABAC, AABB patterns etc.
+const ALL_PATTERNS = [
+  // === Simple AB patterns ===
+  {seq:['🌞','🌛','🌞','🌛','🌞'],answer:'🌛',choices:['🌛','⭐','🌈','🌊'],hint:'Sun, Moon, Sun, Moon...'},
+  {seq:['🍎','🍊','🍎','🍊','🍎'],answer:'🍊',choices:['🍇','🍊','🍋','🍓'],hint:'Apple, Orange, Apple, Orange...'},
+  {seq:['🐱','🐶','🐱','🐶','🐱'],answer:'🐶',choices:['🐱','🐶','🐸','🐧'],hint:'Cat, Dog, Cat, Dog...'},
+  {seq:['❤️','💛','❤️','💛','❤️'],answer:'💛',choices:['💛','💜','💙','💚'],hint:'Red heart, Yellow heart...'},
+  {seq:['🌧️','☀️','🌧️','☀️','🌧️'],answer:'☀️',choices:['☀️','🌪️','⛄','🌩️'],hint:'Rain, Sun, Rain, Sun...'},
+  // === ABB patterns ===
+  {seq:['🔺','🔵','🔵','🔺','🔵'],answer:'🔵',choices:['🔺','🔵','🟡','🟣'],hint:'Triangle, Circle, Circle...'},
+  {seq:['🐸','🌸','🌸','🐸','🌸'],answer:'🌸',choices:['🌸','🐸','🦋','🌿'],hint:'Frog, Flower, Flower...'},
+  {seq:['⭐','🌙','🌙','⭐','🌙'],answer:'🌙',choices:['🌙','⭐','☀️','💫'],hint:'Star, Moon, Moon, Star, Moon...'},
+  // === ABC patterns ===
+  {seq:['🍕','🌮','🍔','🍕','🌮'],answer:'🍔',choices:['🍔','🍩','🍇','🧁'],hint:'Pizza, Taco, Burger, Pizza, Taco...'},
+  {seq:['🦁','🐘','🦒','🦁','🐘'],answer:'🦒',choices:['🦒','🐻','🐧','🦊'],hint:'Lion, Elephant, Giraffe...'},
+  {seq:['🔴','🟡','🔵','🔴','🟡'],answer:'🔵',choices:['🔵','🟢','🟣','🟠'],hint:'Red, Yellow, Blue...'},
+  // === Growing patterns (size/number) ===
+  {seq:['1️⃣','2️⃣','3️⃣','4️⃣'],answer:'5️⃣',choices:['5️⃣','6️⃣','🔟','3️⃣'],hint:'1, 2, 3, 4... counting up!'},
+  {seq:['🐣','🐥','🐔','🐣'],answer:'🐥',choices:['🐥','🐔','🦆','🦅'],hint:'Baby egg, chick, chicken... what comes after egg?'},
+  {seq:['🌱','🌿','🌳','🌱'],answer:'🌿',choices:['🌿','🌳','🍂','🌺'],hint:'Seedling grows into a big tree!'},
+  // === AABB patterns ===
+  {seq:['🐝','🐝','🦋','🦋','🐝'],answer:'🐝',choices:['🐝','🦋','🐛','🌸'],hint:'Bee Bee, Butterfly Butterfly...'},
+  {seq:['🏠','🏠','🌳','🌳','🏠'],answer:'🏠',choices:['🏠','🌳','🏔️','🚗'],hint:'House House, Tree Tree...'},
+  // === Mixed shape/color ===
+  {seq:['🔴','🔴','🔵','🔴','🔴'],answer:'🔵',choices:['🔵','🔴','🟡','🟢'],hint:'Red Red Blue Red Red...'},
+  {seq:['🌺','🍃','🌺','🍃','🌺'],answer:'🍃',choices:['🍃','🌺','🌸','🌵'],hint:'Flower, Leaf, Flower, Leaf...'},
+];
+
+let patterns=[...ALL_PATTERNS].sort(()=>Math.random()-.5);
+let idx=0, score=0, streak=0, solved=0;
+let answered=false;
+
+function loadNext(){
+  if(idx>=patterns.length){idx=0;patterns=[...ALL_PATTERNS].sort(()=>Math.random()-.5);}
+  const p=patterns[idx];
+  answered=false;
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('hintText').textContent='';
+  document.getElementById('levelTag').textContent=`Pattern ${idx+1}`;
+
+  // Build pattern row
+  const row=document.getElementById('patternRow');
+  row.innerHTML='';
+  p.seq.forEach(item=>{
+    const div=document.createElement('div');
+    div.className='p-item';
+    div.textContent=item;
+    row.appendChild(div);
+  });
+  // Arrow
+  const arr=document.createElement('span');
+  arr.className='arrow'; arr.textContent='➡';
+  row.appendChild(arr);
+  // Blank
+  const blank=document.createElement('div');
+  blank.className='p-item blank';
+  blank.id='blankCell';
+  blank.innerHTML='<span class="question-mark">?</span>';
+  row.appendChild(blank);
+
+  // Build choices
+  const cr=document.getElementById('choicesRow');
+  cr.innerHTML='';
+  const shuffled=[...p.choices].sort(()=>Math.random()-.5);
+  shuffled.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=c;
+    btn.dataset.val=c;
+    btn.addEventListener('click',()=>checkAnswer(c,p.answer,btn));
+    cr.appendChild(btn);
+  });
+
+  // Speak the pattern
+  setTimeout(()=>speak(`Look at the pattern! What comes next?`),300);
+}
+
+function checkAnswer(val,correct,btn){
+  if(answered) return;
+  answered=true;
+
+  if(val===correct){
+    btn.classList.add('correct-ans');
+    score+=10+(streak*2);
+    streak++;
+    document.getElementById('scoreEl').textContent=score;
+    document.getElementById('streakEl').textContent=streak;
+    // Fill blank
+    const blank=document.getElementById('blankCell');
+    blank.innerHTML=val;
+    blank.classList.add('filled');
+    document.getElementById('hintText').textContent='✅ '+patterns[idx].hint;
+    playTone(true);
+    speak(`Yes! ${correct}! Well done!`);
+    solved++;
+    if(solved===5||solved===10||solved===15){
+      setTimeout(()=>showCelebration(solved),800);
+    } else {
+      document.getElementById('nextBtn').classList.add('show');
+    }
+  } else {
+    btn.classList.add('wrong-ans');
+    streak=0;
+    document.getElementById('streakEl').textContent=0;
+    document.getElementById('hintText').textContent='🤔 '+patterns[idx].hint;
+    playTone(false);
+    speak(`Hmm, try again! Look carefully.`);
+    setTimeout(()=>{
+      btn.classList.remove('wrong-ans');
+      answered=false;
+    },600);
+  }
+  idx++;
+}
+
+function showCelebration(n){
+  const msgs=[
+    `5 patterns solved! You have a super brain Yuaan! 🧠`,
+    `10 patterns! You are a pattern master! 🏆`,
+    `15 patterns! You are INCREDIBLE! 🌟`,
+  ];
+  const i=n===5?0:n===10?1:2;
+  document.getElementById('celMsg').textContent=msgs[i];
+  document.getElementById('celebrate').classList.add('show');
+  speak(msgs[i]);
+}
+function continueGame(){
+  document.getElementById('celebrate').classList.remove('show');
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function playTone(good){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    if(good){
+      [523,659,784].forEach((f,i)=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.connect(g);g.connect(c.destination);
+        o.frequency.value=f;
+        g.gain.setValueAtTime(0,c.currentTime+i*.1);
+        g.gain.linearRampToValueAtTime(.25,c.currentTime+i*.1+.05);
+        g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.1+.3);
+        o.start(c.currentTime+i*.1);o.stop(c.currentTime+i*.1+.35);
+      });
+    } else {
+      const o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);
+      o.type='sawtooth';o.frequency.value=180;
+      g.gain.setValueAtTime(.2,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.3);
+      o.start();o.stop(c.currentTime+.3);
+    }
+  }catch(e){}
+}
+
+function speak(txt){
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.rate=.88;u.pitch=1.3;speechSynthesis.speak(u);
+  }
+}
+
+loadNext();
+</script>
+</body>
+</html>

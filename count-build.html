@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build & Count! 🧱</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Fredoka One',cursive;
+  background:linear-gradient(160deg,#0f3460 0%,#16213e 50%,#1a1a2e 100%);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* Grid floor */
+.grid-floor{
+  position:fixed;bottom:0;left:0;right:0;height:60px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.03) 0,rgba(255,255,255,.03) 1px,transparent 1px,transparent 40px);
+  z-index:1;pointer-events:none;
+}
+
+header{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px 20px 8px;
+}
+.back-btn{
+  position:absolute;left:16px;
+  background:rgba(255,255,255,.1);backdrop-filter:blur(8px);
+  border:1.5px solid rgba(255,255,255,.25);border-radius:50px;
+  padding:9px 16px;font-family:'Boogaloo',cursive;font-size:.95rem;
+  color:white;text-decoration:none;transition:all .2s;
+}
+.back-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.05);}
+h1{
+  font-family:'Boogaloo',cursive;
+  font-size:clamp(1.8rem,6vw,3rem);color:white;
+  text-shadow:0 0 20px rgba(100,200,255,.7),3px 3px 0 rgba(0,0,0,.3);
+  letter-spacing:2px;
+}
+
+.main{position:relative;z-index:10;max-width:600px;margin:0 auto;padding:0 16px 20px;}
+
+/* Target display */
+.target-card{
+  background:rgba(255,255,255,.07);backdrop-filter:blur(10px);
+  border:2px solid rgba(255,255,255,.15);border-radius:24px;
+  padding:18px 20px;text-align:center;margin-bottom:18px;
+  box-shadow:0 8px 30px rgba(0,0,0,.3);
+}
+.target-top{font-family:'Boogaloo',cursive;font-size:1rem;color:rgba(255,255,255,.6);margin-bottom:8px;letter-spacing:1px;}
+.target-num{
+  font-family:'Boogaloo',cursive;
+  font-size:clamp(4rem,18vw,7rem);
+  line-height:1;
+  color:#ffe066;
+  text-shadow:0 0 30px rgba(255,224,102,.7),3px 3px 0 rgba(0,0,0,.3);
+  display:block;
+}
+.target-word{font-family:'Fredoka One',cursive;font-size:1.4rem;color:rgba(255,255,255,.7);margin-top:4px;}
+.target-dots{font-size:1.4rem;margin-top:8px;letter-spacing:3px;min-height:30px;}
+
+/* Building area */
+.build-section{
+  background:rgba(255,255,255,.06);backdrop-filter:blur(8px);
+  border:2px solid rgba(255,255,255,.1);border-radius:24px;
+  padding:20px;margin-bottom:16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+.build-top{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:14px;
+}
+.build-label{font-family:'Boogaloo',cursive;font-size:1rem;color:rgba(255,255,255,.6);}
+.count-display{
+  background:rgba(255,255,255,.1);border-radius:50px;
+  padding:8px 18px;font-family:'Boogaloo',cursive;font-size:1.1rem;color:white;
+}
+.count-display span{font-size:1.5rem;color:#48dbfb;}
+
+/* Tower area */
+.tower-area{
+  min-height:160px;display:flex;align-items:flex-end;justify-content:center;
+  gap:8px;padding:10px 0 0;flex-wrap:wrap;
+}
+.block{
+  width:clamp(45px,12vw,58px);height:clamp(45px,12vw,58px);
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;
+  box-shadow:0 6px 0 rgba(0,0,0,.3),0 8px 16px rgba(0,0,0,.2);
+  border:2px solid rgba(255,255,255,.2);
+  animation:blockDrop .3s cubic-bezier(.175,.885,.32,1.275);
+  cursor:pointer;transition:transform .15s;
+}
+.block:hover{transform:scale(1.05);}
+@keyframes blockDrop{from{transform:translateY(-40px) scale(.8);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.empty-hint{
+  font-family:'Boogaloo',cursive;font-size:1rem;
+  color:rgba(255,255,255,.3);text-align:center;
+  width:100%;padding:20px 0;
+}
+
+/* Action buttons */
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.add-btn{
+  background:linear-gradient(135deg,#48dbfb,#0abde3);
+  border:none;border-radius:50px;padding:16px 32px;
+  font-family:'Boogaloo',cursive;font-size:1.4rem;color:white;cursor:pointer;
+  box-shadow:0 6px 20px rgba(72,219,251,.4);transition:transform .15s,box-shadow .15s;
+  flex:1;max-width:200px;
+}
+.add-btn:hover{transform:scale(1.04);}
+.add-btn:active{transform:scale(.96);}
+.remove-btn{
+  background:rgba(255,107,107,.2);border:2px solid rgba(255,107,107,.4);
+  border-radius:50px;padding:16px 20px;
+  font-family:'Boogaloo',cursive;font-size:1.2rem;color:rgba(255,150,150,.9);
+  cursor:pointer;transition:all .15s;
+}
+.remove-btn:hover{background:rgba(255,107,107,.35);}
+
+/* Status */
+.status-msg{
+  text-align:center;font-family:'Boogaloo',cursive;font-size:1.3rem;
+  min-height:36px;margin-top:12px;
+  transition:all .3s;color:rgba(255,255,255,.85);
+}
+.status-msg.success{color:#2ed573;animation:statusPop .4s ease;}
+.status-msg.over{color:#ff6b6b;}
+@keyframes statusPop{from{transform:scale(.9)}to{transform:scale(1)}}
+
+/* Check button */
+.check-btn{
+  width:100%;background:linear-gradient(135deg,#2ed573,#1abc9c);
+  border:none;border-radius:50px;padding:16px;
+  font-family:'Boogaloo',cursive;font-size:1.4rem;color:white;cursor:pointer;
+  box-shadow:0 6px 20px rgba(46,213,115,.35);transition:transform .15s;
+  margin-top:14px;display:none;
+}
+.check-btn:hover{transform:scale(1.02);}
+.check-btn.show{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Next */
+.next-btn{
+  width:100%;background:linear-gradient(135deg,#f9ca24,#f0932b);
+  border:none;border-radius:50px;padding:16px;
+  font-family:'Boogaloo',cursive;font-size:1.4rem;color:white;cursor:pointer;
+  box-shadow:0 6px 20px rgba(240,147,43,.4);transition:transform .15s;
+  margin-top:10px;display:none;
+}
+.next-btn.show{display:block;}
+
+/* Firework burst */
+.burst{position:fixed;pointer-events:none;z-index:100;}
+.bparticle{position:absolute;border-radius:50%;width:10px;height:10px;animation:bp var(--d) ease-out forwards;}
+@keyframes bp{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--x),var(--y));opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="grid-floor"></div>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🧱 Build & Count!</h1>
+</header>
+
+<div class="main">
+  <div class="target-card">
+    <div class="target-top">BUILD THIS MANY BLOCKS:</div>
+    <span class="target-num" id="targetNum"></span>
+    <div class="target-word" id="targetWord"></div>
+    <div class="target-dots" id="targetDots"></div>
+  </div>
+
+  <div class="build-section">
+    <div class="build-top">
+      <span class="build-label">YOUR TOWER:</span>
+      <div class="count-display">You have <span id="countNow">0</span> blocks</div>
+    </div>
+    <div class="tower-area" id="towerArea">
+      <div class="empty-hint">Tap ADD BLOCK to start building!</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="add-btn" id="addBtn" onclick="addBlock()">➕ Add Block</button>
+    <button class="remove-btn" onclick="removeBlock()">🗑️</button>
+  </div>
+
+  <div class="status-msg" id="statusMsg"></div>
+  <button class="check-btn" id="checkBtn" onclick="checkAnswer()">✅ Check!</button>
+  <button class="next-btn" id="nextBtn" onclick="nextNumber()">Next Number ➡</button>
+</div>
+
+<script>
+const NUMBERS = [
+  {n:1,word:'One',emoji:'🌟'},
+  {n:2,word:'Two',emoji:'🌙'},
+  {n:3,word:'Three',emoji:'⭐'},
+  {n:4,word:'Four',emoji:'💎'},
+  {n:5,word:'Five',emoji:'❤️'},
+  {n:6,word:'Six',emoji:'🍀'},
+  {n:7,word:'Seven',emoji:'🦋'},
+  {n:8,word:'Eight',emoji:'🌈'},
+  {n:9,word:'Nine',emoji:'🚀'},
+  {n:10,word:'Ten',emoji:'🏆'},
+];
+
+// Shuffle order and gradually increase difficulty
+let order=[...NUMBERS].sort(()=>Math.random()-.5);
+let idx=0, current=null, count=0;
+
+const BLOCK_COLORS=[
+  'linear-gradient(135deg,#ff6b6b,#ee5a24)',
+  'linear-gradient(135deg,#feca57,#ff9f43)',
+  'linear-gradient(135deg,#48dbfb,#0abde3)',
+  'linear-gradient(135deg,#ff9ff3,#f368e0)',
+  'linear-gradient(135deg,#54a0ff,#2e86de)',
+  'linear-gradient(135deg,#1dd1a1,#10ac84)',
+  'linear-gradient(135deg,#ff6348,#c0392b)',
+  'linear-gradient(135deg,#a29bfe,#6c5ce7)',
+  'linear-gradient(135deg,#fd79a8,#e84393)',
+  'linear-gradient(135deg,#fdcb6e,#e17055)',
+];
+
+function loadNumber(){
+  if(idx>=order.length){idx=0;order=[...NUMBERS].sort(()=>Math.random()-.5);}
+  current=order[idx];
+  count=0;
+  updateCountDisplay();
+  document.getElementById('targetNum').textContent=current.n;
+  document.getElementById('targetWord').textContent=current.word;
+  document.getElementById('targetDots').textContent=current.emoji.repeat(current.n);
+  document.getElementById('towerArea').innerHTML='<div class="empty-hint">Tap ADD BLOCK to start building!</div>';
+  document.getElementById('statusMsg').textContent='';
+  document.getElementById('statusMsg').className='status-msg';
+  document.getElementById('checkBtn').classList.remove('show');
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('addBtn').disabled=false;
+
+  speak(`Can you build ${current.n} blocks? That's ${current.word}!`);
+}
+
+function addBlock(){
+  if(count>=current.n+3) return; // max overshoot allowed
+
+  count++;
+  updateCountDisplay();
+
+  const area=document.getElementById('towerArea');
+  if(area.querySelector('.empty-hint')) area.innerHTML='';
+
+  const block=document.createElement('div');
+  block.className='block';
+  block.style.background=BLOCK_COLORS[(count-1)%BLOCK_COLORS.length];
+  block.textContent=count;
+  block.title=`Block ${count}`;
+  block.onclick=()=>{ removeLastBlock(); };
+  area.appendChild(block);
+
+  playClick();
+
+  // Feedback
+  if(count===current.n){
+    document.getElementById('statusMsg').textContent=`That's ${current.n}! Tap Check!`;
+    document.getElementById('statusMsg').className='status-msg success';
+    document.getElementById('checkBtn').classList.add('show');
+    speak(`You have ${current.n}! Now tap check!`);
+  } else if(count<current.n){
+    document.getElementById('statusMsg').textContent=`${current.n-count} more to go!`;
+    document.getElementById('checkBtn').classList.remove('show');
+  } else {
+    document.getElementById('statusMsg').textContent=`Oops! Too many! Remove some!`;
+    document.getElementById('statusMsg').className='status-msg over';
+    document.getElementById('checkBtn').classList.remove('show');
+    speak(`Too many! Take some away!`);
+  }
+}
+
+function removeBlock(){
+  if(count===0) return;
+  count--;
+  updateCountDisplay();
+  const area=document.getElementById('towerArea');
+  const blocks=area.querySelectorAll('.block');
+  if(blocks.length) blocks[blocks.length-1].remove();
+  if(count===0) area.innerHTML='<div class="empty-hint">Tap ADD BLOCK to start building!</div>';
+
+  if(count<current.n){
+    document.getElementById('statusMsg').textContent=count===0?'':` ${current.n-count} more to go!`;
+    document.getElementById('statusMsg').className='status-msg';
+    document.getElementById('checkBtn').classList.remove('show');
+  } else if(count===current.n){
+    document.getElementById('statusMsg').textContent=`That's ${current.n}! Tap Check!`;
+    document.getElementById('statusMsg').className='status-msg success';
+    document.getElementById('checkBtn').classList.add('show');
+  }
+  playClick();
+}
+function removeLastBlock(){ removeBlock(); }
+
+function updateCountDisplay(){
+  document.getElementById('countNow').textContent=count;
+}
+
+function checkAnswer(){
+  if(count===current.n){
+    // Correct!
+    playSuccess();
+    fireworks();
+    document.getElementById('statusMsg').textContent=`🎉 YES! ${current.n} is ${current.word}! Amazing!`;
+    document.getElementById('statusMsg').className='status-msg success';
+    document.getElementById('checkBtn').classList.remove('show');
+    document.getElementById('nextBtn').classList.add('show');
+    document.getElementById('addBtn').disabled=true;
+    speak(`Yay! ${current.n} blocks! ${current.word}! You did it Yuaan!`);
+
+    // Highlight all blocks
+    document.querySelectorAll('.block').forEach((b,i)=>{
+      setTimeout(()=>{b.style.transform='scale(1.12)';setTimeout(()=>b.style.transform='',200);},i*60);
+    });
+  }
+}
+
+function nextNumber(){ idx++; loadNumber(); }
+
+function fireworks(){
+  const cx=window.innerWidth/2, cy=window.innerHeight/2;
+  const colors=['#ff6b6b','#feca57','#48dbfb','#2ed573','#ff9ff3','#a29bfe'];
+  for(let j=0;j<3;j++){
+    setTimeout(()=>{
+      const burst=document.createElement('div');
+      burst.className='burst';
+      const bx=cx+(Math.random()-0.5)*200;
+      const by=cy+(Math.random()-0.5)*150;
+      burst.style.cssText=`left:${bx}px;top:${by}px;`;
+      for(let i=0;i<14;i++){
+        const p=document.createElement('div');p.className='bparticle';
+        const angle=(i/14)*Math.PI*2;
+        const dist=60+Math.random()*60;
+        p.style.cssText=`background:${colors[Math.floor(Math.random()*colors.length)]};--x:${Math.cos(angle)*dist}px;--y:${Math.sin(angle)*dist}px;--d:${(.4+Math.random()*.3).toFixed(2)}s;left:-5px;top:-5px;`;
+        burst.appendChild(p);
+      }
+      document.body.appendChild(burst);
+      setTimeout(()=>burst.remove(),800);
+    },j*200);
+  }
+}
+
+function playClick(){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.frequency.value=300+count*30;
+    g.gain.setValueAtTime(.15,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.1);
+    o.start();o.stop(c.currentTime+.1);
+  }catch(e){}
+}
+
+function playSuccess(){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    [262,330,392,523,659].forEach((f,i)=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);
+      o.frequency.value=f;
+      g.gain.setValueAtTime(0,c.currentTime+i*.08);
+      g.gain.linearRampToValueAtTime(.3,c.currentTime+i*.08+.04);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+i*.08+.4);
+      o.start(c.currentTime+i*.08);o.stop(c.currentTime+i*.08+.5);
+    });
+  }catch(e){}
+}
+
+function speak(txt){
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.rate=.88;u.pitch=1.3;speechSynthesis.speak(u);
+  }
+}
+
+loadNumber();
+</script>
+</body>
+</html>

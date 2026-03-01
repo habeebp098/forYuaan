@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yuaan's Animals! 🐾</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #e8f8f0; font-family: 'Nunito', sans-serif; min-height: 100vh; }
+  header {
+    background: linear-gradient(135deg, #2ed573, #1abc9c, #00b894);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+  }
+  header h1 { font-family: 'Fredoka One', cursive; font-size: clamp(2rem,6vw,3.5rem); color: white; text-shadow: 3px 3px 0 rgba(0,0,0,0.15); }
+  .back-btn {
+    position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+    background: white; border: none; border-radius: 50px; padding: 10px 20px;
+    font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+    text-decoration: none; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+  }
+  .back-btn:hover { transform: translateY(-50%) scale(1.05); }
+  .subtitle { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: rgba(255,255,255,0.95); margin-top: 5px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    padding: 35px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .animal-card {
+    background: white;
+    border-radius: 24px;
+    padding: 25px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    border: 3px solid transparent;
+  }
+  .animal-card:hover { transform: translateY(-8px); box-shadow: 0 16px 35px rgba(0,0,0,0.14); }
+  .animal-card:active { transform: scale(0.95); }
+  .animal-emoji { font-size: 4rem; display: block; margin-bottom: 10px; }
+  .animal-name { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: #2d3436; }
+  .animal-sound { font-size: 0.95rem; color: #636e72; font-weight: 700; margin-top: 4px; }
+  .sound-bubble {
+    display: none;
+    background: #fdcb6e;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: #2d3436;
+    margin-top: 10px;
+    animation: popIn 0.3s ease;
+  }
+  .animal-card.playing .sound-bubble { display: block; }
+  .animal-card.playing { border-color: #fdcb6e; background: #fffbf0; }
+  @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+  .wiggle { animation: wiggle 0.5s ease; }
+  @keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-10deg)} 75%{transform:rotate(10deg)} }
+</style>
+</head>
+<body>
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🐾 Animals!</h1>
+  <div class="subtitle">Tap an animal — hear its sound! 🔊</div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const animals = [
+  { name: "Dog", emoji: "🐶", sound: "Woof Woof!", say: "A dog says woof woof!" },
+  { name: "Cat", emoji: "🐱", sound: "Meow!", say: "A cat says meow!" },
+  { name: "Cow", emoji: "🐮", sound: "Moooo!", say: "A cow says moooo!" },
+  { name: "Duck", emoji: "🦆", sound: "Quack Quack!", say: "A duck says quack quack!" },
+  { name: "Lion", emoji: "🦁", sound: "Roaaaar!", say: "A lion says roaaaar!" },
+  { name: "Elephant", emoji: "🐘", sound: "Trumpet!", say: "An elephant trumpets!" },
+  { name: "Frog", emoji: "🐸", sound: "Ribbit!", say: "A frog says ribbit!" },
+  { name: "Pig", emoji: "🐷", sound: "Oink Oink!", say: "A pig says oink oink!" },
+  { name: "Horse", emoji: "🐴", sound: "Neigh!", say: "A horse says neigh!" },
+  { name: "Sheep", emoji: "🐑", sound: "Baaaaa!", say: "A sheep says baaaaa!" },
+  { name: "Bird", emoji: "🐦", sound: "Tweet Tweet!", say: "A bird says tweet tweet!" },
+  { name: "Snake", emoji: "🐍", sound: "Hissss!", say: "A snake says hissss!" },
+];
+
+const grid = document.getElementById('grid');
+let currentCard = null;
+
+animals.forEach(a => {
+  const div = document.createElement('div');
+  div.className = 'animal-card';
+  div.innerHTML = `
+    <span class="animal-emoji">${a.emoji}</span>
+    <div class="animal-name">${a.name}</div>
+    <div class="animal-sound">Tap to hear me!</div>
+    <div class="sound-bubble">${a.sound}</div>
+  `;
+  div.onclick = () => {
+    if (currentCard && currentCard !== div) {
+      currentCard.classList.remove('playing');
+    }
+    div.classList.toggle('playing');
+    currentCard = div.classList.contains('playing') ? div : null;
+    const emoji = div.querySelector('.animal-emoji');
+    emoji.classList.remove('wiggle');
+    void emoji.offsetWidth;
+    emoji.classList.add('wiggle');
+    speak(a.say);
+  };
+  grid.appendChild(div);
+});
+
+function speak(text) {
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.85; u.pitch = 1.4;
+    speechSynthesis.speak(u);
+  }
+}
+</script>
+</body>
+</html>

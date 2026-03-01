@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find My Shadow! 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Baloo+Tamma+2:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:'Baloo Tamma 2',cursive;
+  background:linear-gradient(160deg,#ffecd2 0%,#fcb69f 50%,#ff8a80 100%);
+  min-height:100vh; overflow-x:hidden;
+}
+
+/* Animated background bubbles */
+.bg-blob{position:fixed;border-radius:50%;opacity:.15;pointer-events:none;z-index:0;animation:blobFloat var(--d) ease-in-out infinite var(--dl) alternate;}
+@keyframes blobFloat{from{transform:translateY(0) scale(1)}to{transform:translateY(-20px) scale(1.05)}}
+
+header{
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px 20px 8px;
+}
+.back-btn{
+  position:absolute;left:16px;
+  background:rgba(255,255,255,.7);border:2px solid rgba(255,255,255,.9);
+  border-radius:50px;padding:9px 16px;
+  font-family:'Boogaloo',cursive;font-size:.95rem;color:#7a1b00;
+  text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.1);transition:transform .2s;
+}
+.back-btn:hover{transform:scale(1.05);}
+h1{
+  font-family:'Boogaloo',cursive;
+  font-size:clamp(1.8rem,6vw,3rem);
+  color:white;text-shadow:3px 3px 0 rgba(0,0,0,.15),0 0 20px rgba(255,100,80,.5);
+  letter-spacing:2px;
+}
+
+.score-row{
+  position:relative;z-index:10;
+  display:flex;justify-content:center;gap:12px;
+  padding:0 20px 12px;
+}
+.badge{
+  background:rgba(255,255,255,.65);backdrop-filter:blur(8px);
+  border:2px solid rgba(255,255,255,.8);border-radius:50px;
+  padding:8px 20px;font-family:'Boogaloo',cursive;font-size:1.1rem;color:#7a1b00;
+  box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+/* Game layout */
+.game-wrap{
+  position:relative;z-index:10;
+  max-width:700px;margin:0 auto;padding:0 16px 30px;
+}
+.instruction{
+  text-align:center;font-family:'Boogaloo',cursive;font-size:1.15rem;
+  color:rgba(255,255,255,.9);margin-bottom:14px;
+  text-shadow:1px 1px 2px rgba(0,0,0,.2);
+}
+
+/* Object (top) */
+.object-card{
+  background:rgba(255,255,255,.85);backdrop-filter:blur(8px);
+  border-radius:28px;padding:24px 20px;text-align:center;
+  margin-bottom:18px;
+  border:3px solid rgba(255,255,255,.9);
+  box-shadow:0 8px 30px rgba(0,0,0,.1);
+}
+.object-label{font-family:'Boogaloo',cursive;font-size:.95rem;color:#888;margin-bottom:10px;letter-spacing:1px;}
+.big-object{font-size:clamp(5rem,15vw,8rem);animation:objectFloat 2.5s ease-in-out infinite;display:inline-block;}
+@keyframes objectFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.object-name{font-family:'Boogaloo',cursive;font-size:1.3rem;color:#555;margin-top:8px;}
+
+/* Shadows grid */
+.shadows-label{
+  font-family:'Boogaloo',cursive;font-size:1.05rem;color:rgba(255,255,255,.85);
+  text-align:center;margin-bottom:10px;
+}
+.shadows-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+}
+.shadow-btn{
+  background:rgba(0,0,0,.18);backdrop-filter:blur(4px);
+  border:3px solid rgba(255,255,255,.15);border-radius:22px;
+  padding:14px 8px;text-align:center;cursor:pointer;
+  transition:transform .15s,background .15s,border-color .15s;
+  box-shadow:0 4px 16px rgba(0,0,0,.15);
+  aspect-ratio:.9;display:flex;align-items:center;justify-content:center;
+}
+.shadow-btn:hover{transform:scale(1.06);background:rgba(0,0,0,.25);}
+.shadow-btn:active{transform:scale(.94);}
+.shadow-emoji{
+  font-size:clamp(2.5rem,8vw,4rem);
+  filter:brightness(0);/* Makes it a silhouette */
+  display:block;
+  transition:filter .4s ease;
+}
+.shadow-btn.correct .shadow-emoji{filter:brightness(1)!important;animation:revealPop .5s cubic-bezier(.175,.885,.32,1.275);}
+.shadow-btn.correct{background:rgba(46,213,115,.3)!important;border-color:#2ed573!important;}
+.shadow-btn.wrong .shadow-emoji{animation:wrongWiggle .4s ease;}
+.shadow-btn.wrong{background:rgba(255,100,100,.3)!important;border-color:#ff6b6b!important;}
+@keyframes revealPop{0%{transform:scale(0) rotate(-10deg)}60%{transform:scale(1.3) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes wrongWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+
+/* Next button */
+.next-row{display:flex;justify-content:center;margin-top:18px;}
+.next-btn{
+  background:linear-gradient(135deg,#ff8a80,#ff5252);
+  border:none;border-radius:50px;padding:14px 40px;
+  font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;
+  cursor:pointer;box-shadow:0 6px 20px rgba(255,82,82,.4);
+  display:none;transition:transform .2s;
+  animation:fadeUp .3s ease;
+}
+.next-btn:hover{transform:scale(1.05);}
+.next-btn.show{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Celebration */
+.win{
+  position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);
+  backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;
+}
+.win.show{display:flex;}
+.win-box{
+  background:linear-gradient(135deg,#fff5f0,#ffe4dc);
+  border-radius:30px;padding:50px 45px;text-align:center;
+  max-width:360px;width:90%;
+  border:3px solid rgba(255,150,100,.4);
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.win-box h2{font-family:'Boogaloo',cursive;font-size:2.5rem;color:#ff5252;}
+.win-box p{color:#888;font-size:1.1rem;margin:10px 0 22px;}
+.win-box button{
+  background:linear-gradient(135deg,#ff8a80,#ff5252);
+  border:none;border-radius:50px;padding:14px 36px;
+  font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;
+  cursor:pointer;box-shadow:0 6px 20px rgba(255,82,82,.4);transition:transform .2s;
+}
+.win-box button:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🌟 Find My Shadow!</h1>
+</header>
+
+<div class="score-row">
+  <div class="badge">✅ <span id="correctEl">0</span> correct</div>
+  <div class="badge">Round <span id="roundEl">1</span></div>
+</div>
+
+<div class="game-wrap">
+  <p class="instruction">Look at the object! Tap its matching shadow! 👇</p>
+
+  <div class="object-card">
+    <div class="object-label">WHAT AM I?</div>
+    <div class="big-object" id="bigObject"></div>
+    <div class="object-name" id="objectName"></div>
+  </div>
+
+  <div class="shadows-label">Which shadow matches?</div>
+  <div class="shadows-grid" id="shadowsGrid"></div>
+
+  <div class="next-row">
+    <button class="next-btn" id="nextBtn" onclick="nextPuzzle()">Next! ➡</button>
+  </div>
+</div>
+
+<div class="win" id="win">
+  <div class="win-box">
+    <div style="font-size:4rem">🌟</div>
+    <h2>Eagle Eyes!</h2>
+    <p id="winMsg">You found 5 shadows! Amazing eyes Yuaan!</p>
+    <button onclick="keepPlaying()">More Shadows! 🌟</button>
+  </div>
+</div>
+
+<script>
+const PUZZLES = [
+  {object:'🦁',name:'Lion',options:['🦁','🐅','🐻','🦊','🦒','🐘']},
+  {object:'🍎',name:'Apple',options:['🍎','🍊','🍇','🍌','🍓','🍑']},
+  {object:'⭐',name:'Star',options:['⭐','🌙','☀️','💎','🔷','🔺']},
+  {object:'🚗',name:'Car',options:['🚗','🚕','🏎️','🚌','✈️','🚂']},
+  {object:'🌸',name:'Flower',options:['🌸','🌺','🌻','🌷','🍀','🌿']},
+  {object:'🐘',name:'Elephant',options:['🐘','🦛','🦏','🐪','🦍','🐄']},
+  {object:'🎂',name:'Cake',options:['🎂','🍰','🧁','🍩','🍪','🍫']},
+  {object:'🚀',name:'Rocket',options:['🚀','✈️','🛸','🚁','🛩️','🚂']},
+  {object:'🐬',name:'Dolphin',options:['🐬','🐋','🦈','🐙','🦑','🐠']},
+  {object:'🏠',name:'House',options:['🏠','🏢','🏰','🏕️','⛺','🏗️']},
+  {object:'🦋',name:'Butterfly',options:['🦋','🐝','🐛','🦗','🐞','🦟']},
+  {object:'🎸',name:'Guitar',options:['🎸','🎺','🎻','🪕','🥁','🎹']},
+  {object:'🍕',name:'Pizza',options:['🍕','🥪','🌮','🍔','🥗','🍜']},
+  {object:'🌈',name:'Rainbow',options:['🌈','☁️','⛅','🌤️','🌦️','🌩️']},
+  {object:'🐢',name:'Turtle',options:['🐢','🦎','🐊','🐸','🐍','🦕']},
+  {object:'✈️',name:'Aeroplane',options:['✈️','🚀','🛸','🚁','🛩️','🎈']},
+];
+
+let puzzles=[...PUZZLES].sort(()=>Math.random()-.5);
+let qIdx=0, correct=0, answered=false;
+
+// Animated blobs
+for(let i=0;i<8;i++){
+  const b=document.createElement('div');b.className='bg-blob';
+  const sz=80+Math.random()*200;
+  const colors=['#ff8a80','#ff6b6b','#ff9f7f','#ffb3a7'];
+  b.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};--d:${(Math.random()*3+2).toFixed(1)}s;--dl:${(Math.random()*3).toFixed(1)}s`;
+  document.body.appendChild(b);
+}
+
+function nextPuzzle(){
+  if(qIdx>=puzzles.length){qIdx=0;puzzles=[...PUZZLES].sort(()=>Math.random()-.5);}
+  const p=puzzles[qIdx];
+  answered=false;
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('roundEl').textContent=qIdx+1;
+
+  // Set object
+  document.getElementById('bigObject').textContent=p.object;
+  document.getElementById('objectName').textContent=p.name;
+
+  // Build shadows — pick 3 options including the correct one
+  const wrong=p.options.filter(o=>o!==p.object).sort(()=>Math.random()-.5).slice(0,2);
+  const choices=[p.object,...wrong].sort(()=>Math.random()-.5);
+
+  const grid=document.getElementById('shadowsGrid');
+  grid.innerHTML='';
+  choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='shadow-btn';
+    btn.innerHTML=`<span class="shadow-emoji">${c}</span>`;
+    btn.dataset.val=c;
+    btn.addEventListener('click',()=>checkShadow(c,p.object,btn,p.name));
+    grid.appendChild(btn);
+  });
+
+  speak(`Can you find the shadow of the ${p.name}?`);
+}
+
+function checkShadow(val,correct_val,btn,name){
+  if(answered) return;
+  if(val===correct_val){
+    answered=true;
+    btn.classList.add('correct');
+    correct++;
+    document.getElementById('correctEl').textContent=correct;
+    playTone(true);
+    speak(`Yes! That's the ${name}! Great eyes!`);
+    if(correct%5===0) setTimeout(()=>showWin(correct),800);
+    else setTimeout(()=>{ document.getElementById('nextBtn').classList.add('show'); },700);
+  } else {
+    btn.classList.add('wrong');
+    setTimeout(()=>btn.classList.remove('wrong'),500);
+    playTone(false);
+    speak(`Look carefully at the shape!`);
+  }
+  qIdx++;
+}
+
+function showWin(n){
+  const msgs=[`You found 5 shadows!`,`10 shadows matched! Amazing!`,`15! You have incredible eyes!`];
+  document.getElementById('winMsg').textContent=`${msgs[Math.min(Math.floor(n/5)-1,2)]} Amazing Yuaan!`;
+  document.getElementById('win').classList.add('show');
+}
+function keepPlaying(){
+  document.getElementById('win').classList.remove('show');
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function playTone(good){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    if(good){
+      o.frequency.setValueAtTime(440,c.currentTime);
+      o.frequency.setValueAtTime(880,c.currentTime+.1);
+      g.gain.setValueAtTime(.3,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);
+    } else {
+      o.type='sawtooth';o.frequency.value=150;
+      g.gain.setValueAtTime(.2,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.25);
+    }
+    o.start();o.stop(c.currentTime+.4);
+  }catch(e){}
+}
+
+function speak(txt){
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.rate=.88;u.pitch=1.3;speechSynthesis.speak(u);
+  }
+}
+
+nextPuzzle();
+</script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Feed the Animals! 🐾</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #b8f0ff;
+  --ground: #7ec850;
+  --ground2: #5a9e35;
+}
+* { margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent; }
+body { font-family:'Nunito',sans-serif; background:var(--sky); min-height:100vh; overflow-x:hidden; user-select:none; }
+
+/* Sky scene */
+.scene-bg {
+  position:fixed; inset:0; z-index:0;
+  background: linear-gradient(180deg, #89d4f5 0%, #b8f0ff 55%, #7ec850 55.1%, #5a9e35 100%);
+}
+.sun { position:fixed;top:30px;right:60px;width:70px;height:70px;background:#ffe066;border-radius:50%;
+  box-shadow:0 0 0 12px rgba(255,224,102,.3), 0 0 0 24px rgba(255,224,102,.15);
+  z-index:1;animation:sunPulse 4s ease-in-out infinite; }
+@keyframes sunPulse{0%,100%{box-shadow:0 0 0 12px rgba(255,224,102,.3),0 0 0 24px rgba(255,224,102,.15)}50%{box-shadow:0 0 0 18px rgba(255,224,102,.35),0 0 0 36px rgba(255,224,102,.18)}}
+.cloud { position:fixed;z-index:1;animation:drift var(--d) linear infinite; opacity:.85; }
+.cloud-body { background:white;border-radius:50px;position:relative; }
+.cloud-body::before,.cloud-body::after { content:'';position:absolute;background:white;border-radius:50%; }
+@keyframes drift{from{transform:translateX(-200px)}to{transform:translateX(110vw)}}
+
+/* Header */
+header {
+  position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  padding:14px 20px 8px;
+}
+.back-btn {
+  position:absolute;left:16px;
+  background:rgba(255,255,255,.85);border:2px solid rgba(255,255,255,.9);
+  border-radius:50px;padding:9px 16px;
+  font-family:'Boogaloo',cursive;font-size:.95rem;color:#2d5a1b;
+  text-decoration:none;box-shadow:0 3px 10px rgba(0,0,0,.12);transition:transform .2s;
+}
+.back-btn:hover{transform:scale(1.05);}
+h1 { font-family:'Boogaloo',cursive;font-size:clamp(1.8rem,6vw,3rem);color:#1a3a00;
+  text-shadow:2px 2px 0 rgba(255,255,255,.6);letter-spacing:1px; }
+.subtitle { text-align:center;font-family:'Boogaloo',cursive;font-size:1.1rem;
+  color:rgba(255,255,255,.95);margin-bottom:12px;position:relative;z-index:10;
+  text-shadow:1px 1px 2px rgba(0,100,0,.4); }
+
+/* Progress */
+.progress-bar {
+  position:relative;z-index:10;display:flex;justify-content:center;align-items:center;
+  gap:8px;padding:0 20px 10px;
+}
+.star-prog { font-size:1.6rem;transition:transform .3s; }
+.star-prog.earned { animation:starEarn .4s cubic-bezier(.175,.885,.32,1.275); }
+@keyframes starEarn{0%{transform:scale(0) rotate(-180deg)}60%{transform:scale(1.4) rotate(10deg)}100%{transform:scale(1) rotate(0)}}
+.round-badge {
+  background:rgba(255,255,255,.85);border-radius:50px;padding:8px 18px;
+  font-family:'Boogaloo',cursive;font-size:1.1rem;color:#2d5a1b;
+  box-shadow:0 3px 10px rgba(0,0,0,.1);
+}
+
+/* Main game area */
+.game-area { position:relative;z-index:10;max-width:700px;margin:0 auto;padding:0 16px 20px; }
+
+/* Animal stalls */
+.animals-row { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px; }
+.animal-stall {
+  background:rgba(255,255,255,.88);border-radius:24px;padding:14px 10px;text-align:center;
+  border:3px dashed #aee571;box-shadow:0 6px 20px rgba(0,0,0,.1);
+  transition:border-color .3s, background .3s, transform .3s;
+  position:relative; min-height:130px;
+}
+.animal-stall.highlight { border-color:#ff6b6b;border-style:solid;background:rgba(255,220,200,.6);transform:scale(1.04); }
+.animal-stall.correct { border-color:#2ed573;border-style:solid;background:rgba(46,213,115,.15);animation:correctPulse .5s ease; }
+.animal-stall.wrong { animation:wrongShake .4s ease; }
+@keyframes correctPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.animal-emoji { font-size:2.8rem;display:block;margin-bottom:6px; }
+.animal-name { font-family:'Boogaloo',cursive;font-size:1rem;color:#2d5a1b; }
+.animal-eats { font-size:.75rem;color:#888;margin-top:2px;min-height:16px; }
+.drop-zone-hint { font-size:2rem;opacity:.3;margin-top:4px; }
+
+/* Food tray */
+.food-tray {
+  background:rgba(255,255,255,.88);border-radius:24px;padding:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,.1);border:2px solid rgba(255,255,255,.9);
+}
+.tray-label { font-family:'Boogaloo',cursive;font-size:1rem;color:#555;margin-bottom:10px;text-align:center; }
+.food-items { display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:60px;align-items:center; }
+.food-item {
+  font-size:2.5rem;cursor:grab;border-radius:16px;padding:8px 10px;
+  background:rgba(255,255,255,.95);box-shadow:0 4px 12px rgba(0,0,0,.12);
+  border:2px solid rgba(0,0,0,.06);
+  transition:transform .15s,box-shadow .15s;
+  touch-action:none;
+}
+.food-item:hover{transform:scale(1.12);box-shadow:0 8px 20px rgba(0,0,0,.2);}
+.food-item.dragging{opacity:.5;transform:scale(1.1);}
+.food-item.ghost{
+  position:fixed;pointer-events:none;z-index:100;transform:scale(1.15);
+  box-shadow:0 12px 30px rgba(0,0,0,.3);
+  transition:none;
+}
+
+/* Feedback popup */
+.feedback {
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  z-index:200;background:white;border-radius:30px;padding:30px 40px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);transition:transform .3s cubic-bezier(.175,.885,.32,1.275);
+  min-width:260px;
+}
+.feedback.show{transform:translate(-50%,-50%) scale(1);}
+.feedback-emoji{font-size:4rem;margin-bottom:8px;}
+.feedback-msg{font-family:'Boogaloo',cursive;font-size:1.8rem;color:#2d3436;}
+.feedback-sub{font-size:1rem;color:#636e72;margin-top:4px;}
+
+/* Win screen */
+.win-screen {
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+}
+.win-screen.show{display:flex;}
+.win-box {
+  background:linear-gradient(135deg,#fff9e6,#fffce0);
+  border-radius:30px;padding:50px 50px;text-align:center;
+  max-width:360px;width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  border:3px solid rgba(255,200,50,.5);
+  animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.win-box h2{font-family:'Boogaloo',cursive;font-size:2.5rem;color:#e17055;}
+.win-box p{font-size:1.1rem;color:#636e72;margin:10px 0 20px;}
+.win-btn{background:linear-gradient(135deg,#6c5ce7,#a29bfe);border:none;border-radius:50px;padding:14px 32px;
+  font-family:'Boogaloo',cursive;font-size:1.3rem;color:white;cursor:pointer;transition:transform .2s;}
+.win-btn:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+
+<div class="scene-bg"></div>
+<div class="sun"></div>
+
+<header>
+  <a class="back-btn" href="index.html">🏠 Home</a>
+  <h1>🍎 Feed the Animals!</h1>
+</header>
+<p class="subtitle">Drag the right food to each animal! 🐾</p>
+
+<div class="progress-bar">
+  <span class="round-badge" id="roundBadge">Round 1</span>
+  <span class="star-prog" id="s1">⭐</span>
+  <span class="star-prog" id="s2">⭐</span>
+  <span class="star-prog" id="s3">⭐</span>
+</div>
+
+<div class="game-area">
+  <div class="animals-row" id="animalsRow"></div>
+  <div class="food-tray">
+    <div class="tray-label">🍽️ What should they eat? Drag to the right animal!</div>
+    <div class="food-items" id="foodItems"></div>
+  </div>
+</div>
+
+<div class="feedback" id="feedback">
+  <div class="feedback-emoji" id="fbEmoji"></div>
+  <div class="feedback-msg" id="fbMsg"></div>
+  <div class="feedback-sub" id="fbSub"></div>
+</div>
+
+<div class="win-screen" id="winScreen">
+  <div class="win-box">
+    <div style="font-size:4rem">🏆</div>
+    <h2>Amazing Yuaan!</h2>
+    <p id="winMsg">You fed all the animals! They are so happy!</p>
+    <button class="win-btn" onclick="nextRound()">Next Animals! ➡</button>
+  </div>
+</div>
+
+<script>
+// All rounds — each has 3 animals + their correct food + distractors
+const ROUNDS = [
+  {
+    animals:[
+      {emoji:'🐰',name:'Rabbit',eats:['🥕','🥬','🍎'],correct:'🥕',hint:'loves crunchy carrots!'},
+      {emoji:'🐄',name:'Cow',eats:['🌿','🌾','🍃'],correct:'🌿',hint:'munches on grass!'},
+      {emoji:'🐒',name:'Monkey',eats:['🍌','🍇','🍊'],correct:'🍌',hint:'goes bananas for bananas!'},
+    ],
+    foods:['🥕','🌿','🍌','🍕','🍰','🧃'],
+    distractors:['🍕','🍰','🧃'],
+  },
+  {
+    animals:[
+      {emoji:'🐻',name:'Bear',eats:['🍯','🐟','🫐'],correct:'🍯',hint:'loves sweet honey!'},
+      {emoji:'🐟',name:'Fish',eats:['🦐','🌊','🪲'],correct:'🦐',hint:'gobbles up shrimps!'},
+      {emoji:'🐦',name:'Bird',eats:['🌾','🐛','🌰'],correct:'🌾',hint:'pecks at seeds!'},
+    ],
+    foods:['🍯','🦐','🌾','🍔','🍩','🥤'],
+    distractors:['🍔','🍩','🥤'],
+  },
+  {
+    animals:[
+      {emoji:'🐘',name:'Elephant',eats:['🍉','🌿','🍌'],correct:'🍉',hint:'loves juicy watermelon!'},
+      {emoji:'🐿️',name:'Squirrel',eats:['🌰','🥜','🫘'],correct:'🌰',hint:'hoards acorns!'},
+      {emoji:'🦒',name:'Giraffe',eats:['🍃','🌿','🌱'],correct:'🍃',hint:'eats leaves from tall trees!'},
+    ],
+    foods:['🍉','🌰','🍃','🍟','🍦','🥛'],
+    distractors:['🍟','🍦','🥛'],
+  },
+  {
+    animals:[
+      {emoji:'🐧',name:'Penguin',eats:['🐟','🦑','🦐'],correct:'🐟',hint:'swoops for fish!'},
+      {emoji:'🐝',name:'Bee',eats:['🌸','🌺','🌷'],correct:'🌸',hint:'sips nectar from flowers!'},
+      {emoji:'🦊',name:'Fox',eats:['🐇','🍇','🫐'],correct:'🍇',hint:'snacks on berries!'},
+    ],
+    foods:['🐟','🌸','🍇','🍫','🥞','🧇'],
+    distractors:['🍫','🥞','🧇'],
+  },
+];
+
+let round=0, solved=0, totalCorrect=0, dragItem=null, ghostEl=null, offsetX=0, offsetY=0;
+
+function buildRound(){
+  solved=0;
+  const r = ROUNDS[round % ROUNDS.length];
+  const animalsRow=document.getElementById('animalsRow');
+  const foodItems=document.getElementById('foodItems');
+  animalsRow.innerHTML=''; foodItems.innerHTML='';
+  document.getElementById('roundBadge').textContent=`Round ${round+1}`;
+
+  r.animals.forEach(a=>{
+    const div=document.createElement('div');
+    div.className='animal-stall';
+    div.dataset.correct=a.correct;
+    div.innerHTML=`<span class="animal-emoji">${a.emoji}</span><div class="animal-name">${a.name}</div><div class="animal-eats"></div><div class="drop-zone-hint">⬇</div>`;
+    animalsRow.appendChild(div);
+  });
+
+  // Shuffle foods
+  const foods=[...r.foods].sort(()=>Math.random()-.5);
+  foods.forEach(f=>{
+    const div=document.createElement('div');
+    div.className='food-item';
+    div.textContent=f;
+    div.dataset.food=f;
+    attachDrag(div);
+    foodItems.appendChild(div);
+  });
+
+  speak(`Let's feed the animals! Drag the right food to each one!`);
+}
+
+function attachDrag(el){
+  // Mouse
+  el.addEventListener('mousedown',e=>{startDrag(e,el);});
+  // Touch
+  el.addEventListener('touchstart',e=>{e.preventDefault();startDrag(e.touches[0],el);},{passive:false});
+}
+
+function startDrag(e, el){
+  if(el.dataset.disabled) return;
+  dragItem=el;
+  const rect=el.getBoundingClientRect();
+  offsetX=e.clientX-rect.left-rect.width/2;
+  offsetY=e.clientY-rect.top-rect.height/2;
+
+  ghostEl=el.cloneNode(true);
+  ghostEl.className='food-item ghost';
+  ghostEl.style.width=rect.width+'px';
+  ghostEl.style.height=rect.height+'px';
+  ghostEl.style.left=(e.clientX-offsetX-rect.width/2)+'px';
+  ghostEl.style.top=(e.clientY-offsetY-rect.height/2)+'px';
+  document.body.appendChild(ghostEl);
+  el.classList.add('dragging');
+
+  // Highlight stalls
+  document.querySelectorAll('.animal-stall:not(.correct)').forEach(s=>s.classList.add('highlight'));
+}
+
+function moveDrag(ex,ey){
+  if(!ghostEl) return;
+  ghostEl.style.left=(ex-offsetX-parseInt(ghostEl.style.width)/2)+'px';
+  ghostEl.style.top=(ey-offsetY-parseInt(ghostEl.style.height)/2)+'px';
+}
+
+function endDrag(ex,ey){
+  if(!dragItem || !ghostEl) return;
+  ghostEl.remove(); ghostEl=null;
+  dragItem.classList.remove('dragging');
+  document.querySelectorAll('.animal-stall').forEach(s=>s.classList.remove('highlight'));
+
+  // Find which stall we're over
+  const stalls=document.querySelectorAll('.animal-stall:not(.correct-done)');
+  let target=null;
+  stalls.forEach(stall=>{
+    const r=stall.getBoundingClientRect();
+    if(ex>=r.left&&ex<=r.right&&ey>=r.top&&ey<=r.bottom) target=stall;
+  });
+
+  if(!target){ dragItem=null; return; }
+
+  const food=dragItem.dataset.food;
+  const correct=target.dataset.correct;
+
+  if(food===correct){
+    // Correct!
+    target.classList.add('correct');
+    target.dataset.correctDone='1';
+    const animalEmoji=target.querySelector('.animal-emoji').textContent;
+    target.querySelector('.drop-zone-hint').textContent=food;
+    target.querySelector('.drop-zone-hint').style.fontSize='2.2rem';
+    target.querySelector('.drop-zone-hint').style.opacity='1';
+    dragItem.remove();
+    solved++;
+    totalCorrect++;
+    updateStars();
+    showFeedback(true, `${animalEmoji} + ${food}`, `Correct! Great job!`);
+    playBeep(true);
+    if(solved===3) setTimeout(showWin,1200);
+  } else {
+    // Wrong
+    target.classList.add('wrong');
+    setTimeout(()=>target.classList.remove('wrong'),400);
+    showFeedback(false, '❌', 'Try another animal!');
+    playBeep(false);
+  }
+  dragItem=null;
+}
+
+document.addEventListener('mousemove',e=>moveDrag(e.clientX,e.clientY));
+document.addEventListener('mouseup',e=>endDrag(e.clientX,e.clientY));
+document.addEventListener('touchmove',e=>{if(ghostEl){e.preventDefault();moveDrag(e.touches[0].clientX,e.touches[0].clientY);}},{passive:false});
+document.addEventListener('touchend',e=>{endDrag(e.changedTouches[0].clientX,e.changedTouches[0].clientY);});
+
+let fbTimer;
+function showFeedback(good, emoji, msg){
+  clearTimeout(fbTimer);
+  const fb=document.getElementById('feedback');
+  document.getElementById('fbEmoji').textContent=emoji;
+  document.getElementById('fbMsg').textContent=good?'Yes! 🎉':'Hmm...';
+  document.getElementById('fbSub').textContent=msg;
+  fb.style.background=good?'linear-gradient(135deg,#d4ffd4,#afffaf)':'linear-gradient(135deg,#ffe4e4,#ffcccc)';
+  fb.classList.add('show');
+  fbTimer=setTimeout(()=>fb.classList.remove('show'),1200);
+}
+
+function updateStars(){
+  const ids=['s1','s2','s3'];
+  if(totalCorrect>0) document.getElementById(ids[Math.min(totalCorrect-1,2)]).textContent='🌟';
+}
+
+function showWin(){
+  const msgs=[
+    'You fed all the animals! They are so happy! 🐾',
+    'Wow, you know exactly what animals eat! 🌟',
+    'All animals are full and happy because of you! 💚',
+  ];
+  document.getElementById('winMsg').textContent=msgs[round%msgs.length];
+  document.getElementById('winScreen').classList.add('show');
+  speak('Amazing! You fed all the animals correctly!');
+}
+
+function nextRound(){
+  round++;
+  document.getElementById('winScreen').classList.remove('show');
+  buildRound();
+}
+
+function playBeep(good){
+  try{
+    const c=new(window.AudioContext||window.webkitAudioContext)();
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    if(good){
+      o.frequency.setValueAtTime(523,c.currentTime);
+      o.frequency.setValueAtTime(784,c.currentTime+.1);
+      g.gain.setValueAtTime(.3,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);
+      o.start();o.stop(c.currentTime+.35);
+    } else {
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(200,c.currentTime);
+      g.gain.setValueAtTime(.2,c.currentTime);
+      g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.2);
+      o.start();o.stop(c.currentTime+.2);
+    }
+  }catch(e){}
+}
+
+function speak(txt){
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.rate=.88;u.pitch=1.3;speechSynthesis.speak(u);
+  }
+}
+
+buildRound();
+</script>
+</body>
+</html>
