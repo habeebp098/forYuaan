@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanic's Garage</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #bdc3c7; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+        #controls { background-color: #7f8c8d; padding: 15px; display: flex; justify-content: space-between; align-items: center; color: white; font-weight: bold; font-size: 1.2rem; }
+        .btn { background-color: white; color: #7f8c8d; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; cursor: pointer; }
+        
+        #play-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        
+        #car-container { position: relative; font-size: 8rem; margin-bottom: 50px; transition: transform 0.5s; }
+        #car { filter: drop-shadow(0 10px 5px rgba(0,0,0,0.3)); }
+        
+        /* Problem Overlays */
+        .problem-indicator { position: absolute; font-size: 4rem; z-index: 10; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        #dirt { top: 20px; left: 20px; color: #8B4513; font-size: 6rem; }
+        #flat-tire { bottom: -10px; left: 10px; font-size: 3rem; }
+        #empty-gas { top: -40px; right: -20px; }
+        
+        .show-problem { opacity: 1 !important; }
+
+        /* Tools */
+        #toolbox { display: flex; gap: 20px; background: #34495e; padding: 20px; border-radius: 20px; border: 5px solid #2c3e50; }
+        .tool { font-size: 4rem; background: white; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 15px; cursor: pointer; border: 4px solid #95a5a6; transition: transform 0.1s; user-select: none; }
+        .tool:active { transform: scale(0.9); }
+        
+        #status-text { font-size: 2rem; font-weight: bold; color: #2c3e50; margin-bottom: 20px; height: 40px; }
+    </style>
+</head>
+<body>
+    <div id="controls"><a href="index.html" class="btn">🏠 Home</a><div>Mechanic's Garage</div><button class="btn" onclick="nextProblem()">Next Car 🚙</button></div>
+    
+    <div id="play-area">
+        <div id="status-text">The car is dirty!</div>
+        
+        <div id="car-container">
+            <div id="car">🚙</div>
+            <div id="dirt" class="problem-indicator show-problem">🟤</div>
+            <div id="flat-tire" class="problem-indicator">💥</div>
+            <div id="empty-gas" class="problem-indicator">🪫</div>
+        </div>
+
+        <div id="toolbox">
+            <div class="tool" onclick="useTool('sponge')">🧽</div>
+            <div class="tool" onclick="useTool('pump')">💨</div>
+            <div class="tool" onclick="useTool('gas')">⛽</div>
+        </div>
+    </div>
+
+    <script>
+        const problems = [
+            { id: 'dirt', tool: 'sponge', msg: "The car is dirty! How do we clean it?", success: "Clean! Good job.", error: "That won't clean the mud!" },
+            { id: 'flat-tire', tool: 'pump', msg: "Oh no, a flat tire! How do we fix it?", success: "Tire is full! Great work.", error: "That won't fix a tire!" },
+            { id: 'empty-gas', tool: 'gas', msg: "Out of gas! What does it need?", success: "Tank is full! Ready to drive.", error: "That's not gas!" }
+        ];
+        let currentProblem = 0;
+
+        function speak(text) { try { window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; window.speechSynthesis.speak(u); } catch(e){} }
+
+        function loadProblem() {
+            document.querySelectorAll('.problem-indicator').forEach(el => el.classList.remove('show-problem'));
+            document.getElementById(problems[currentProblem].id).classList.add('show-problem');
+            
+            if (problems[currentProblem].id === 'flat-tire') {
+                document.getElementById('car-container').style.transform = 'rotate(-10deg) translateY(20px)';
+            } else {
+                document.getElementById('car-container').style.transform = 'none';
+            }
+            
+            document.getElementById('status-text').innerText = problems[currentProblem].msg;
+            speak(problems[currentProblem].msg);
+        }
+
+        function useTool(toolUsed) {
+            const prob = problems[currentProblem];
+            if (toolUsed === prob.tool) {
+                document.getElementById('status-text').innerText = prob.success;
+                speak(prob.success);
+                document.getElementById(prob.id).classList.remove('show-problem');
+                document.getElementById('car-container').style.transform = 'none';
+            } else {
+                document.getElementById('status-text').innerText = prob.error;
+                speak(prob.error);
+            }
+        }
+
+        function nextProblem() {
+            currentProblem++;
+            if (currentProblem >= problems.length) currentProblem = 0;
+            loadProblem();
+        }
+
+        setTimeout(loadProblem, 500);
+    </script>
+</body>
+</html>

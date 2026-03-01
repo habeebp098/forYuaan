@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridge Builder</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #87CEEB; display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+        #controls { background-color: #d35400; padding: 15px; display: flex; justify-content: space-between; align-items: center; color: white; font-weight: bold; font-size: 1.2rem; }
+        .btn { background-color: white; color: #d35400; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-decoration: none; cursor: pointer; }
+        
+        #play-area { flex-grow: 1; position: relative; display: flex; flex-direction: column; justify-content: flex-end; }
+        
+        #scene { position: relative; height: 200px; width: 100%; border-bottom: 50px solid #3498db; /* River */ }
+        .land { position: absolute; bottom: 0; width: 35%; height: 100px; background: #27ae60; border-top: 10px solid #2ecc71; }
+        #left-land { left: 0; } #right-land { right: 0; }
+        
+        #gap { position: absolute; bottom: 0; left: 35%; width: 30%; height: 100px; display: flex; align-items: center; justify-content: center; }
+        
+        #car { position: absolute; bottom: 110px; left: 10%; font-size: 5rem; z-index: 20; transition: transform 2s linear; }
+        #house { position: absolute; bottom: 110px; right: 10%; font-size: 5rem; }
+
+        #puzzle-pieces { display: flex; justify-content: center; gap: 20px; background: #ecf0f1; padding: 30px; border-top: 5px solid #bdc3c7; z-index: 50; }
+        .piece { font-size: 4rem; cursor: pointer; user-select: none; transition: transform 0.1s; background: white; padding: 10px; border-radius: 10px; border: 3px solid #95a5a6; }
+        .piece:active { transform: scale(0.9); }
+        
+        #status-text { position: absolute; top: 20px; width: 100%; text-align: center; font-size: 2rem; font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div id="controls"><a href="index.html" class="btn">🏠 Home</a><div>Bridge Builder</div><button class="btn" onclick="reset()">🔄 Reset</button></div>
+    
+    <div id="play-area">
+        <div id="status-text">The car needs to cross. Which shape fits the gap?</div>
+        
+        <div id="scene">
+            <div class="land" id="left-land"></div>
+            <div id="gap"></div>
+            <div class="land" id="right-land"></div>
+            
+            <div id="car">🚗</div>
+            <div id="house">🏠</div>
+        </div>
+
+        <div id="puzzle-pieces">
+            <div class="piece" onclick="tryPiece('square')">🟥</div>
+            <div class="piece" onclick="tryPiece('triangle')">🔺</div>
+            <div class="piece" onclick="tryPiece('bridge')">🌉</div>
+        </div>
+    </div>
+
+    <script>
+        let bridgeBuilt = false;
+
+        function speak(text) { try { window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; window.speechSynthesis.speak(u); } catch(e){} }
+
+        function tryPiece(type) {
+            if (bridgeBuilt) return;
+            const gap = document.getElementById('gap');
+            
+            if (type === 'bridge') {
+                gap.innerHTML = '<div style="font-size: 5rem; margin-top: -20px;">🌉</div>';
+                document.getElementById('status-text').innerText = "Perfect fit! The bridge is built.";
+                speak("Perfect fit! The bridge is built. Let's drive!");
+                bridgeBuilt = true;
+                setTimeout(driveCar, 1500);
+            } else if (type === 'triangle') {
+                gap.innerHTML = '<div style="font-size: 5rem;">🔺</div>';
+                document.getElementById('status-text').innerText = "A triangle is too bumpy to drive on!";
+                speak("A triangle is too bumpy to drive on! Try again.");
+            } else {
+                gap.innerHTML = '<div style="font-size: 5rem;">🟥</div>';
+                document.getElementById('status-text').innerText = "A square doesn't connect the road!";
+                speak("A square doesn't connect the road! Try again.");
+            }
+        }
+
+        function driveCar() {
+            document.getElementById('car').style.transform = `translateX(${window.innerWidth * 0.6}px)`;
+            setTimeout(() => {
+                document.getElementById('status-text').innerText = "The car made it home safely!";
+                speak("The car made it home safely! Good job, Yuaan.");
+            }, 2000);
+        }
+
+        function reset() {
+            bridgeBuilt = false;
+            document.getElementById('gap').innerHTML = '';
+            document.getElementById('car').style.transition = 'none';
+            document.getElementById('car').style.transform = 'translateX(0)';
+            setTimeout(() => document.getElementById('car').style.transition = 'transform 2s linear', 50);
+            document.getElementById('status-text').innerText = "The car needs to cross. Which shape fits?";
+            speak("Which shape fits the gap?");
+        }
+    </script>
+</body>
+</html>

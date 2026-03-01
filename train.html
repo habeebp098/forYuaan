@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuaan's Animal Train</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
+            background-color: #dff9fb; /* Light sky blue */
+            display: flex; flex-direction: column; 
+            height: 100dvh; overflow: hidden; 
+        }
+
+        /* Top Navigation */
+        #controls { 
+            background-color: #1e90ff; padding: clamp(10px, 2vw, 15px) 20px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 200; flex-shrink: 0;
+        }
+
+        .home-btn { 
+            background-color: white; color: #1e90ff; border: none; border-radius: 12px; 
+            padding: 8px 15px; font-size: clamp(1rem, 4vw, 1.5rem); cursor: pointer; 
+            font-weight: bold; text-decoration: none; display: inline-block;
+            box-shadow: 0 4px 0px #0984e3; transition: transform 0.1s;
+        }
+        .home-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #0984e3; }
+        .title-text { color: white; font-size: clamp(1.2rem, 5vw, 2rem); font-weight: bold; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+
+        .reset-btn {
+            background-color: #ff9f43; color: white; border: none; border-radius: 12px;
+            padding: 8px 15px; font-size: clamp(1rem, 4vw, 1.2rem); font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 0px #ee5253; transition: transform 0.1s;
+        }
+        .reset-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #ee5253; }
+
+        /* Play Area & Scenery */
+        #play-area {
+            flex-grow: 1; position: relative; display: flex; flex-direction: column;
+            justify-content: flex-end; padding-bottom: 20px;
+        }
+
+        #ground {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 35%;
+            background-color: #badc58; border-top: 8px solid #6ab04c; z-index: 1;
+        }
+
+        #track {
+            position: absolute; bottom: 30%; left: 0; width: 100%; height: 15px;
+            background: repeating-linear-gradient(90deg, #535c68, #535c68 20px, #95afc0 20px, #95afc0 30px);
+            border-top: 4px solid #30336b; border-bottom: 4px solid #30336b; z-index: 2;
+        }
+
+        /* The Train Assembly */
+        #train-assembly {
+            position: absolute; bottom: calc(30% + 15px); left: 20px;
+            display: flex; align-items: flex-end; gap: 10px; z-index: 10;
+            transition: transform 3s cubic-bezier(0.5, 0, 0.2, 1); /* Smooth driving off */
+        }
+
+        .train-engine {
+            font-size: clamp(4rem, 15vw, 6rem); line-height: 1;
+            filter: drop-shadow(0 10px 5px rgba(0,0,0,0.3));
+            margin-right: 10px;
+        }
+
+        .train-car {
+            width: clamp(80px, 20vw, 120px);
+            height: clamp(60px, 15vw, 90px);
+            border: 4px solid #2d3436; border-radius: 10px 10px 5px 5px;
+            box-shadow: 0 8px 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        /* Wheels for the cars */
+        .train-car::before, .train-car::after {
+            content: ''; position: absolute; bottom: -15px;
+            width: 25px; height: 25px; background-color: #2d3436;
+            border-radius: 50%; border: 3px solid #b2bec3;
+        }
+        .train-car::before { left: 10px; }
+        .train-car::after { right: 10px; }
+
+        /* The Colored Drop Zones */
+        #car-red { background-color: #ff4757; }
+        #car-blue { background-color: #1e90ff; }
+        #car-green { background-color: #2ed573; }
+
+        /* The Golden Whistle Rope */
+        #whistle-rope {
+            position: absolute; top: -10px; right: 40px;
+            width: 15px; height: 150px; background-color: #f1c40f;
+            border-radius: 10px; border: 3px solid #f39c12;
+            cursor: pointer; z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.2); transition: transform 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #whistle-rope::after {
+            content: ''; width: 35px; height: 35px; background-color: #e67e22;
+            border-radius: 50%; margin-bottom: -15px; border: 3px solid #d35400;
+        }
+        #whistle-rope:active { transform: translateY(20px); }
+
+        .pull-text { position: absolute; right: 80px; top: 50px; font-weight: bold; color: #2d3436; background: white; padding: 5px 10px; border-radius: 10px; border: 2px dashed #ff9f43; transform: rotate(-10deg); pointer-events: none;}
+
+        /* The Animal Station (Parts Tray) */
+        #station {
+            position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);
+            display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(15px, 4vw, 30px);
+            background-color: rgba(255, 255, 255, 0.8); padding: 15px 30px;
+            border-radius: 30px; border: 5px dashed #ff9f43; z-index: 50; width: 80%; max-width: 500px;
+        }
+
+        .animal {
+            font-size: clamp(3.5rem, 12vw, 5rem); line-height: 1; cursor: grab; user-select: none;
+            touch-action: none; filter: drop-shadow(0 8px 5px rgba(0,0,0,0.3));
+            transition: transform 0.1s; display: flex; align-items: center; justify-content: center;
+        }
+        .animal:active { cursor: grabbing; transform: scale(1.1); }
+
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <a href="index.html" class="home-btn">🏠 Home</a>
+        <div class="title-text">Color Train</div>
+        <button class="reset-btn" onclick="resetGame()">🔄 Back up!</button>
+    </div>
+
+    <div id="play-area">
+        
+        <div id="whistle-rope" onclick="pullWhistle()"></div>
+        <div class="pull-text">Pull for Whistle!</div>
+
+        <div id="ground"></div>
+        <div id="track"></div>
+
+        <div id="train-assembly">
+            <div class="train-engine">🚂</div>
+            <div class="train-car" id="car-red" data-color="red"></div>
+            <div class="train-car" id="car-green" data-color="green"></div>
+            <div class="train-car" id="car-blue" data-color="blue"></div>
+        </div>
+
+        <div id="station">
+            <div class="animal" id="animal-red" data-color="red" data-name="Red Bug">🐞</div>
+            <div class="animal" id="animal-green" data-color="green" data-name="Green Frog">🐸</div>
+            <div class="animal" id="animal-blue" data-color="blue" data-name="Blue Whale">🐳</div>
+        </div>
+    </div>
+
+    <script>
+        const animals = document.querySelectorAll('.animal');
+        const station = document.getElementById('station');
+        const trainAssembly = document.getElementById('train-assembly');
+        const rope = document.getElementById('whistle-rope');
+        
+        const totalAnimals = 3;
+        let animalsLoaded = 0;
+        let isTrainGone = false;
+
+        // Drag and Drop Variables
+        let activeAnimal = null;
+        let offsetX = 0; let offsetY = 0;
+
+        // Bulletproof Audio
+        let audioCtx; 
+        function getAudio() { 
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) audioCtx = new AudioContext(); 
+                }
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); 
+                return audioCtx; 
+            } catch (e) { return null; }
+        }
+
+        function speak(text) { 
+            try {
+                if ('speechSynthesis' in window) { 
+                    window.speechSynthesis.cancel(); 
+                    const utterance = new SpeechSynthesisUtterance(text); 
+                    utterance.rate = 0.9; utterance.pitch = 1.3; window.speechSynthesis.speak(utterance); 
+                } 
+            } catch (e) {} 
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudio(); if (!ctx) return;
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                
+                if (type === 'pop') { 
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, ctx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1); 
+                    gain.gain.setValueAtTime(1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1); 
+                    osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.1);
+                }
+                else if (type === 'error') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.2);
+                }
+                else if (type === 'whistle') {
+                    // Creating a train whistle chord!
+                    const osc2 = ctx.createOscillator();
+                    osc.type = 'square'; osc2.type = 'square';
+                    osc.frequency.setValueAtTime(400, ctx.currentTime); // Base note
+                    osc2.frequency.setValueAtTime(500, ctx.currentTime); // Major third harmony
+                    
+                    gain.gain.setValueAtTime(0, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1); // Attack
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime + 0.6); // Hold
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 1); // Fade
+                    
+                    osc.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+                    osc.start(); osc2.start(); 
+                    osc.stop(ctx.currentTime + 1); osc2.stop(ctx.currentTime + 1);
+                }
+            } catch (e) {}
+        }
+
+        // --- Drag and Drop Logic ---
+        animals.forEach(animal => {
+            animal.addEventListener('pointerdown', startDrag);
+        });
+
+        function startDrag(e) {
+            if (isTrainGone) return;
+            // Don't drag if it's already in a car
+            if (e.target.parentNode.classList.contains('train-car')) return;
+            
+            e.preventDefault();
+            activeAnimal = e.target;
+
+            speak(activeAnimal.dataset.name);
+
+            const rect = activeAnimal.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            activeAnimal.style.position = 'fixed';
+            activeAnimal.style.left = rect.left + 'px';
+            activeAnimal.style.top = rect.top + 'px';
+            activeAnimal.style.zIndex = 1000;
+            document.body.appendChild(activeAnimal);
+        }
+
+        document.addEventListener('pointermove', (e) => {
+            if (!activeAnimal) return;
+            e.preventDefault();
+            activeAnimal.style.left = (e.clientX - offsetX) + 'px';
+            activeAnimal.style.top = (e.clientY - offsetY) + 'px';
+        }, { passive: false });
+
+        document.addEventListener('pointerup', (e) => {
+            if (!activeAnimal) return;
+
+            // Figure out which color car this animal belongs to
+            const targetColor = activeAnimal.dataset.color;
+            const targetCar = document.getElementById('car-' + targetColor);
+            
+            const animalRect = activeAnimal.getBoundingClientRect();
+            const carRect = targetCar.getBoundingClientRect();
+
+            const animalCenterX = animalRect.left + (animalRect.width / 2);
+            const animalCenterY = animalRect.top + (animalRect.height / 2);
+
+            // Check if dropped inside its matching color car
+            const isInside = (
+                animalCenterX >= carRect.left && animalCenterX <= carRect.right &&
+                animalCenterY >= carRect.top && animalCenterY <= carRect.bottom
+            );
+
+            if (isInside && targetCar.children.length === 0) {
+                // SUCCESS! 
+                playSound('pop');
+                speak(`The ${targetColor} car! Good job!`);
+                activeAnimal.style.position = 'static'; 
+                targetCar.appendChild(activeAnimal); 
+                activeAnimal.style.cursor = 'default';
+                animalsLoaded++;
+                
+                if (animalsLoaded === totalAnimals) {
+                    setTimeout(() => speak("All aboard! Pull the golden rope!"), 1500);
+                }
+            } else {
+                // Try checking if they dropped it in the WRONG car
+                const allCars = document.querySelectorAll('.train-car');
+                let droppedInWrongCar = false;
+                
+                allCars.forEach(car => {
+                    const wrongRect = car.getBoundingClientRect();
+                    if (animalCenterX >= wrongRect.left && animalCenterX <= wrongRect.right &&
+                        animalCenterY >= wrongRect.top && animalCenterY <= wrongRect.bottom) {
+                        droppedInWrongCar = true;
+                    }
+                });
+
+                if (droppedInWrongCar) {
+                    playSound('error');
+                    speak(`Oh no! That is not the ${targetColor} car!`);
+                }
+
+                // Return to station
+                activeAnimal.style.position = 'static';
+                station.appendChild(activeAnimal);
+            }
+
+            activeAnimal = null;
+        });
+
+        // --- Train Drive Logic ---
+        function pullWhistle() {
+            if (isTrainGone) return;
+
+            // First pull to wake audio engine
+            getAudio();
+
+            if (animalsLoaded < totalAnimals) {
+                speak("Wait! The animals are not in their cars yet!");
+                playSound('error');
+                
+                // Wiggle the rope
+                rope.style.transform = "translateY(20px) rotate(5deg)";
+                setTimeout(() => rope.style.transform = "none", 200);
+                return;
+            }
+
+            // SUCCESS! Drive away!
+            isTrainGone = true;
+            rope.style.transform = "translateY(30px)"; // Pull rope down visually
+            setTimeout(() => rope.style.transform = "none", 300);
+
+            playSound('whistle');
+            speak("Choo Choo! Bye bye animals!");
+
+            // Delay the drive slightly so the whistle blows first
+            setTimeout(() => {
+                // Translates the whole train block off the right side of the screen
+                trainAssembly.style.transform = `translateX(${window.innerWidth + 500}px)`;
+            }, 800);
+        }
+
+        function resetGame() {
+            isTrainGone = false;
+            animalsLoaded = 0;
+
+            // Stop the train and teleport it instantly back to the left
+            trainAssembly.style.transition = 'none';
+            trainAssembly.style.transform = 'translateX(-500px)'; // Hide off the left screen
+
+            // Unload animals back to station
+            animals.forEach(animal => {
+                animal.style.position = 'static';
+                animal.style.cursor = 'grab';
+                station.appendChild(animal);
+            });
+
+            // Smoothly drive the empty train back into the station
+            setTimeout(() => {
+                trainAssembly.style.transition = 'transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                trainAssembly.style.transform = 'translateX(0)';
+                playSound('pop');
+                speak("The train is back! Let's load the animals!");
+            }, 100);
+        }
+    </script>
+</body>
+</html>

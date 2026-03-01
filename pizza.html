@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef Yuaan's Pizza Shop</title>
+    <style>
+        body { 
+            margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
+            background-color: #fdf5e6; display: flex; flex-direction: column; 
+            height: 100dvh; overflow: hidden; 
+        }
+
+        /* Top Navigation */
+        #controls { 
+            background-color: #e74c3c; padding: clamp(10px, 2vw, 15px) 20px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 200; flex-shrink: 0;
+        }
+
+        .home-btn { 
+            background-color: white; color: #e74c3c; border: none; border-radius: 12px; 
+            padding: 8px 15px; font-size: clamp(1rem, 4vw, 1.5rem); cursor: pointer; 
+            font-weight: bold; text-decoration: none; display: inline-block;
+            box-shadow: 0 4px 0px #c0392b; transition: transform 0.1s;
+        }
+        .home-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #c0392b; }
+
+        .title-text { color: white; font-size: clamp(1.2rem, 5vw, 2rem); font-weight: bold; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+
+        .reset-btn {
+            background-color: #f1c40f; color: #d35400; border: none; border-radius: 12px;
+            padding: 8px 15px; font-size: clamp(1rem, 4vw, 1.2rem); font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 0px #f39c12; transition: transform 0.1s;
+        }
+        .reset-btn:active { transform: translateY(4px); box-shadow: 0 0px 0px #f39c12; }
+
+        /* The Play Area */
+        #play-area {
+            flex-grow: 1; position: relative; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; overflow: hidden;
+            background-image: radial-gradient(#ecf0f1 10%, transparent 10%);
+            background-size: 30px 30px;
+        }
+
+        /* The Pizza */
+        #pizza-container {
+            position: relative;
+            width: clamp(250px, 70vw, 400px);
+            height: clamp(250px, 70vw, 400px);
+            margin-bottom: 20px;
+        }
+
+        #crust {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #f3ce85; /* Raw dough */
+            border-radius: 50%; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: clamp(10px, 3vw, 20px) solid #e6b964; /* Crust edge */
+            box-sizing: border-box; transition: background-color 2s, border-color 2s;
+            overflow: hidden; /* Keeps toppings inside the crust */
+        }
+
+        /* The melted cheese layer that appears during baking */
+        #cheese-melt {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #f1c40f; border-radius: 50%;
+            opacity: 0; transition: opacity 2s ease-in-out; z-index: 5;
+        }
+
+        /* The Toppings */
+        #toppings-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+        }
+
+        .topping {
+            position: absolute; font-size: clamp(2.5rem, 8vw, 4rem);
+            transform: translate(-50%, -50%); /* Centers the emoji on the drop point */
+            animation: splat 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            user-select: none;
+        }
+
+        @keyframes splat {
+            0% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* The Oven Door */
+        #oven-door {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, #7f8c8d, #2c3e50);
+            border-bottom: 15px solid #e74c3c;
+            z-index: 100; transform: translateY(-100%);
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        #oven-window {
+            width: 60%; height: 40%; background-color: rgba(230, 126, 34, 0.3);
+            border: 10px solid #34495e; border-radius: 20px;
+            box-shadow: inset 0 0 50px rgba(231, 76, 60, 0.8);
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .fire { font-size: 5rem; animation: flicker 0.5s infinite alternate; }
+        @keyframes flicker { 0% { transform: scale(1) translateY(0); opacity: 0.8; } 100% { transform: scale(1.1) translateY(-10px); opacity: 1; } }
+
+        /* The Controls */
+        #ingredient-panel {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(10px, 3vw, 15px);
+            width: 100%; max-width: 500px; padding: 10px; z-index: 50;
+        }
+
+        .ing-btn {
+            background-color: white; border: 4px solid #bdc3c7; border-radius: 15px;
+            padding: 10px clamp(15px, 4vw, 25px); font-size: clamp(1.5rem, 5vw, 2.5rem);
+            cursor: pointer; box-shadow: 0 6px 0px #bdc3c7; transition: transform 0.1s;
+            display: flex; flex-direction: column; align-items: center; -webkit-tap-highlight-color: transparent;
+        }
+        .ing-btn:active { transform: translateY(6px); box-shadow: 0 0px 0px #bdc3c7; }
+        .ing-name { font-size: clamp(0.8rem, 2.5vw, 1rem); font-weight: bold; color: #2c3e50; margin-top: 5px; }
+
+        /* Bake Button */
+        #bake-btn {
+            background-color: #e74c3c; color: white; border: 4px solid #c0392b;
+            border-radius: 20px; padding: 15px 40px; font-size: clamp(1.5rem, 5vw, 2rem);
+            font-weight: bold; cursor: pointer; box-shadow: 0 8px 0px #c0392b;
+            margin-top: 10px; transition: transform 0.1s; width: 80%; max-width: 300px;
+            -webkit-tap-highlight-color: transparent; font-family: 'Comic Sans MS', sans-serif;
+        }
+        #bake-btn:active { transform: translateY(8px); box-shadow: 0 0px 0px #c0392b; }
+
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <a href="index.html" class="home-btn">🏠 Home</a>
+        <div class="title-text">Pizza Shop</div>
+        <button class="reset-btn" onclick="resetPizza()">🔄 New</button>
+    </div>
+
+    <div id="play-area">
+        <div id="pizza-container">
+            <div id="crust">
+                <div id="cheese-melt"></div>
+                <div id="toppings-layer"></div>
+            </div>
+        </div>
+
+        <div id="ingredient-panel">
+            <button class="ing-btn" onclick="addTopping('Cheese', '🧀')">🧀<span class="ing-name">Cheese</span></button>
+            <button class="ing-btn" onclick="addTopping('Pepperoni', '🥩')">🥩<span class="ing-name">Pepperoni</span></button>
+            <button class="ing-btn" onclick="addTopping('Tomato', '🍅')">🍅<span class="ing-name">Tomato</span></button>
+            <button class="ing-btn" onclick="addTopping('Broccoli', '🥦')">🥦<span class="ing-name">Broccoli</span></button>
+        </div>
+
+        <button id="bake-btn" onclick="bakePizza()">🔥 BAKE PIZZA</button>
+
+        <div id="oven-door">
+            <div id="oven-window"><div class="fire">🔥</div></div>
+        </div>
+    </div>
+
+    <script>
+        const toppingsLayer = document.getElementById('toppings-layer');
+        const crust = document.getElementById('crust');
+        const cheeseMelt = document.getElementById('cheese-melt');
+        const ovenDoor = document.getElementById('oven-door');
+        const buttons = document.querySelectorAll('button');
+
+        let isBaking = false;
+
+        // Keep track of how many of each topping we add to count out loud!
+        let toppingCounts = {
+            'Cheese': 0, 'Pepperoni': 0, 'Tomato': 0, 'Broccoli': 0
+        };
+
+        // Bulletproof Audio
+        let audioCtx; 
+        function getAudio() { 
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) audioCtx = new AudioContext(); 
+                }
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); 
+                return audioCtx; 
+            } catch (e) { return null; }
+        }
+
+        function speak(text) { 
+            try {
+                if ('speechSynthesis' in window) { 
+                    window.speechSynthesis.cancel(); 
+                    const utterance = new SpeechSynthesisUtterance(text); 
+                    utterance.rate = 0.9; utterance.pitch = 1.3; window.speechSynthesis.speak(utterance); 
+                } 
+            } catch (e) {} 
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudio(); if (!ctx) return;
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                
+                if (type === 'splat') { 
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, ctx.currentTime); 
+                    osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.15); 
+                    gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15); 
+                    osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.15);
+                }
+                else if (type === 'ding') { 
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(880, ctx.currentTime); // High A note
+                    gain.gain.setValueAtTime(1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5); 
+                    osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 1.5);
+                }
+                else if (type === 'slide') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(100, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(50, ctx.currentTime + 1);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 1);
+                    osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 1);
+                }
+            } catch (e) {}
+        }
+
+        function addTopping(name, emoji) {
+            if (isBaking) return; // Can't add while baking
+
+            toppingCounts[name]++;
+            
+            // Speak the count! (e.g., "One Pepperoni", "Two Pepperonis")
+            let countText = toppingCounts[name];
+            speak(`${countText} ${name}`);
+            playSound('splat');
+
+            // Math to place it randomly inside the circle
+            const radius = 50 - 15; // Percentage radius (50% is edge, minus a margin)
+            const angle = Math.random() * Math.PI * 2; // Random angle 0-360
+            const dist = Math.sqrt(Math.random()) * radius; // Random distance from center
+            
+            const x = 50 + (Math.cos(angle) * dist);
+            const y = 50 + (Math.sin(angle) * dist);
+
+            const item = document.createElement('div');
+            item.classList.add('topping');
+            item.innerText = emoji;
+            item.style.left = x + '%';
+            item.style.top = y + '%';
+            
+            // Give it a random little rotation so it looks natural
+            const rotation = Math.floor(Math.random() * 360);
+            item.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+
+            toppingsLayer.appendChild(item);
+        }
+
+        function bakePizza() {
+            if (isBaking) return;
+            
+            // Check if there are toppings
+            let total = 0;
+            for (let t in toppingCounts) total += toppingCounts[t];
+            if (total === 0) {
+                speak("Wait! We need toppings first, Chef!");
+                return;
+            }
+
+            isBaking = true;
+            disableButtons(true);
+            
+            speak("In the oven!");
+            playSound('slide');
+            
+            // 1. Slide door down
+            ovenDoor.style.transform = 'translateY(0)';
+
+            // 2. While door is down, change the pizza!
+            setTimeout(() => {
+                crust.style.backgroundColor = '#f1c40f'; // Cooked cheese color base
+                crust.style.borderColor = '#d35400'; // Darker baked crust edge
+                cheeseMelt.style.opacity = '0.5'; // Fades in the gooey cheese layer
+            }, 1500);
+
+            // 3. DING! Done baking
+            setTimeout(() => {
+                playSound('ding');
+            }, 3000);
+
+            // 4. Slide door up and reveal
+            setTimeout(() => {
+                playSound('slide');
+                ovenDoor.style.transform = 'translateY(-100%)';
+                speak("Ding! Pizza is ready, Chef Yuaan!");
+            }, 3500);
+        }
+
+        function resetPizza() {
+            if (isBaking) return;
+            
+            speak("Let's make a new pizza!");
+            toppingsLayer.innerHTML = '';
+            
+            // Reset counts
+            toppingCounts = { 'Cheese': 0, 'Pepperoni': 0, 'Tomato': 0, 'Broccoli': 0 };
+            
+            // Reset colors to raw dough
+            crust.style.backgroundColor = '#f3ce85';
+            crust.style.borderColor = '#e6b964';
+            cheeseMelt.style.opacity = '0';
+            
+            disableButtons(false);
+        }
+
+        function disableButtons(disable) {
+            buttons.forEach(btn => {
+                if (!btn.classList.contains('home-btn')) {
+                    btn.style.opacity = disable ? '0.5' : '1';
+                    btn.disabled = disable;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
