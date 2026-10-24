@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>Which Has More? | Yuaan’s Playroom</title>
+  <style>
+    :root{color-scheme:light;--ink:#293b4a;--muted:#667682;--paper:#f7f4eb;--card:#fffefa;--green:#dcebdc;--green-ink:#3c684c;--gold:#f3e4bb;--soft:#f4f6ef;font-family:"Avenir Next",Avenir,"Trebuchet MS",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper)}
+    .page{width:min(100% - 28px,760px);min-height:100svh;margin:auto;display:flex;flex-direction:column}
+    header{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .home{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e3dfd3;border-radius:13px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem;font-weight:850}
+    .brand{color:var(--muted);font-size:.88rem;font-weight:800}
+    main{flex:1;display:grid;align-content:center;padding:24px 0 54px}
+    .panel{padding:clamp(20px,5vw,36px);border:1px solid #e6e0cf;border-radius:26px;background:var(--card);box-shadow:0 12px 30px rgba(42,60,65,.05)}
+    .eyebrow{margin:0 0 8px;color:var(--green-ink);font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(1.8rem,6vw,2.7rem);letter-spacing:-.05em}
+    .instruction{margin:8px 0 19px;color:var(--muted);font-size:1rem;line-height:1.5}
+    .round{margin-bottom:9px;color:var(--muted);font-size:.87rem;font-weight:800;text-align:center}
+    .groups{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+    .group{width:100%;min-width:0;padding:13px 9px 15px;border:2px solid #e5e9df;border-radius:18px;background:var(--soft);font:inherit;text-align:center;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+    .group:hover{transform:translateY(-2px)}.group.selected{border-color:#9fbe9d;background:#edf4e9}.group:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    .things{min-height:105px;display:flex;flex-wrap:wrap;align-content:center;align-items:center;justify-content:center;gap:6px}
+    .thing{width:clamp(25px,5.5vw,38px);height:clamp(25px,5.5vw,38px);display:grid;place-items:center;border-radius:9px;background:#fff;font-size:clamp(1.1rem,4vw,1.7rem);box-shadow:0 2px 0 #e6e9e1}
+    .group-name{display:block;margin-top:7px;color:var(--muted);font-size:.82rem;font-weight:800;text-align:center}
+    .versus{color:#9b927e;font-size:.83rem;font-weight:900}
+    .prompt{margin:17px 0 10px;text-align:center;font-size:1.08rem;font-weight:900}
+    .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .choice{min-height:54px;border:2px solid #d5e4d3;border-radius:15px;background:var(--green);color:#315b3e;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #c3d8c1;transition:transform .12s,background .12s}
+    .choice:hover{background:#d2e6d2}.choice:active{transform:translateY(3px)}.choice:disabled{cursor:default;opacity:.72}
+    .feedback{min-height:45px;display:flex;align-items:center;justify-content:center;margin:9px 0 0;color:var(--muted);font-weight:800;text-align:center}
+    .feedback.good{color:var(--green-ink)}.feedback.try{color:#876b32}
+    .actions{display:flex;justify-content:center;gap:9px;margin-top:4px}
+    .action{min-height:43px;padding:0 14px;border:1px solid #e3dfd3;border-radius:13px;background:white;color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+    .action.next{border:0;background:var(--gold);color:#685522}.action[hidden]{display:none}
+    button:focus-visible,a:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    @media(max-width:460px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:19px 13px;border-radius:21px}.groups{gap:6px}.group{padding:10px 5px}.things{min-height:94px;gap:4px}.thing{border-radius:7px}.group-name{font-size:.74rem}.versus{font-size:.72rem}.choice{font-size:.9rem}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header><a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a><span class="brand">Yuaan’s Playroom</span></header>
+    <main><section class="panel" aria-labelledby="title">
+      <p class="eyebrow">Number game</p>
+      <h1 id="title">Which has more?</h1>
+      <p class="instruction">Look carefully at both groups. Tap the group with more things.</p>
+      <div class="round" id="round" aria-live="polite"></div>
+      <p class="prompt">Tap the group with more.</p>
+      <div class="groups" id="groups" aria-label="Choose which group has more"></div>
+      <p class="feedback" id="feedback" aria-live="polite">Look at both groups, then choose.</p>
+      <div class="actions"><button class="action" id="hear" type="button">🔊 Hear the question</button><button class="action" id="reset" type="button">Start over</button></div>
+    </section></main>
+  </div>
+  <script>
+    (()=>{
+      const rounds=[
+        {left:2,right:4,icon:'🍎',name:'apples',more:'right'},
+        {left:5,right:3,icon:'🐠',name:'fish',more:'left'},
+        {left:1,right:6,icon:'⭐',name:'stars',more:'right'},
+        {left:7,right:4,icon:'🧸',name:'teddy bears',more:'left'},
+        {left:3,right:8,icon:'🍓',name:'strawberries',more:'right'},
+        {left:9,right:5,icon:'🦋',name:'butterflies',more:'left'},
+        {left:6,right:10,icon:'🚗',name:'cars',more:'right'},
+        {left:8,right:2,icon:'🐥',name:'chicks',more:'left'}
+      ];
+      const groups=document.getElementById('groups'),feedback=document.getElementById('feedback'),roundLabel=document.getElementById('round'),hearButton=document.getElementById('hear');
+      let index=0,answered=false,advanceTimer;
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;speechSynthesis.speak(u)}
+      function sayQuestion(){speak('Look carefully at both groups. Tap the group with more things.')}
+      function render(){clearTimeout(advanceTimer);hearButton.disabled=false;const r=rounds[index];answered=false;roundLabel.textContent=`Pair ${index+1} of ${rounds.length}`;groups.replaceChildren();[['left',r.left],['right',r.right]].forEach(([side,total])=>{const group=document.createElement('button');group.type='button';group.className='group';group.setAttribute('aria-label',`${side==='left'?'Left':'Right'} group with ${total} ${r.name}`);group.addEventListener('click',()=>answer(side));const things=document.createElement('span');things.className='things';for(let n=0;n<total;n++){const item=document.createElement('span');item.className='thing';item.setAttribute('aria-hidden','true');item.textContent=r.icon;things.append(item)}const label=document.createElement('span');label.className='group-name';label.textContent=`${side==='left'?'Left':'Right'} group`;group.append(things,label);groups.append(group)});feedback.className='feedback';feedback.textContent='Look at both groups, then tap one.'}
+      function advance(){if(index===rounds.length-1){window.location.href='index.html';return}index++;render();sayQuestion()}
+      function answer(side){if(answered)return;const r=rounds[index];if(side===r.more){answered=true;hearButton.disabled=true;feedback.className='feedback good';const finished=index===rounds.length-1;feedback.textContent=finished?'You finished the number activities!':'That group has more!';for(const b of groups.children)b.disabled=true;speak(finished?'You finished the number activities, Yuaan!':'That group has more. Good comparing!',()=>{advanceTimer=setTimeout(advance,finished?1800:1100)})}else{feedback.className='feedback try';feedback.textContent='Look at both groups again. Tap the one with more.';speak('Look at both groups again. Tap the one with more.')}}
+      document.getElementById('hear').addEventListener('click',sayQuestion);
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();index=0;render();sayQuestion()});
+      render();window.addEventListener('load',()=>setTimeout(sayQuestion,350));
+    })();
+  </script>
+</body>
+</html>

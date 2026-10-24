@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>Count & Collect | Yuaan’s Playroom</title>
+  <style>
+    :root{color-scheme:light;--ink:#293b4a;--muted:#667682;--paper:#f7f4eb;--card:#fffefa;--green:#dcebdc;--green-ink:#3c684c;--gold:#f3e4bb;--soft:#f4f6ef;font-family:"Avenir Next",Avenir,"Trebuchet MS",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper)}
+    .page{width:min(100% - 28px,760px);min-height:100svh;margin:auto;display:flex;flex-direction:column}
+    header{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .home{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e3dfd3;border-radius:13px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem;font-weight:850}
+    .brand{color:var(--muted);font-size:.88rem;font-weight:800}
+    main{flex:1;display:grid;align-content:center;padding:22px 0 48px}
+    .panel{padding:clamp(18px,4vw,32px);border:1px solid #e6e0cf;border-radius:26px;background:var(--card);box-shadow:0 12px 30px rgba(42,60,65,.05)}
+    .eyebrow{margin:0 0 7px;color:var(--green-ink);font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(1.7rem,5vw,2.45rem);letter-spacing:-.05em}
+    .instruction{margin:7px 0 14px;color:var(--muted);font-size:.97rem;line-height:1.45}
+    .task{display:flex;align-items:center;justify-content:center;gap:12px;min-height:62px;margin-bottom:12px;padding:10px;border-radius:16px;background:#f3f5eb;text-align:center}
+    .target{color:#806a36;font-size:2.2rem;font-weight:950}.task-text{font-size:1.05rem;font-weight:900}
+    .areas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .area{min-width:0;min-height:164px;padding:12px;border:2px solid #e4e8dd;border-radius:18px;background:var(--soft)}
+    .area-title{display:block;margin-bottom:9px;color:var(--muted);font-size:.82rem;font-weight:850;text-align:center}
+    .items{min-height:116px;display:flex;flex-wrap:wrap;align-content:center;align-items:center;justify-content:center;gap:7px}
+    .item{width:clamp(38px,8vw,54px);height:clamp(38px,8vw,54px);display:grid;place-items:center;border:1px solid #e3e8df;border-radius:14px;background:white;font-size:clamp(1.6rem,5vw,2.2rem);cursor:pointer;box-shadow:0 3px 0 #e5e9e1;transition:transform .12s,opacity .12s}
+    .item:hover{transform:translateY(-2px)}.item:active{transform:scale(.94)}.item:disabled{opacity:.36;cursor:default;box-shadow:none}
+    .basket{border-color:#d6e4d2;background:#edf4e9}
+    .count{min-height:30px;margin:10px 0 0;color:var(--green-ink);font-size:.95rem;font-weight:900;text-align:center}
+    .feedback{min-height:44px;display:flex;align-items:center;justify-content:center;margin:8px 0 0;color:var(--muted);font-weight:800;text-align:center}
+    .feedback.good{color:var(--green-ink)}
+    .actions{display:flex;justify-content:center;gap:9px;margin-top:5px}
+    .action{min-height:44px;padding:0 15px;border:1px solid #e3dfd3;border-radius:13px;background:white;color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+    .action.next{border:0;background:var(--gold);color:#685522}.action[hidden]{display:none}
+    .auto-next{margin:0;color:var(--muted);font-size:.82rem;font-weight:750;text-align:center}
+    button:focus-visible,a:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:18px 13px;border-radius:21px}.area{min-height:146px;padding:9px}.items{min-height:104px;gap:5px}.item{border-radius:12px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header><a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a><span class="brand">Yuaan’s Playroom</span></header>
+    <main><section class="panel" aria-labelledby="title">
+      <p class="eyebrow">Count and collect</p>
+      <h1 id="title">Fill the basket</h1>
+      <p class="instruction">Tap one item at a time to move it into the basket. Count each one as it goes in.</p>
+      <div class="task" aria-live="polite"><span class="target" id="target">1</span><span class="task-text" id="task-text">Collect 1 apple</span></div>
+      <div class="areas">
+        <section class="area" aria-label="Items to collect"><span class="area-title">Tap an item</span><div class="items" id="source"></div></section>
+        <section class="area basket" aria-label="Basket"><span class="area-title">Basket</span><div class="items" id="basket"></div></section>
+      </div>
+      <p class="count" id="count" aria-live="polite">Collected: 0</p>
+      <p class="feedback" id="feedback" aria-live="polite">Listen, then collect the right amount.</p>
+      <p class="auto-next" id="auto-next" aria-live="polite" hidden>Next amount coming up…</p>
+      <div class="actions"><button class="action" id="hear" type="button">🔊 Hear amount</button><button class="action" id="reset" type="button">Start over</button></div>
+    </section></main>
+  </div>
+  <script>
+    (()=>{
+      const rounds=[
+        {n:1,icon:'🍎',one:'apple',many:'apples'}, {n:2,icon:'⭐',one:'star',many:'stars'},
+        {n:3,icon:'🐠',one:'fish',many:'fish'}, {n:4,icon:'🧸',one:'teddy bear',many:'teddy bears'},
+        {n:5,icon:'🍓',one:'strawberry',many:'strawberries'}, {n:6,icon:'🚗',one:'car',many:'cars'},
+        {n:7,icon:'🦋',one:'butterfly',many:'butterflies'}, {n:8,icon:'🐥',one:'chick',many:'chicks'},
+        {n:9,icon:'🍪',one:'cookie',many:'cookies'}, {n:10,icon:'🪁',one:'kite',many:'kites'}
+      ];
+      const source=document.getElementById('source'),basket=document.getElementById('basket'),target=document.getElementById('target'),taskText=document.getElementById('task-text'),count=document.getElementById('count'),feedback=document.getElementById('feedback'),autoNext=document.getElementById('auto-next'),hearButton=document.getElementById('hear');
+      const words=['one','two','three','four','five','six','seven','eight','nine','ten'];let round=0,collected=0,nextTimer;
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;speechSynthesis.speak(u)}
+      function sayAmount(){const item=rounds[round];speak(`Collect ${words[item.n-1]} ${item.many}.`)}
+      function render(){clearTimeout(nextTimer);hearButton.disabled=false;autoNext.hidden=true;const item=rounds[round];collected=0;target.textContent=item.n;taskText.textContent=`Collect ${item.n} ${item.many}`;source.replaceChildren();basket.replaceChildren();count.textContent='Collected: 0';feedback.className='feedback';feedback.textContent='Tap an item and count as it goes in.';for(let i=0;i<10;i++){const button=document.createElement('button');button.type='button';button.className='item';button.textContent=item.icon;button.setAttribute('aria-label',`Collect ${item.one}`);button.addEventListener('click',()=>collect(button,item));source.append(button)}}
+      function collect(button,item){if(button.disabled||collected>=item.n)return;button.disabled=true;const moved=document.createElement('span');moved.className='item';moved.setAttribute('aria-hidden','true');moved.textContent=item.icon;basket.append(moved);collected++;count.textContent=`Collected: ${collected}`;if(collected===item.n){hearButton.disabled=true;feedback.className='feedback good';feedback.textContent=`You collected ${item.n} ${item.many}!`;autoNext.hidden=false;autoNext.textContent=round===rounds.length-1?'Next activity coming up…':'Next amount coming up…';speak(`You collected ${item.n} ${item.many}!`,()=>{nextTimer=setTimeout(()=>{if(round===rounds.length-1){window.location.href='number-match.html';return}round++;render();sayAmount()},1300)})}else{speak(String(collected))}}
+      document.getElementById('hear').addEventListener('click',sayAmount);
+      document.getElementById('reset').addEventListener('click',()=>{clearTimeout(nextTimer);if('speechSynthesis'in window)speechSynthesis.cancel();round=0;render();sayAmount()});
+      render();window.addEventListener('load',()=>setTimeout(sayAmount,350));
+    })();
+  </script>
+</body>
+</html>

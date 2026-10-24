@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>Rocket Countdown | Yuaan’s Playroom</title>
+  <style>
+    :root{color-scheme:light;--ink:#293b4a;--muted:#667682;--paper:#f7f4eb;--card:#fffefa;--green:#dcebdc;--green-ink:#3c684c;--gold:#f3e4bb;--soft:#f4f6ef;font-family:"Avenir Next",Avenir,"Trebuchet MS",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper)}
+    .page{width:min(100% - 28px,760px);min-height:100svh;margin:auto;display:flex;flex-direction:column}
+    header{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .home{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e3dfd3;border-radius:13px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem;font-weight:850}
+    .brand{color:var(--muted);font-size:.88rem;font-weight:800}
+    main{flex:1;display:grid;align-content:center;padding:22px 0 48px}
+    .panel{padding:clamp(18px,4vw,32px);border:1px solid #e6e0cf;border-radius:26px;background:var(--card);box-shadow:0 12px 30px rgba(42,60,65,.05)}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:10px}.eyebrow{margin:0;color:var(--green-ink);font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.step{color:var(--muted);font-size:.85rem;font-weight:800}
+    h1{margin:7px 0 0;font-size:clamp(1.7rem,5vw,2.4rem);letter-spacing:-.05em}.instruction{margin:7px 0 18px;color:var(--muted);font-size:.97rem;line-height:1.45}
+    .sky{position:relative;min-height:160px;display:grid;place-items:center;overflow:hidden;border:1px solid #dce8e5;border-radius:19px;background:linear-gradient(#e8f1ef 0 72%,#dce8d6 72%)}
+    .stars{position:absolute;inset:0;color:#bba968;letter-spacing:1.3rem;font-size:1rem;opacity:.75}.rocket{position:relative;z-index:1;font-size:5rem;line-height:1;transition:transform .45s cubic-bezier(.2,.8,.2,1)}.rocket.launch{animation:launch .85s ease-in forwards}
+    @keyframes launch{to{transform:translate(90px,-220px) rotate(25deg);opacity:0}}
+    .countdown{margin:16px 0 7px;color:#806a36;font-size:clamp(3.5rem,15vw,6rem);font-weight:950;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
+    .rail-wrap{padding:9px 3px 0}.rail{position:relative;display:grid;grid-template-columns:repeat(11,minmax(0,1fr));align-items:center;min-height:53px;border-radius:16px;background:var(--soft)}
+    .rail-number{display:grid;place-items:center;color:#60716a;font-size:clamp(.85rem,3.3vw,1.15rem);font-weight:900}
+    .rocket-handle{position:absolute;left:0;top:50%;z-index:2;width:48px;height:48px;display:grid;place-items:center;border:2px solid #e8d59e;border-radius:15px;background:#fff8e4;font-size:1.9rem;touch-action:none;transform:translate(-50%,-50%);transition:left .25s ease;cursor:grab;user-select:none;-webkit-user-select:none}
+    .rocket-handle:active{cursor:grabbing}.rocket-handle:focus-visible,button:focus-visible,a:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    .feedback{min-height:48px;display:flex;align-items:center;justify-content:center;margin:11px 0 0;color:var(--muted);font-weight:800;text-align:center}.feedback.good{color:var(--green-ink)}
+    .actions{display:flex;justify-content:center;gap:9px;margin-top:5px}.action{min-height:43px;padding:0 14px;border:1px solid #e3dfd3;border-radius:13px;background:white;color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+    @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:17px 12px;border-radius:21px}.sky{min-height:142px}.rocket{font-size:4.4rem}.rail-number{font-size:.8rem}.rocket-handle{width:42px;height:42px;font-size:1.6rem}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header><a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a><span class="brand">Yuaan’s Playroom</span></header>
+    <main><section class="panel" aria-labelledby="title">
+      <div class="topline"><p class="eyebrow">Count backwards</p><span class="step" id="step">10 to go</span></div>
+      <h1 id="title">Rocket countdown</h1>
+      <p class="instruction">Drag the rocket right one step each time. Count backward to zero!</p>
+      <div class="sky" aria-hidden="true"><div class="stars">✦　　✦　　　✦　</div><div class="rocket" id="rocket">🚀</div></div>
+      <div class="countdown" id="countdown" aria-live="polite">10</div>
+      <div class="rail-wrap"><div class="rail" id="rail" aria-label="Countdown number line from ten to zero"></div></div>
+      <p class="feedback" id="feedback" aria-live="polite">Drag the rocket one step to count down.</p>
+      <div class="actions"><button class="action" id="hear" type="button">🔊 Hear number</button><button class="action" id="reset" type="button">Start over</button></div>
+    </section></main>
+  </div>
+  <script>
+    (()=>{
+      const words=['zero','one','two','three','four','five','six','seven','eight','nine','ten'];
+      const rail=document.getElementById('rail'),handle=document.createElement('button'),countdown=document.getElementById('countdown'),step=document.getElementById('step'),feedback=document.getElementById('feedback'),rocket=document.getElementById('rocket');
+      let current=10,startX=0,dragging=false,finished=false;
+      for(let value=10;value>=0;value--){const mark=document.createElement('span');mark.className='rail-number';mark.textContent=value;rail.append(mark)}
+      handle.type='button';handle.className='rocket-handle';handle.setAttribute('aria-label','Drag rocket one step forward');handle.setAttribute('aria-valuemin','0');handle.setAttribute('aria-valuemax','10');handle.setAttribute('aria-valuenow','10');rail.append(handle);
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;speechSynthesis.speak(voice)}
+      function place(){const progress=10-current;handle.style.left=`${(progress+.5)*100/11}%`;countdown.textContent=current;step.textContent=current===0?'Ready for launch!':`${current} to go`;handle.setAttribute('aria-valuenow',String(current));handle.setAttribute('aria-label',current===0?'Countdown complete':'Drag rocket right to count down')}
+      function moveOne(){if(finished)return;if(current>0){current--;place();if(current===0){finished=true;feedback.className='feedback good';feedback.textContent='Zero! Blast off!';speak('Zero. Blast off, Yuaan!',()=>{rocket.classList.add('launch');setTimeout(()=>{window.location.href='number-more.html'},1400)})}else{feedback.textContent='Keep counting backward.';speak(words[current])}}}
+      handle.addEventListener('pointerdown',event=>{if(finished)return;event.preventDefault();startX=event.clientX;dragging=true;handle.setPointerCapture(event.pointerId)});
+      handle.addEventListener('pointerup',event=>{if(!dragging)return;dragging=false;const distance=event.clientX-startX;if(distance>24)moveOne();else if(distance< -24){feedback.textContent='Move the rocket to the right along the number line.'}});
+      handle.addEventListener('pointercancel',()=>{dragging=false});
+      handle.addEventListener('keydown',event=>{if(event.key==='ArrowRight'){event.preventDefault();moveOne()}});
+      document.getElementById('hear').addEventListener('click',()=>speak(words[current]));
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();current=10;finished=false;dragging=false;rocket.classList.remove('launch');feedback.className='feedback';feedback.textContent='Drag the rocket one step to count down.';place();speak('Start at ten.')});
+      place();window.addEventListener('load',()=>setTimeout(()=>speak('Start at ten. Drag the rocket right one step.'),350));
+    })();
+  </script>
+</body>
+</html>

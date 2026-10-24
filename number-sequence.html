@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>What Comes Next? | Yuaan’s Playroom</title>
+  <style>
+    :root{color-scheme:light;--ink:#293b4a;--muted:#667682;--paper:#f7f4eb;--card:#fffefa;--green:#dcebdc;--green-ink:#3c684c;--gold:#f3e4bb;font-family:"Avenir Next",Avenir,"Trebuchet MS",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper)}
+    .page{width:min(100% - 28px,760px);min-height:100svh;margin:auto;display:flex;flex-direction:column}
+    header{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .home{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e3dfd3;border-radius:13px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem;font-weight:850}
+    .brand{color:var(--muted);font-size:.88rem;font-weight:800}
+    main{flex:1;display:grid;align-content:center;padding:24px 0 54px}
+    .panel{padding:clamp(20px,5vw,38px);border:1px solid #e6e0cf;border-radius:26px;background:var(--card);box-shadow:0 12px 30px rgba(42,60,65,.05)}
+    .eyebrow{margin:0 0 8px;color:var(--green-ink);font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(1.8rem,6vw,2.7rem);letter-spacing:-.05em}
+    .instruction{margin:8px 0 22px;color:var(--muted);font-size:1rem;line-height:1.5}
+    .sequence{min-height:98px;display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,20px);margin-bottom:20px;padding:14px;border-radius:18px;background:#f4f6ef}
+    .sequence span{width:clamp(42px,12vw,70px);height:clamp(50px,14vw,78px);display:grid;place-items:center;border-radius:15px;background:#fff;color:#315b3e;font-size:clamp(1.6rem,7vw,3rem);font-weight:950;box-shadow:0 3px 0 #e4e8dc}
+    .sequence .missing{border:2px dashed #cfb66b;background:#fff9e8;color:#806a36}
+    .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:440px;margin:auto}
+    .choice{min-height:64px;border:2px solid #d5e4d3;border-radius:16px;background:var(--green);color:#315b3e;font:inherit;font-size:1.8rem;font-weight:950;cursor:pointer;box-shadow:0 4px 0 #c3d8c1;transition:transform .12s,background .12s}
+    .choice:hover{background:#d2e6d2}.choice:active{transform:translateY(3px)}.choice:disabled{cursor:default;opacity:.7}
+    .feedback{min-height:48px;display:flex;align-items:center;justify-content:center;margin:13px 0 0;color:var(--muted);font-weight:800;text-align:center}
+    .feedback.good{color:var(--green-ink)}.feedback.try{color:#876b32}
+    .actions{display:flex;justify-content:center;gap:10px;margin-top:5px}
+    .action{min-height:44px;padding:0 15px;border:1px solid #e3dfd3;border-radius:13px;background:white;color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+    .action.next{border:0;background:var(--gold);color:#685522}.action[hidden]{display:none}
+    .round{margin:16px 0 0;color:var(--muted);font-size:.85rem;font-weight:750;text-align:center}
+    button:focus-visible,a:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    @media(max-width:420px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:20px 15px;border-radius:21px}.sequence{gap:7px;padding:10px}.sequence span{border-radius:12px}.choices{gap:8px}.choice{min-height:58px;border-radius:14px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header><a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a><span class="brand">Yuaan’s Playroom</span></header>
+    <main><section class="panel" aria-labelledby="title">
+      <p class="eyebrow">Number pattern</p>
+      <h1 id="title">What comes next?</h1>
+      <p class="instruction">Look at the numbers in order. Choose the number that comes next.</p>
+      <div class="sequence" id="sequence" aria-label="Number sequence"></div>
+      <div class="choices" id="choices" aria-label="Choose the next number"></div>
+      <p class="feedback" id="feedback" aria-live="polite">Which number comes next?</p>
+      <div class="actions"><button class="action" id="repeat" type="button">🔊 Hear the question</button></div>
+      <p class="round" id="round"></p>
+    </section></main>
+  </div>
+  <script>
+    (()=>{
+      const rounds=[
+        {shown:[1,2,3],answer:4,options:[4,5,2]},
+        {shown:[3,4,5],answer:6,options:[7,6,4]},
+        {shown:[5,6,7],answer:8,options:[8,9,6]},
+        {shown:[2,3,4],answer:5,options:[4,5,6]},
+        {shown:[6,7,8],answer:9,options:[10,8,9]},
+        {shown:[1,2,3],answer:4,options:[3,4,5]},
+        {shown:[4,5,6],answer:7,options:[8,6,7]},
+        {shown:[7,8,9],answer:10,options:[9,10,8]}
+      ];
+      const sequence=document.getElementById('sequence'),choices=document.getElementById('choices');
+      const feedback=document.getElementById('feedback'),roundLabel=document.getElementById('round'),repeatButton=document.getElementById('repeat');
+      const words=['one','two','three','four','five','six','seven','eight','nine','ten'];let index=0,solved=false,advanceTimer;
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;speechSynthesis.speak(u)}
+      function sayQuestion(){speak(`Look at the numbers. ${rounds[index].shown.join(', ')}. What comes next?`)}
+      function render(){clearTimeout(advanceTimer);repeatButton.disabled=false;const r=rounds[index];solved=false;sequence.replaceChildren();r.shown.forEach(n=>{const s=document.createElement('span');s.textContent=n;sequence.append(s)});const gap=document.createElement('span');gap.className='missing';gap.setAttribute('aria-label','empty place for the next number');sequence.append(gap);choices.replaceChildren();r.options.forEach(n=>{const b=document.createElement('button');b.type='button';b.className='choice';b.textContent=n;b.setAttribute('aria-label',String(n));b.addEventListener('click',()=>choose(n));choices.append(b)});feedback.className='feedback';feedback.textContent='Which number comes next?';roundLabel.textContent=`${index+1} of ${rounds.length}`}
+      function advance(){if(index===rounds.length-1){window.location.href='number-collect.html';return}index++;render();sayQuestion()}
+      function choose(n){if(solved)return;const r=rounds[index];if(n===r.answer){solved=true;repeatButton.disabled=true;sequence.lastElementChild.textContent=n;sequence.lastElementChild.classList.remove('missing');feedback.className='feedback good';feedback.textContent=`Yes! ${words[n-1]} comes next.`;for(const b of choices.children)b.disabled=true;speak(`${words[n-1]} comes next.`,()=>{advanceTimer=setTimeout(advance,1100)})}else{feedback.className='feedback try';feedback.textContent='Say the numbers in order. Which comes after the last one?';speak('Say the numbers in order. Which comes after the last one?')}}
+      document.getElementById('repeat').addEventListener('click',sayQuestion);
+      render();window.addEventListener('load',()=>setTimeout(sayQuestion,350));
+    })();
+  </script>
+</body>
+</html>

@@ -1,204 +1,407 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yuaan's Magic Space</title>
-    <style>
-        body { 
-            margin: 0; padding: 0; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; 
-            background-color: #81ecec; 
-            background-image: radial-gradient(#00cec9 10%, transparent 10%), radial-gradient(#00cec9 10%, transparent 10%); 
-            background-size: 60px 60px; background-position: 0 0, 30px 30px; 
-            display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; overflow-x: hidden; padding-bottom: 40px; 
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f4ef">
+  <meta name="description" content="A little playroom made for Yuaan.">
+  <title>Yuaan’s Playroom</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #263746;
+      --muted: #657581;
+      --paper: #f5f4ef;
+      --white: #fffefa;
+      --blue: #d9ebee;
+      --blue-ink: #2e6970;
+      --peach: #f4d9c6;
+      --line: #e3e3da;
+      font-family: "Avenir Next", Avenir, "Trebuchet MS", system-ui, sans-serif;
+    }
 
-        h1 { 
-            color: #ff7675; font-size: clamp(3rem, 10vw, 5rem); 
-            margin-top: 40px; margin-bottom: 0; text-shadow: 4px 4px 0px white; 
-            z-index: 10; text-align: center; padding: 0 10px;
-            animation: bounce 2s infinite ease-in-out;
-        }
+    * { box-sizing: border-box; }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 12% 12%, rgba(255,255,255,.82), transparent 34%),
+        var(--paper);
+    }
 
-        p { 
-            font-size: clamp(1.2rem, 5vw, 2rem); color: #2d3436; margin: 10px 10px 40px 10px; 
-            font-weight: bold; background-color: white; padding: 10px 30px; border-radius: 30px; 
-            border: 5px dashed #ff7675; z-index: 10; text-align: center; 
-        }
+    .page {
+      width: min(100% - 36px, 960px);
+      min-height: 100svh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .game-grid { 
-            display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(20px, 5vw, 40px); 
-            width: 90%; max-width: 1000px; z-index: 10; 
-        }
+    header {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        /* Standard HTML link to prevent mobile JS crashes */
-        .game-card { 
-            background-color: white; border-radius: 30px; 
-            width: clamp(150px, 40vw, 280px); height: clamp(160px, 40vw, 250px); 
-            color: #2d3436; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15); border: clamp(5px, 2vw, 8px) solid #0984e3; 
-            cursor: pointer; transition: transform 0.2s; text-decoration: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
 
-        .game-card:hover { transform: scale(1.05); }
-        .game-card:active { transform: scale(0.95); }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--blue);
+      font-size: 1.05rem;
+    }
 
-        .emoji { font-size: clamp(4rem, 12vw, 6rem); margin-bottom: 15px; }
-        .title { font-size: clamp(1.2rem, 5vw, 2rem); font-weight: bold; text-align: center; }
+    .made-for {
+      color: var(--muted);
+      font-size: .83rem;
+      font-weight: 700;
+    }
 
-        /* Magic Stars */
-        .magic-star { position: absolute; font-size: 2rem; pointer-events: none; animation: floatUp 1s forwards ease-out; z-index: 100; }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; } 100% { transform: translateY(-100px) scale(1.5) rotate(90deg); opacity: 0; } }
-    </style>
+    main {
+      flex: 1;
+      display: grid;
+      align-content: center;
+      gap: clamp(30px, 6vw, 58px);
+      padding: 28px 0 60px;
+    }
+
+    .welcome {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      align-items: center;
+      gap: 20px;
+      padding: clamp(26px, 5vw, 54px);
+      overflow: hidden;
+      border: 1px solid #e5e3da;
+      border-radius: 30px;
+      background: var(--white);
+      box-shadow: 0 14px 38px rgba(42, 60, 65, .06);
+    }
+
+    .welcome::before {
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -72px;
+      top: -140px;
+      border-radius: 50%;
+      background: #f8eadb;
+      content: "";
+    }
+
+    .welcome-copy, .illustration { position: relative; }
+
+    .eyebrow {
+      margin: 0 0 11px;
+      color: var(--blue-ink);
+      font-size: .84rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 540px;
+      margin: 0;
+      font-size: clamp(1.9rem, 5vw, 3.2rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+    }
+
+    .welcome-copy > p:last-child {
+      max-width: 420px;
+      margin: 20px 0 0;
+      color: var(--muted);
+      font-size: clamp(.96rem, 1.6vw, 1.05rem);
+      line-height: 1.6;
+    }
+
+    .illustration {
+      width: 218px;
+      height: 218px;
+      justify-self: center;
+      display: grid;
+      place-items: center;
+      border-radius: 46% 54% 57% 43% / 45% 44% 56% 55%;
+      background: var(--blue);
+      transform: rotate(4deg);
+    }
+
+    .illustration span {
+      font-size: 7rem;
+      transform: rotate(-4deg);
+      filter: drop-shadow(0 7px 0 rgba(38,55,70,.08));
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 15px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 4vw, 1.8rem);
+      letter-spacing: -.04em;
+    }
+
+    .section-heading p {
+      margin: 0 0 2px;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .activity-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .activity-link {
+      min-height: 116px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto 1fr auto;
+      align-items: center;
+      gap: 8px 12px;
+      padding: 16px;
+      border: 2px solid #c8dfe0;
+      border-radius: 23px;
+      background: #e8f2f0;
+      color: var(--ink);
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(42, 60, 65, .05);
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .activity-link.numbers {
+      border-color: #ead5b4;
+      background: #fbf0dc;
+    }
+
+    .activity-link.numbers:hover { background: #f7e9ce; }
+    .activity-link.numbers .arrow { background: #f0dfbf; color: #795d2d; }
+
+    .activity-link.old-activities {
+      grid-column: 1 / -1;
+      min-height: 80px;
+      grid-template-columns: 52px 1fr auto;
+      grid-template-rows: 1fr;
+      padding: 12px 16px;
+      border-color: var(--line);
+      background: rgba(255,254,250,.72);
+      box-shadow: none;
+    }
+
+    .activity-link.old-activities:hover { background: #fffefa; }
+
+    .activity-link:hover {
+      background: #e2efed;
+      box-shadow: 0 12px 24px rgba(42, 60, 65, .09);
+      transform: translateY(-2px);
+    }
+
+    .activity-link:active { transform: scale(.985); }
+
+    .activity-icon {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      background: rgba(255,255,255,.78);
+      font-size: 2rem;
+    }
+
+    .activity-title {
+      display: block;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-weight: 900;
+      letter-spacing: -.04em;
+    }
+
+    .activity-description {
+      display: block;
+      grid-column: 1 / -1;
+      margin-top: 0;
+      color: #536a70;
+      font-size: .88rem;
+      line-height: 1.4;
+    }
+
+    .arrow {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #d1e5e3;
+      color: var(--blue-ink);
+      font-size: 1.5rem;
+      font-weight: 900;
+    }
+
+    footer {
+      display: flex;
+      justify-content: center;
+      padding: 0 0 25px;
+      color: #7d898d;
+      font-size: .82rem;
+      font-weight: 650;
+    }
+
+    a:focus-visible { outline: 4px solid #315d8c; outline-offset: 4px; }
+
+    @media (max-width: 620px) {
+      .page { width: min(100% - 24px, 480px); }
+      header { height: 64px; }
+      .made-for { font-size: .76rem; }
+      main { gap: 30px; padding: 20px 0 44px; }
+      .welcome {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 27px 23px 24px;
+        border-radius: 25px;
+      }
+      .welcome::before { width: 190px; height: 190px; right: -70px; top: -116px; }
+      h1 { max-width: 430px; font-size: clamp(2rem, 8vw, 2.7rem); }
+      .welcome-copy > p:last-child { margin-top: 13px; }
+      .illustration { width: 144px; height: 138px; justify-self: center; margin: 0; }
+      .illustration span { font-size: 4.7rem; }
+      .section-heading { align-items: start; flex-direction: column; gap: 4px; }
+      .activity-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .activity-link { min-height: 100px; gap: 6px 9px; padding: 12px; border-radius: 17px; }
+      .activity-link.old-activities { grid-column: 1 / -1; min-height: 74px; grid-template-columns: 46px 1fr 31px; grid-template-rows: 1fr; }
+      .activity-icon { width: 43px; height: 43px; border-radius: 14px; font-size: 1.7rem; }
+      .activity-title { font-size: 1.05rem; }
+      .activity-description { font-size: .78rem; }
+      .arrow { width: 31px; height: 31px; font-size: 1.1rem; }
+    }
+
+    @media (max-width: 360px) {
+      .activity-list { grid-template-columns: 1fr; }
+      .activity-link.old-activities { grid-column: auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
+  <div class="page">
+    <header>
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><span>Yuaan’s Playroom</span></div>
+      <span class="made-for">Made just for Yuaan</span>
+    </header>
 
-    <h1>✨ Yuaan's Space ✨</h1>
-    <p>What are we playing today, Yuaan?</p>
-
-    <!-- <div class="game-grid">
-        <a href="alphabet.html" class="game-card">
-            <div class="emoji">🔤</div>
-            <div class="title">ABC Adventure</div>
-        </a>
-        
-        <div class="game-card" style="border-color: #b2bec3; opacity: 0.7; cursor: default;">
-            <div class="emoji">🔒</div>
-            <div class="title">Coming Soon!</div>
+    <main>
+      <section class="welcome" aria-labelledby="welcome-title">
+        <div class="welcome-copy">
+          <p class="eyebrow">YOUR PLAYROOM</p>
+          <h1 id="welcome-title">Yuaan’s Playroom</h1>
+          <p>Choose a favorite activity and have fun, Yuaan.</p>
         </div>
-    </div> -->
+        <div class="illustration" aria-hidden="true"><span>🧸</span></div>
+      </section>
 
-    <div class="game-grid">
-        <a href="alphabet.html" class="game-card">
-            <div class="emoji">🔤</div>
-            <div class="title">ABC Adventure</div>
-        </a>
-        
-        <a href="numbers.html" class="game-card" style="border-color: #2ed573;">
-            <div class="emoji">🔢</div>
-            <div class="title">123 Safari</div>
-        </a>
-
-        <a href="balloon.html" class="game-card" style="border-color: #ff4757;">
-            <div class="emoji">🎈</div><div class="title">Magic Balloon</div>
-        </a>
-        <a href="draw.html" class="game-card" style="border-color: #ffa502;">
-            <div class="emoji">🖍️</div><div class="title">Rainbow Draw</div>
-        </a>
-        <a href="shapes.html" class="game-card" style="border-color: #ffa502;">
-            <div class="emoji">🔺</div><div class="title">Shape Shapes</div>
-        </a>
-        <a href="drawing.html" class="game-card" style="border-color: #ffa502;">
-            <div class="emoji">✏s️</div><div class="title">Drawing Time</div>
-        </a>
-        <a href="memory.html" class="game-card" style="border-color: #ffa502;">
-            <div class="emoji">🖼️</div><div class="title">Match Pictures</div>
-        </a>
-
-         
-        <a href="feed-animals.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🍎</div><div class="title">Feed The Animals</div>
-        </a>
-        
-      
-        <a href="patterns.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🔮</div><div class="title">Patterns</div>
-        </a>
-
-      
-        <a href="shadows.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">👤</div><div class="title">Shadow Match</div>
-        </a>
-
-           
-        <a href="count-build.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🧱</div><div class="title">Count & Build</div>
-        </a>
-
-        
-        <a href="sorting.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🏡</div><div class="title">Sorting Fun</div>
-        </a> 
-        
-       
-        <a href="clock.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">⏰</div><div class="title">Clock Time</div>
-        </a>
-       
-        <a href="big-small.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🐘</div><div class="title">Big & Small</div>
-            </a>    
-        
-        
-        <a href="build-robot.html" class="game-card" style="border-color: #9c88ff;">
-            <div class="emoji">🤖</div><div class="title">Build-A-Robot</div>
-        </a>
-
-         <a href="colors.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🌈</div><div class="title">Colours</div>
-        </a>
-        <a href="animals.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🐾</div><div class="title">Animal Friends</div>
-        </a>
-        <a href="numbers2.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🔢</div><div class="title">Numbers</div>
-        </a>
-
-        <!-- <a href="robot.html" class="game-card" style="border-color: #9c88ff;">
-            <div class="emoji">🤖</div>
-            <div class="title">Build-A-Robot</div>
-        </a> -->
-        
-        <a href="weather.html" class="game-card" style="border-color: #00cec9;">
-            <div class="emoji">🌤️</div><div class="title">Weather Window</div>
-        </a>
-
-        
-        <a href="safari.html" class="game-card" style="border-color: #34495e; background-color: #e2e8f0;">
-            <div class="emoji">🔦</div><div class="title">Night Safari</div>
-        </a>
-
-       <a href="veggies.html" class="game-card" style="border-color: #27ae60;">
-            <div class="emoji">🥕</div><div class="title">Veggie Soup</div>
-        </a>
-       
-
-        <a href="pizza.html" class="game-card" style="border-color: #e74c3c;">
-            <div class="emoji">🍕</div><div class="title">Pizza Shop</div>
-        </a>
-
-        <a href="train.html" class="game-card" style="border-color: #1e90ff;">
-            <div class="emoji">🚂</div><div class="title">Color Train</div>
-        </a>
-        <!-- <a href="rocket.html" class="game-card" style="border-color: #9b59b6;">
-            <div class="emoji">🚀</div><div class="title">Blast Off!</div>
-        </a> -->
-
-
-
-         <div class="game-card" style="border-color: #b2bec3; opacity: 0.7; cursor: default;">
-            <div class="emoji">🔒</div>
-            <div class="title">Coming Soon!</div>
+      <section aria-labelledby="activities-title">
+        <div class="section-heading">
+          <h2 id="activities-title">Your activities</h2>
+          <p>Choose one to get started</p>
         </div>
-    </div>
+        <div class="activity-list">
+          <a class="activity-link numbers" href="number-counting.html">
+            <span class="activity-icon" aria-hidden="true">🔢</span>
+            <span class="activity-title">Numbers</span>
+            <span class="arrow" aria-hidden="true">✦</span>
+            <span class="activity-description">Numbers 1–10</span>
+          </a>
+          <a class="activity-link numbers" href="number-order.html">
+            <span class="activity-icon" aria-hidden="true">➡️</span>
+            <span class="activity-title">Number Order</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Tap 1 to 10 in order</span>
+          </a>
+          <a class="activity-link numbers" href="number-sequence.html">
+            <span class="activity-icon" aria-hidden="true">🧩</span>
+            <span class="activity-title">Next Number</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Find what comes next</span>
+          </a>
+          <a class="activity-link numbers" href="number-collect.html">
+            <span class="activity-icon" aria-hidden="true">🧺</span>
+            <span class="activity-title">Count & Collect</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Collect the number you hear</span>
+          </a>
+          <a class="activity-link numbers" href="number-match.html">
+            <span class="activity-icon" aria-hidden="true">🔗</span>
+            <span class="activity-title">Match the Number</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Find a group with that many</span>
+          </a>
+          <a class="activity-link numbers" href="number-one-more.html">
+            <span class="activity-icon" aria-hidden="true">➕</span>
+            <span class="activity-title">One More</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Add one and count again</span>
+          </a>
+          <a class="activity-link numbers" href="number-hippo.html">
+            <span class="activity-icon" aria-hidden="true">🦛</span>
+            <span class="activity-title">Feed the Hippo</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Drag food and count aloud</span>
+          </a>
+          <a class="activity-link numbers" href="number-trace.html">
+            <span class="activity-icon" aria-hidden="true">✍️</span>
+            <span class="activity-title">Trace Numbers</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Trace 1 to 10 with a finger</span>
+          </a>
+          <a class="activity-link numbers" href="number-countdown.html">
+            <span class="activity-icon" aria-hidden="true">🚀</span>
+            <span class="activity-title">Rocket Countdown</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Swipe from 10 down to 0</span>
+          </a>
+          <a class="activity-link numbers" href="number-more.html">
+            <span class="activity-icon" aria-hidden="true">⚖️</span>
+            <span class="activity-title">Which Has More?</span>
+            <span class="arrow" aria-hidden="true">→</span>
+            <span class="activity-description">Compare two groups</span>
+          </a>
+          <a class="activity-link old-activities" href="old.html">
+            <span class="activity-icon" aria-hidden="true">🧩</span>
+            <span>
+              <span class="activity-title">Old Activities</span>
+              <span class="activity-description">Find your familiar games and favorites</span>
+            </span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </section>
+    </main>
 
-    <script>
-        // Fun magic stars when you tap the empty background
-        document.body.addEventListener('click', function(e) {
-            if (e.target.closest('.game-card')) return;
-            const star = document.createElement('div'); 
-            star.classList.add('magic-star'); star.innerText = '⭐';
-            star.style.left = (e.clientX - 15) + 'px'; star.style.top = (e.clientY - 15) + 'px';
-            document.body.appendChild(star); 
-            setTimeout(() => { star.remove(); }, 1000);
-        });
-    </script>
+    <footer>Made with love for Yuaan <span aria-hidden="true">&nbsp;♥</span></footer>
+  </div>
 </body>
 </html>

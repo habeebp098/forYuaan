@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>Numbers | Yuaan’s Playroom</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #293b4a;
+      --muted: #667682;
+      --paper: #f7f4eb;
+      --card: #fffefa;
+      --green: #dcebdc;
+      --green-ink: #3c684c;
+      font-family: "Avenir Next", Avenir, "Trebuchet MS", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--paper); }
+    .page { width: min(100% - 28px, 760px); min-height: 100svh; margin: auto; display: flex; flex-direction: column; }
+    header { min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .home { min-height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid #e3dfd3; border-radius: 13px; background: var(--card); color: var(--ink); text-decoration: none; font-size: .92rem; font-weight: 850; }
+    .brand { color: var(--muted); font-size: .88rem; font-weight: 800; }
+    main { flex: 1; display: grid; align-content: center; padding: 24px 0 54px; }
+    .panel { padding: clamp(20px, 5vw, 38px); border: 1px solid #e6e0cf; border-radius: 26px; background: var(--card); box-shadow: 0 12px 30px rgba(42,60,65,.05); }
+    .eyebrow { margin: 0 0 8px; color: var(--green-ink); font-size: .76rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 6vw, 2.7rem); letter-spacing: -.05em; }
+    .instruction { margin: 8px 0 22px; color: var(--muted); font-size: 1rem; line-height: 1.5; }
+    .number-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(9px, 2vw, 15px); }
+    .number-button { min-width: 0; aspect-ratio: 1; display: grid; place-items: center; border: 2px solid #d5e4d3; border-radius: clamp(15px, 3vw, 23px); background: var(--green); color: #315b3e; font: inherit; font-size: clamp(2.1rem, 9vw, 4.2rem); font-weight: 950; cursor: pointer; box-shadow: 0 4px 0 #c3d8c1; transition: transform .12s ease, background .12s ease, box-shadow .12s ease; -webkit-tap-highlight-color: transparent; }
+    .number-button:hover { background: #d2e6d2; }
+    .number-button:active { transform: translateY(3px) scale(.97); box-shadow: 0 1px 0 #c3d8c1; }
+    .number-button:focus-visible, a:focus-visible { outline: 4px solid #315d8c; outline-offset: 3px; }
+    @media (max-width: 420px) {
+      .page { width: min(100% - 20px, 420px); }
+      header { min-height: 58px; }
+      .brand { font-size: .78rem; }
+      .panel { padding: 20px 15px; border-radius: 21px; }
+      .number-grid { gap: 8px; }
+      .number-button { border-radius: 15px; font-size: clamp(2rem, 12vw, 3.4rem); }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a>
+      <span class="brand">Yuaan’s Playroom</span>
+    </header>
+    <main>
+      <section class="panel" aria-labelledby="title">
+        <p class="eyebrow">Numbers with Yuaan</p>
+        <h1 id="title">Tap a number</h1>
+        <p class="instruction">Choose any number from 1 to 10. Listen to its name.</p>
+        <div class="number-grid" aria-label="Numbers one to ten">
+          <button class="number-button" type="button" data-word="one" aria-label="1, one">1</button>
+          <button class="number-button" type="button" data-word="two" aria-label="2, two">2</button>
+          <button class="number-button" type="button" data-word="three" aria-label="3, three">3</button>
+          <button class="number-button" type="button" data-word="four" aria-label="4, four">4</button>
+          <button class="number-button" type="button" data-word="five" aria-label="5, five">5</button>
+          <button class="number-button" type="button" data-word="six" aria-label="6, six">6</button>
+          <button class="number-button" type="button" data-word="seven" aria-label="7, seven">7</button>
+          <button class="number-button" type="button" data-word="eight" aria-label="8, eight">8</button>
+          <button class="number-button" type="button" data-word="nine" aria-label="9, nine">9</button>
+          <button class="number-button" type="button" data-word="ten" aria-label="10, ten">10</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const numberButtons = document.querySelectorAll('.number-button');
+    const heardNumbers = new Set();
+    let advanceTimer;
+    numberButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        heardNumbers.add(button.textContent.trim());
+        clearTimeout(advanceTimer);
+        if (!('speechSynthesis' in window)) {
+          if (heardNumbers.size === numberButtons.length) advanceTimer = setTimeout(() => { window.location.href = 'number-order.html'; }, 1400);
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const spokenNumber = new SpeechSynthesisUtterance(button.dataset.word);
+        spokenNumber.rate = 0.78;
+        spokenNumber.pitch = 1.1;
+        if (heardNumbers.size === numberButtons.length) spokenNumber.onend = () => { advanceTimer = setTimeout(() => { window.location.href = 'number-order.html'; }, 900); };
+        window.speechSynthesis.speak(spokenNumber);
+      });
+    });
+  </script>
+</body>
+</html>

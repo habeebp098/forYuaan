@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>Trace Numbers | Yuaan’s Playroom</title>
+  <style>
+    :root{color-scheme:light;--ink:#293b4a;--muted:#667682;--paper:#f7f4eb;--card:#fffefa;--green:#dcebdc;--green-ink:#3c684c;--gold:#f3e4bb;--soft:#f4f6ef;font-family:"Avenir Next",Avenir,"Trebuchet MS",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper)}
+    .page{width:min(100% - 28px,760px);min-height:100svh;margin:auto;display:flex;flex-direction:column}
+    header{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .home{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e3dfd3;border-radius:13px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem;font-weight:850}
+    .brand{color:var(--muted);font-size:.88rem;font-weight:800}
+    main{flex:1;display:grid;align-content:center;padding:22px 0 48px}
+    .panel{padding:clamp(18px,4vw,32px);border:1px solid #e6e0cf;border-radius:26px;background:var(--card);box-shadow:0 12px 30px rgba(42,60,65,.05)}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .eyebrow{margin:0;color:var(--green-ink);font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    .progress-label{color:var(--muted);font-size:.84rem;font-weight:800}
+    h1{margin:7px 0 0;font-size:clamp(1.7rem,5vw,2.4rem);letter-spacing:-.05em}
+    .instruction{margin:7px 0 12px;color:var(--muted);font-size:.96rem;line-height:1.45}
+    .stage{position:relative;width:min(100%,380px);margin:0 auto;overflow:hidden;border:1px solid #e4e8dd;border-radius:20px;background:var(--soft);touch-action:none;user-select:none;-webkit-user-select:none}
+    svg{display:block;width:100%;height:auto;aspect-ratio:1;touch-action:none;cursor:crosshair}
+    .guide{fill:none;stroke:#c5d4b7;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1 3}
+    .guide-shadow{fill:none;stroke:#dfe8d8;stroke-width:15;stroke-linecap:round;stroke-linejoin:round}
+    .start-dot{fill:#82a976;stroke:#fff;stroke-width:2}
+    .trace{fill:none;stroke:#527e61;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+    #mask-guides polyline{fill:none;stroke:#fff;stroke-width:18;stroke-linecap:round;stroke-linejoin:round}
+    .feedback{min-height:44px;display:flex;align-items:center;justify-content:center;margin:7px 0 0;color:var(--muted);font-weight:800;text-align:center}.feedback.good{color:var(--green-ink)}
+    .actions{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin-top:4px}
+    .action{min-height:43px;padding:0 14px;border:1px solid #e3dfd3;border-radius:13px;background:white;color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+    .action.next{border:0;background:var(--gold);color:#685522}
+    button:focus-visible,a:focus-visible,svg:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:17px 12px;border-radius:21px}.stage{width:min(100%,340px)}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header><a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a><span class="brand">Yuaan’s Playroom</span></header>
+    <main><section class="panel" aria-labelledby="title">
+      <div class="topline"><p class="eyebrow">Finger tracing</p><span class="progress-label" id="progress-label">1 of 10</span></div>
+      <h1 id="title">Trace the number</h1>
+      <p class="instruction">Follow the dotted path with your finger. Lift and trace again if you need.</p>
+      <div class="stage"><svg id="tracing" viewBox="0 0 100 100" role="img" aria-label="Trace number one" tabindex="0"><defs><mask id="trace-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100"><rect width="100" height="100" fill="#000"></rect><g id="mask-guides"></g></mask></defs><g id="guides"></g><circle class="start-dot" id="start-dot" r="4"></circle><g id="traces" mask="url(#trace-mask)"></g></svg></div>
+      <p class="feedback" id="feedback" aria-live="polite">Trace the dotted number.</p>
+      <div class="actions"><button class="action" id="hear" type="button">🔊 Hear number</button><button class="action" id="clear" type="button">Clear this number</button><button class="action" id="reset" type="button">Start over</button></div>
+    </section></main>
+  </div>
+  <script>
+    (()=>{
+      const data={
+        1:[[[50,17],[50,83]]],
+        2:[[[27,29],[34,20],[47,16],[61,18],[71,27],[73,36],[66,45],[55,54],[43,63],[32,73],[28,82],[73,82]]],
+        3:[[[31,22],[44,17],[58,18],[68,24],[71,32],[66,39],[56,45],[48,49],[60,51],[69,58],[72,66],[68,75],[58,81],[44,82],[31,77]]],
+        4:[[[64,82],[64,18],[27,59],[76,59]]],
+        5:[[[71,19],[35,19],[32,43],[48,41],[61,44],[70,51],[72,61],[68,71],[59,79],[46,82],[33,78],[28,74]]],
+        6:[[[66,20],[54,21],[43,28],[35,39],[30,53],[29,64],[35,75],[46,81],[59,80],[68,73],[72,64],[68,55],[59,50],[47,50],[36,55],[30,63]]],
+        7:[[[27,20],[75,20],[43,82]]],
+        8:[[[50,50],[39,46],[32,39],[31,30],[37,22],[49,18],[61,21],[68,29],[67,38],[60,46],[50,50],[39,54],[32,62],[32,70],[39,78],[50,82],[62,79],[68,71],[67,62],[60,54],[50,50]]],
+        9:[[[64,51],[54,55],[43,55],[34,49],[30,40],[32,30],[39,22],[50,19],[61,22],[68,30],[70,40],[68,54],[64,68],[56,78],[44,82],[34,79]]],
+        10:[[[28,18],[28,82]],[[72,18],[82,22],[88,32],[90,50],[88,68],[82,78],[72,82],[62,78],[56,68],[54,50],[56,32],[62,22],[72,18]]]
+      };
+      const svg=document.getElementById('tracing'),guides=document.getElementById('guides'),maskGuides=document.getElementById('mask-guides'),traces=document.getElementById('traces'),dot=document.getElementById('start-dot'),feedback=document.getElementById('feedback'),label=document.getElementById('progress-label'),hear=document.getElementById('hear');
+      const words=['one','two','three','four','five','six','seven','eight','nine','ten'];let number=1,visited=new Set(),covered=new Set(),samples=[],stroke=null,solved=false,advanceTimer;
+      const ns='http://www.w3.org/2000/svg';
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;speechSynthesis.speak(voice)}
+      function pointString(points){return points.map(([x,y])=>`${x},${y}`).join(' ')}
+      function makeSamples(paths){const result=[];paths.forEach(path=>{for(let i=1;i<path.length;i++){const [x1,y1]=path[i-1],[x2,y2]=path[i];const distance=Math.hypot(x2-x1,y2-y1);const count=Math.max(1,Math.ceil(distance/1.5));for(let n=0;n<=count;n++){const t=n/count;result.push([x1+(x2-x1)*t,y1+(y2-y1)*t])}}});return result}
+      function render(){clearTimeout(advanceTimer);number=Math.min(number,10);solved=false;stroke=null;covered=new Set();traces.replaceChildren();guides.replaceChildren();maskGuides.replaceChildren();const paths=data[number];samples=makeSamples(paths);paths.forEach(points=>{const shadow=document.createElementNS(ns,'polyline');shadow.setAttribute('class','guide-shadow');shadow.setAttribute('points',pointString(points));guides.append(shadow);const guide=document.createElementNS(ns,'polyline');guide.setAttribute('class','guide');guide.setAttribute('points',pointString(points));guides.append(guide);const maskLine=document.createElementNS(ns,'polyline');maskLine.setAttribute('points',pointString(points));maskGuides.append(maskLine)});dot.setAttribute('cx',paths[0][0][0]);dot.setAttribute('cy',paths[0][0][1]);label.textContent=`${number} of 10`;svg.setAttribute('aria-label',`Trace number ${number}`);feedback.className='feedback';feedback.textContent='Start on the dotted path and follow it.';hear.disabled=false}
+      function localPoint(event){const rect=svg.getBoundingClientRect();return[(event.clientX-rect.left)*100/rect.width,(event.clientY-rect.top)*100/rect.height]}
+      function markCovered(point){samples.forEach((sample,index)=>{if(Math.hypot(sample[0]-point[0],sample[1]-point[1])<6.5)covered.add(index)})}
+      function distanceToGuide(point){return Math.min(...samples.map(sample=>Math.hypot(sample[0]-point[0],sample[1]-point[1])))}
+      function markSegment(from,to){const distance=Math.hypot(to[0]-from[0],to[1]-from[1]);const steps=Math.max(1,Math.ceil(distance/.7));for(let i=1;i<=steps;i++){const t=i/steps;markCovered([from[0]+(to[0]-from[0])*t,from[1]+(to[1]-from[1])*t])}}
+      function pointerDown(event){if(solved)return;event.preventDefault();const p=localPoint(event);if(distanceToGuide(p)>12){feedback.textContent='Start on the dotted path.';return}svg.setPointerCapture(event.pointerId);stroke=document.createElementNS(ns,'polyline');stroke.setAttribute('class','trace');stroke.setAttribute('points',pointString([p]));traces.append(stroke);markCovered(p);feedback.textContent='Keep following the dotted path.'}
+      function pointerMove(event){if(!stroke||!svg.hasPointerCapture(event.pointerId))return;const points=stroke.getAttribute('points').split(' ').map(pair=>pair.split(',').map(Number));const point=localPoint(event);markSegment(points[points.length-1],point);points.push(point);stroke.setAttribute('points',pointString(points))}
+      function pointerUp(event){if(!stroke||!svg.hasPointerCapture(event.pointerId))return;const points=stroke.getAttribute('points').split(' ').map(pair=>pair.split(',').map(Number));markSegment(points[points.length-1],localPoint(event));svg.releasePointerCapture(event.pointerId);stroke=null;const ratio=covered.size/samples.length;if(ratio>=.95)finish();else feedback.textContent='Trace every part of the dotted number. You can lift and continue.'}
+      function advance(){if(number===10){window.location.href='number-countdown.html';return}number++;render();speak(`Trace number ${words[number-1]}.`)}
+      function finish(){if(solved)return;solved=true;visited.add(number);hear.disabled=true;feedback.className='feedback good';feedback.textContent=`You traced ${number}!`;speak(`Number ${words[number-1]}. Nice tracing.`,()=>{advanceTimer=setTimeout(advance,1000)})}
+      svg.addEventListener('pointerdown',pointerDown);svg.addEventListener('pointermove',pointerMove);svg.addEventListener('pointerup',pointerUp);svg.addEventListener('pointercancel',()=>{stroke=null;feedback.textContent='Lift and try tracing again.'});
+      hear.addEventListener('click',()=>speak(words[number-1]));
+      document.getElementById('clear').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();render()});
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();number=1;visited.clear();render();speak('Trace number one.')});
+      render();window.addEventListener('load',()=>setTimeout(()=>speak('Trace number one.'),350));
+    })();
+  </script>
+</body>
+</html>

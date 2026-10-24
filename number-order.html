@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>Count the Group | Yuaan’s Playroom</title>
+  <style>
+    :root { color-scheme:light; --ink:#293b4a; --muted:#667682; --paper:#f7f4eb; --card:#fffefa; --green:#dcebdc; --green-ink:#3c684c; --gold:#f3e4bb; --soft:#f4f6ef; font-family:"Avenir Next",Avenir,"Trebuchet MS",system-ui,sans-serif }
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper)}
+    .page{width:min(100% - 28px,760px);min-height:100svh;margin:auto;display:flex;flex-direction:column}
+    header{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .home{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e3dfd3;border-radius:13px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem;font-weight:850}
+    .brand{color:var(--muted);font-size:.88rem;font-weight:800}
+    main{flex:1;display:grid;align-content:center;padding:22px 0 48px}
+    .panel{padding:clamp(18px,4vw,32px);border:1px solid #e6e0cf;border-radius:26px;background:var(--card);box-shadow:0 12px 30px rgba(42,60,65,.05)}
+    .eyebrow{margin:0 0 7px;color:var(--green-ink);font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(1.7rem,5vw,2.45rem);letter-spacing:-.05em}
+    .instruction{margin:7px 0 16px;color:var(--muted);font-size:.97rem;line-height:1.45}
+    .status{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px;color:var(--muted);font-size:.88rem;font-weight:850}
+    .say{min-height:40px;padding:0 12px;border:1px solid #d9dfcb;border-radius:12px;background:#f3f5eb;color:#4c6443;font:inherit;font-weight:850;cursor:pointer}
+    .scene{min-height:170px;display:flex;align-content:center;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;padding:17px;border-radius:19px;background:var(--soft)}
+    .thing{width:clamp(42px,9vw,62px);height:clamp(42px,9vw,62px);display:grid;place-items:center;border-radius:16px;background:white;box-shadow:0 3px 0 #e5e9de;font-size:clamp(1.8rem,6vw,2.6rem)}
+    .question{margin:17px 0 5px;text-align:center;font-size:1.1rem;font-weight:900}
+    .choice-instruction{margin:0 0 11px;color:var(--muted);font-size:.93rem;font-weight:700;text-align:center}
+    .choices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+    .choice{min-height:58px;border:2px solid #d5e4d3;border-radius:16px;background:var(--green);color:#315b3e;font:inherit;font-size:1.7rem;font-weight:950;cursor:pointer;box-shadow:0 4px 0 #c3d8c1;transition:transform .12s,background .12s}
+    .choice:hover{background:#d2e6d2}.choice:active{transform:translateY(3px)}.choice:disabled{cursor:default;opacity:.8}
+    .feedback{min-height:48px;display:flex;align-items:center;justify-content:center;margin:9px 0 0;color:var(--muted);font-weight:800;text-align:center}
+    .feedback.good{color:var(--green-ink)}.feedback.try{color:#876b32}
+    .next{display:block;min-height:49px;margin:0 auto;padding:0 18px;border:0;border-radius:14px;background:var(--gold);color:#685522;font:inherit;font-weight:900;cursor:pointer}
+    .next[hidden]{display:none}
+    .reset{display:block;min-height:42px;margin:12px auto 0;padding:0 15px;border:1px solid #e3dfd3;border-radius:13px;background:#fff;color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+    button:focus-visible,a:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:18px 13px;border-radius:21px}.scene{min-height:145px;gap:7px;padding:12px}.thing{border-radius:13px}.choices{gap:6px}.choice{min-height:52px;border-radius:13px;font-size:1.5rem}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header><a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a><span class="brand">Yuaan’s Playroom</span></header>
+    <main><section class="panel" aria-labelledby="title">
+      <p class="eyebrow">Counting game</p>
+      <h1 id="title">How many can you count?</h1>
+      <p class="instruction">First tap each apple and count aloud. Then tap the number that tells how many apples you counted.</p>
+      <div class="status"><span id="round">Round 1</span><button class="say" id="hear" type="button">🔊 Hear the question</button></div>
+      <div class="scene" id="scene" aria-label="Count the objects"></div>
+      <p class="question" id="question">How many apples did you count?</p>
+      <p class="choice-instruction">Now tap that number.</p>
+      <div class="choices" id="choices" aria-label="Choose how many objects"></div>
+      <p class="feedback" id="feedback" aria-live="polite">Count each one, then tap your answer.</p>
+      <button class="reset" id="reset" type="button">Start over</button>
+    </section></main>
+  </div>
+  <script>
+    (() => {
+      const rounds=[
+        {n:2,icon:'🍎',name:'apples',one:'apple'}, {n:4,icon:'🐠',name:'fish',one:'fish'},
+        {n:1,icon:'🧸',name:'teddy bears',one:'teddy bear'}, {n:5,icon:'⭐',name:'stars',one:'star'},
+        {n:3,icon:'🍓',name:'strawberries',one:'strawberry'}, {n:7,icon:'🦋',name:'butterflies',one:'butterfly'},
+        {n:6,icon:'🚗',name:'cars',one:'car'}, {n:8,icon:'🐥',name:'chicks',one:'chick'},
+        {n:9,icon:'🍪',name:'cookies',one:'cookie'}, {n:10,icon:'🪁',name:'kites',one:'kite'}
+      ];
+      const scene=document.getElementById('scene'), choices=document.getElementById('choices');
+      const question=document.getElementById('question'), feedback=document.getElementById('feedback');
+      const roundLabel=document.getElementById('round');
+      const hearButton=document.getElementById('hear');
+      let round=0, answered=false, countingIndex=0, hasStarted=false, advanceTimer;
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return} speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;speechSynthesis.speak(u)}
+      function loadRound(){
+        clearTimeout(advanceTimer); hearButton.disabled=false; const item=rounds[round]; answered=false; countingIndex=0; scene.replaceChildren(); choices.replaceChildren();
+        roundLabel.textContent=`Group ${round+1} of ${rounds.length}`;
+        question.textContent=`How many ${item.name} did you count?`;
+        scene.setAttribute('aria-label',`${item.n} ${item.name}`);
+        for(let i=0;i<item.n;i++){const thing=document.createElement('button');thing.type='button';thing.className='thing';thing.textContent=item.icon;thing.setAttribute('aria-label',`Count ${i+1} of ${item.name}`);thing.addEventListener('click',()=>{if(thing.classList.contains('counted'))return;thing.classList.add('counted');thing.style.outline='3px solid #9fbe9d';countingIndex++;feedback.textContent=`You counted ${countingIndex}.`;if(countingIndex===item.n)speak(String(countingIndex),askForNumber);else speak(String(countingIndex))});scene.append(thing)}
+        for(let n=1;n<=10;n++){const b=document.createElement('button');b.type='button';b.className='choice';b.textContent=n;b.setAttribute('aria-label',String(n));b.addEventListener('click',()=>answer(n));choices.append(b)}
+        feedback.className='feedback';feedback.textContent='Count each one, then tap your answer.';
+      }
+      function advance(){if(round===rounds.length-1){window.location.href='number-sequence.html';return}round++;loadRound();speak(`Touch each ${rounds[round].one} to count.`)}
+      function askForNumber(){const item=rounds[round];feedback.className='feedback';feedback.textContent='Now choose the number that tells how many.';speak(`Now touch the number that tells how many ${item.name}.`)}
+      function answer(n){if(answered)return;const item=rounds[round];if(countingIndex<item.n){feedback.className='feedback try';feedback.textContent='Touch each picture to count it first.';speak(`Touch each ${item.one} to count.`);return}if(n===item.n){answered=true;hearButton.disabled=true;feedback.className='feedback good';feedback.textContent=`That’s right! You counted ${item.n}.`;for(const b of choices.children)b.disabled=true;speak(`That’s right. You counted ${item.n} ${item.name}.`,()=>{advanceTimer=setTimeout(advance,1100)})}else{feedback.className='feedback try';feedback.textContent='Count the taps you made, then choose that number.';speak('Count the taps you made, then choose that number.')}}
+      document.getElementById('hear').addEventListener('click',()=>{const item=rounds[round];if(countingIndex<item.n)speak(`Touch each ${item.one} to count.`);else askForNumber()});
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();round=0;loadRound();speak(`Touch each apple to count.`)});
+      loadRound();
+      window.addEventListener('load',()=>{if(hasStarted)return;hasStarted=true;setTimeout(()=>speak(`Touch each apple to count.`),350)});
+    })();
+  </script>
+</body>
+</html>

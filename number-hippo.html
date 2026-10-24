@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f4eb">
+  <title>Feed the Hippo | Yuaan’s Playroom</title>
+  <style>
+    :root{color-scheme:light;--ink:#293b4a;--muted:#667682;--paper:#f7f4eb;--card:#fffefa;--green:#dcebdc;--green-ink:#3c684c;--gold:#f3e4bb;--soft:#f4f6ef;--pink:#f5e2e1;font-family:"Avenir Next",Avenir,"Trebuchet MS",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--ink);background:var(--paper)}
+    .page{width:min(100% - 28px,760px);min-height:100svh;margin:auto;display:flex;flex-direction:column}
+    header{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .home{min-height:42px;display:inline-flex;align-items:center;gap:8px;padding:0 13px;border:1px solid #e3dfd3;border-radius:13px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.92rem;font-weight:850}
+    .brand{color:var(--muted);font-size:.88rem;font-weight:800}
+    main{flex:1;display:grid;align-content:center;padding:22px 0 48px}
+    .panel{padding:clamp(18px,4vw,32px);border:1px solid #e6e0cf;border-radius:26px;background:var(--card);box-shadow:0 12px 30px rgba(42,60,65,.05)}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .eyebrow{margin:0;color:var(--green-ink);font-size:.76rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    .round{color:var(--muted);font-size:.83rem;font-weight:800}
+    h1{margin:7px 0 0;font-size:clamp(1.7rem,5vw,2.45rem);letter-spacing:-.05em}
+    .instruction{margin:7px 0 14px;color:var(--muted);font-size:.97rem;line-height:1.45}
+    .task{display:flex;align-items:center;justify-content:center;gap:11px;min-height:59px;margin-bottom:11px;padding:9px;border-radius:15px;background:#f3f5eb;text-align:center}
+    .target{color:#806a36;font-size:2.2rem;font-weight:950}.task-text{font-size:1rem;font-weight:900}
+    .play-area{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .zone{min-width:0;min-height:170px;padding:11px;border:2px solid #e4e8dd;border-radius:18px;background:var(--soft)}
+    .zone-title{display:block;margin-bottom:7px;color:var(--muted);font-size:.82rem;font-weight:850;text-align:center}
+    .food-tray{min-height:125px;display:flex;flex-wrap:wrap;align-content:center;align-items:center;justify-content:center;gap:8px}
+    .food{width:clamp(42px,8vw,56px);height:clamp(42px,8vw,56px);display:grid;place-items:center;border:1px solid #e3e8df;border-radius:15px;background:#fff;font-size:clamp(1.8rem,5vw,2.25rem);box-shadow:0 3px 0 #e5e9e1;touch-action:none;user-select:none;cursor:grab;-webkit-user-select:none}
+    .food:active{cursor:grabbing}.food.used{visibility:hidden;pointer-events:none}
+    .mouth{min-height:125px;display:flex;flex-wrap:wrap;align-content:center;align-items:center;justify-content:center;gap:7px;padding:9px;border:3px dashed #d5adaa;border-radius:18px;background:var(--pink);font-size:1.05rem;font-weight:850;text-align:center;transition:background .15s,border-color .15s}
+    .mouth.ready{background:#f7e9e7;border-color:#ba8580}.mouth .fed{font-size:clamp(1.7rem,5vw,2.2rem)}
+    .hippo{margin:4px 0 8px;text-align:center;font-size:clamp(3.1rem,11vw,5rem);line-height:1}
+    .count{min-height:28px;margin:10px 0 0;color:var(--green-ink);font-size:.94rem;font-weight:900;text-align:center}
+    .feedback{min-height:42px;display:flex;align-items:center;justify-content:center;margin:5px 0 0;color:var(--muted);font-weight:800;text-align:center}.feedback.good{color:var(--green-ink)}
+    .actions{display:flex;justify-content:center;gap:9px;margin-top:4px}
+    .action{min-height:43px;padding:0 14px;border:1px solid #e3dfd3;border-radius:13px;background:white;color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+    .action:disabled{opacity:.55;cursor:default}.ghost{position:fixed;z-index:10;pointer-events:none;display:grid;place-items:center;width:54px;height:54px;border-radius:15px;background:#fff;font-size:2rem;box-shadow:0 8px 22px #293b4a33;transform:translate(-50%,-50%)}
+    a:focus-visible,button:focus-visible{outline:4px solid #315d8c;outline-offset:3px}
+    @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:17px 12px;border-radius:21px}.zone{min-height:150px;padding:8px}.food-tray,.mouth{min-height:108px;gap:5px}.food{border-radius:12px}.mouth{padding:6px;font-size:.88rem}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header><a class="home" href="index.html" aria-label="Back to Yuaan’s Playroom">← <span>Home</span></a><span class="brand">Yuaan’s Playroom</span></header>
+    <main><section class="panel" aria-labelledby="title">
+      <div class="topline"><p class="eyebrow">Drag and count</p><span class="round" id="round">1 of 10</span></div>
+      <h1 id="title">Feed the hippo</h1>
+      <p class="instruction">Drag the food into the hippo’s mouth. Count each piece as you feed him.</p>
+      <div class="task" aria-live="polite"><span class="target" id="target">1</span><span class="task-text" id="task-text">Feed 1 apple</span></div>
+      <div class="hippo" aria-hidden="true" id="hippo">🦛</div>
+      <div class="play-area">
+        <section class="zone" aria-label="Food to drag"><span class="zone-title">Food</span><div class="food-tray" id="tray"></div></section>
+        <section class="zone" aria-label="Hippo’s mouth"><span class="zone-title">Hippo’s mouth</span><div class="mouth" id="mouth" aria-label="Drop food here">Drop food here</div></section>
+      </div>
+      <p class="count" id="count" aria-live="polite">Fed: 0</p>
+      <p class="feedback" id="feedback" aria-live="polite">Drag one piece of food into the mouth.</p>
+      <div class="actions"><button class="action" id="hear" type="button">🔊 Hear amount</button><button class="action" id="reset" type="button">Start over</button></div>
+    </section></main>
+  </div>
+  <script>
+    (()=>{
+      const rounds=[
+        {n:1,icon:'🍎',one:'apple',many:'apples'}, {n:2,icon:'🍌',one:'banana',many:'bananas'},
+        {n:3,icon:'🍐',one:'pear',many:'pears'}, {n:4,icon:'🥕',one:'carrot',many:'carrots'},
+        {n:5,icon:'🍎',one:'apple',many:'apples'}, {n:6,icon:'🍌',one:'banana',many:'bananas'},
+        {n:7,icon:'🍐',one:'pear',many:'pears'}, {n:8,icon:'🥕',one:'carrot',many:'carrots'},
+        {n:9,icon:'🍎',one:'apple',many:'apples'}, {n:10,icon:'🍌',one:'banana',many:'bananas'}
+      ];
+      const words=['one','two','three','four','five','six','seven','eight','nine','ten'];
+      const tray=document.getElementById('tray'),mouth=document.getElementById('mouth'),target=document.getElementById('target'),taskText=document.getElementById('task-text'),count=document.getElementById('count'),feedback=document.getElementById('feedback'),hear=document.getElementById('hear'),hippo=document.getElementById('hippo'),roundLabel=document.getElementById('round');
+      let index=0,fed=0,drag=null,advanceTimer;
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;speechSynthesis.speak(voice)}
+      function sayAmount(){const item=rounds[index];speak(`Feed the hippo ${words[item.n-1]} ${item.n===1?item.one:item.many}.`)}
+      function render(){clearTimeout(advanceTimer);const item=rounds[index];fed=0;target.textContent=item.n;taskText.textContent=`Feed ${item.n} ${item.n===1?item.one:item.many}`;roundLabel.textContent=`${index+1} of ${rounds.length}`;tray.replaceChildren();mouth.replaceChildren();mouth.textContent='Drop food here';mouth.classList.remove('ready');hippo.textContent='🦛';count.textContent='Fed: 0';feedback.className='feedback';feedback.textContent='Drag one piece of food into the mouth.';hear.disabled=false;for(let n=0;n<10;n++){const food=document.createElement('button');food.type='button';food.className='food';food.textContent=item.icon;food.setAttribute('aria-label',`Drag a ${item.one}`);food.addEventListener('pointerdown',event=>startDrag(event,food,item));food.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();feed(food,item)}});tray.append(food)}}
+      function startDrag(event,food,item){if(food.classList.contains('used')||fed>=item.n)return;event.preventDefault();food.setPointerCapture(event.pointerId);drag={pointerId:event.pointerId,food,item,ghost:document.createElement('span')};drag.ghost.className='ghost';drag.ghost.textContent=item.icon;document.body.append(drag.ghost);moveGhost(event);mouth.classList.add('ready');feedback.textContent='Keep dragging the food into the mouth.'}
+      function moveGhost(event){if(!drag||event.pointerId!==drag.pointerId)return;drag.ghost.style.left=`${event.clientX}px`;drag.ghost.style.top=`${event.clientY}px`}
+      function endDrag(event){if(!drag||event.pointerId!==drag.pointerId)return;const rect=mouth.getBoundingClientRect();const dropped=event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;const current=drag;current.ghost.remove();drag=null;mouth.classList.remove('ready');if(dropped)feed(current.food,current.item);else feedback.textContent='Try dragging the food into the hippo’s mouth.'}
+      function feed(food,item){if(food.classList.contains('used')||fed>=item.n)return;food.classList.add('used');const piece=document.createElement('span');piece.className='fed';piece.setAttribute('aria-hidden','true');piece.textContent=item.icon;if(fed===0)mouth.replaceChildren();mouth.append(piece);fed++;count.textContent=`Fed: ${fed}`;if(fed===item.n){hear.disabled=true;hippo.textContent='😋🦛';feedback.className='feedback good';feedback.textContent=`The hippo ate ${item.n} ${item.n===1?item.one:item.many}!`;speak(`The hippo ate ${words[item.n-1]} ${item.n===1?item.one:item.many}.`,()=>{advanceTimer=setTimeout(()=>{if(index===rounds.length-1){window.location.href='number-trace.html';return}index++;render();sayAmount()},1200)})}else{speak(String(fed))}}
+      window.addEventListener('pointermove',moveGhost);window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',event=>{if(drag&&event.pointerId===drag.pointerId){drag.ghost.remove();drag=null;mouth.classList.remove('ready')}});
+      hear.addEventListener('click',sayAmount);
+      document.getElementById('reset').addEventListener('click',()=>{clearTimeout(advanceTimer);if('speechSynthesis'in window)speechSynthesis.cancel();if(drag){drag.ghost.remove();drag=null}index=0;render();sayAmount()});
+      render();window.addEventListener('load',()=>setTimeout(sayAmount,350));
+    })();
+  </script>
+</body>
+</html>
