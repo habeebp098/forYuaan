@@ -71,21 +71,15 @@
   </div>
   <script>
     const numberButtons = document.querySelectorAll('.number-button');
-    const heardNumbers = new Set();
-    let advanceTimer;
     numberButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        heardNumbers.add(button.textContent.trim());
-        clearTimeout(advanceTimer);
         if (!('speechSynthesis' in window)) {
-          if (heardNumbers.size === numberButtons.length) advanceTimer = setTimeout(() => { window.location.href = 'number-order.html'; }, 1400);
           return;
         }
         window.speechSynthesis.cancel();
         const spokenNumber = new SpeechSynthesisUtterance(button.dataset.word);
         spokenNumber.rate = 0.78;
         spokenNumber.pitch = 1.1;
-        if (heardNumbers.size === numberButtons.length) spokenNumber.onend = () => { advanceTimer = setTimeout(() => { window.location.href = 'number-order.html'; }, 900); };
         window.speechSynthesis.speak(spokenNumber);
       });
     });
