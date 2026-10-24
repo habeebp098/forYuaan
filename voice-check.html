@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check voice | Yuaan’s Playroom</title>
+<style>body{max-width:620px;margin:40px auto;padding:20px;font:18px/1.5 system-ui;background:#f7f4eb;color:#293b4a}button{display:block;min-height:48px;width:100%;margin:14px 0;padding:12px;border:1px solid #acbfa3;border-radius:12px;background:#e7f0e2;color:inherit;font:inherit}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.5 monospace;padding:16px;background:white;border-radius:12px}h1{font-size:1.6rem}a{color:inherit}</style>
+<script src="speech.js?v=1"></script>
+</head>
+<body>
+<a href="index.html">← Home</a><h1>Check voice on this Mac</h1>
+<p>Try each button and listen for “Hello, Yuaan.” This page helps identify why Chrome is silent.</p>
+<button id="default">1. Try Chrome’s default voice</button>
+<button id="samantha">2. Try Samantha directly</button>
+<button id="updated">3. Try the updated speech handler</button>
+<pre id="result" role="status" aria-live="polite">Ready.</pre>
+<script>
+(() => {
+  const result=document.getElementById('result');
+  let held=null, timer=null, generation=0;
+  const synth=window.speechSynthesis;
+  function voices(){return synth ? synth.getVoices() : []}
+  function test(mode){
+    generation++; const run=generation;
+    clearTimeout(timer);YuaanSpeech.cancel();
+    if(!synth){result.textContent='Speech synthesis is unavailable in this browser.';return}
+    const list=voices(), samantha=list.find(v=>/Samantha/i.test(v.name));
+    const u=new SpeechSynthesisUtterance('Hello, Yuaan. Let’s count together.');
+    held=u;u.rate=.78;u.pitch=1.08;
+    if(mode==='samantha'){
+      if(!samantha){result.textContent=`Chrome does not list Samantha. Available voices: ${list.length}.\nEnglish voices: ${list.filter(v=>/^en/i.test(v.lang)).map(v=>v.name).join(', ') || 'none'}`;return}
+      u.voice=samantha;u.lang=samantha.lang;
+    }
+    const write=text=>{if(run===generation)result.textContent=text};
+    const info=`Test: ${mode}\nAvailable voices: ${list.length}\nSamantha listed: ${!!samantha}\n`;
+    write(info+'Waiting for Chrome to start speech…');
+    u.onstart=()=>{clearTimeout(timer);write(info+'Chrome reported speech started. Did you hear the voice?')};
+    u.onend=()=>{clearTimeout(timer);write(info+'Chrome reported speech finished. Did you hear the voice?')};
+    u.onerror=e=>{clearTimeout(timer);write(info+'Speech error: '+e.error)};
+    timer=setTimeout(()=>write(info+'No speech-start event received.\nPaused: '+synth.paused+'; speaking: '+synth.speaking+'; pending: '+synth.pending),10000);
+    if(mode==='updated')YuaanSpeech.speak(u);
+    else {try{synth.speak(u)}catch(e){write(info+'Error: '+e.message)}}
+  }
+  voices();
+  for(const mode of ['default','samantha','updated'])document.getElementById(mode).addEventListener('click',()=>test(mode));
+  window.addEventListener('pagehide',()=>{generation++;clearTimeout(timer);held=null});
+})();
+</script>
+</body></html>
