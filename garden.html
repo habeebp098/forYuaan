@@ -21,6 +21,7 @@
         
         #status-text { position: absolute; top: 120px; font-size: 2rem; font-weight: bold; color: #00695c; text-align: center; width: 100%; }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls"><a href="index.html" class="btn">🏠 Home</a><div>Seed Garden</div><button class="btn" onclick="reset()">🔄 Replant</button></div>
@@ -44,7 +45,7 @@
         let step = 0; 
         // Steps: 0 = start, 1 = hole dug, 2 = seed planted, 3 = watered, 4 = sun/grown
 
-        function speak(text) { try { window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; window.speechSynthesis.speak(u); } catch(e){} }
+        function speak(text) { try { YuaanSpeech.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; YuaanSpeech.speak(u); } catch(e){} }
 
         function useTool(tool) {
             const spot = document.getElementById('plant-spot');

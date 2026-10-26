@@ -35,6 +35,7 @@
     @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:18px 13px;border-radius:21px}.scene{min-height:145px;gap:7px;padding:12px}.thing{border-radius:13px}.choices{gap:6px}.choice{min-height:52px;border-radius:13px;font-size:1.5rem}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
   </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
   <div class="page">
@@ -66,7 +67,7 @@
       const roundLabel=document.getElementById('round');
       const hearButton=document.getElementById('hear');
       let round=0, answered=false, countingIndex=0, hasStarted=false, advanceTimer;
-      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return} speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;speechSynthesis.speak(u)}
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return} YuaanSpeech.cancel(); const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;YuaanSpeech.speak(u)}
       function loadRound(){
         clearTimeout(advanceTimer); hearButton.disabled=false; const item=rounds[round]; answered=false; countingIndex=0; scene.replaceChildren(); choices.replaceChildren();
         roundLabel.textContent=`Group ${round+1} of ${rounds.length}`;
@@ -80,7 +81,7 @@
       function askForNumber(){const item=rounds[round];feedback.className='feedback';feedback.textContent='Now choose the number that tells how many.';speak(`Now touch the number that tells how many ${item.name}.`)}
       function answer(n){if(answered)return;const item=rounds[round];if(countingIndex<item.n){feedback.className='feedback try';feedback.textContent='Touch each picture to count it first.';speak(`Touch each ${item.one} to count.`);return}if(n===item.n){answered=true;hearButton.disabled=true;feedback.className='feedback good';feedback.textContent=`That’s right! You counted ${item.n}.`;for(const b of choices.children)b.disabled=true;speak(`That’s right. You counted ${item.n} ${item.name}.`,()=>{advanceTimer=setTimeout(advance,1100)})}else{feedback.className='feedback try';feedback.textContent='Count the taps you made, then choose that number.';speak('Count the taps you made, then choose that number.')}}
       document.getElementById('hear').addEventListener('click',()=>{const item=rounds[round];if(countingIndex<item.n)speak(`Touch each ${item.one} to count.`);else askForNumber()});
-      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();round=0;loadRound();speak(`Touch each apple to count.`)});
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)YuaanSpeech.cancel();round=0;loadRound();speak(`Touch each apple to count.`)});
       loadRound();
       window.addEventListener('load',()=>{if(hasStarted)return;hasStarted=true;setTimeout(()=>speak(`Touch each apple to count.`),350)});
     })();

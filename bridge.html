@@ -26,6 +26,7 @@
         
         #status-text { position: absolute; top: 20px; width: 100%; text-align: center; font-size: 2rem; font-weight: bold; color: #2c3e50; }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls"><a href="index.html" class="btn">🏠 Home</a><div>Bridge Builder</div><button class="btn" onclick="reset()">🔄 Reset</button></div>
@@ -52,7 +53,7 @@
     <script>
         let bridgeBuilt = false;
 
-        function speak(text) { try { window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; window.speechSynthesis.speak(u); } catch(e){} }
+        function speak(text) { try { YuaanSpeech.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; YuaanSpeech.speak(u); } catch(e){} }
 
         function tryPiece(type) {
             if (bridgeBuilt) return;

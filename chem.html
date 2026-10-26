@@ -20,6 +20,7 @@
         .drop:hover { transform: rotate(45deg) scale(1.1); box-shadow: 8px 8px 20px rgba(0,0,0,0.15); } .drop:active { transform: rotate(45deg) scale(0.9); }
         #drop-red { background-color: #ff5252; } #drop-yellow { background-color: #ffda79; } #drop-blue { background-color: #34ace0; }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls">
@@ -39,7 +40,7 @@
         const mixResults = { "red": { hex: "#ff5252", item: "🍎", phrase: "Red! Like an apple!" }, "yellow": { hex: "#ffda79", item: "☀️", phrase: "Yellow! Like the sun!" }, "blue": { hex: "#34ace0", item: "🐳", phrase: "Blue! Like a whale!" }, "red-yellow": { hex: "#ffb142", item: "🍊", phrase: "Orange! Like an orange!" }, "blue-yellow": { hex: "#33d9b2", item: "🐸", phrase: "Green! Like a frog!" }, "blue-red": { hex: "#706fd3", item: "🍇", phrase: "Purple! Like grapes!" }, "blue-red-yellow": { hex: "#84817a", item: "🐻", phrase: "Brown! Like a bear!" }, "clean": { hex: "#ecf0f1", item: "✨", phrase: "All clean!" } };
         
         let audioCtx; function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
-        function speak(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance); } }
+        function speak(text) { if ('speechSynthesis' in window) { YuaanSpeech.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.9; utterance.pitch = 1.2; YuaanSpeech.speak(utterance); } }
         function playSplash() {
             const ctx = getAudio(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
             osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3); gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);

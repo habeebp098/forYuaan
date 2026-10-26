@@ -55,6 +55,7 @@
   .num-emoji { font-size: 1.5rem; }
   .colors { --c1:#ff6b6b;--c2:#feca57;--c3:#48dbfb;--c4:#ff9ff3;--c5:#2ed573;--c6:#f9ca24;--c7:#6c5ce7;--c8:#fd79a8;--c9:#00cec9;--c10:#e17055; }
 </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
 <header>
@@ -101,21 +102,21 @@ nums.forEach((item, i) => {
 
 function countUp(n, word) {
   if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
+  YuaanSpeech.cancel();
   let i = 1;
   function sayNext() {
     if (i > n) {
       setTimeout(()=>{
         const u = new SpeechSynthesisUtterance(`${n}! ${word}! Great job Yuaan!`);
         u.rate = 0.85; u.pitch = 1.4;
-        speechSynthesis.speak(u);
+        YuaanSpeech.speak(u);
       }, 300);
       return;
     }
     const u = new SpeechSynthesisUtterance(String(i));
     u.rate = 0.8; u.pitch = 1.3;
     u.onend = () => { i++; setTimeout(sayNext, 150); };
-    speechSynthesis.speak(u);
+    YuaanSpeech.speak(u);
   }
   sayNext();
 }

@@ -37,6 +37,7 @@
         .apple:hover { transform: scale(1.1) rotate(-10deg); }
         #hippo { font-size: clamp(8rem, 30vw, 12rem); user-select: none; filter: drop-shadow(0 15px 10px rgba(0,0,0,0.2)); position: relative; z-index: 20; }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls">
@@ -54,7 +55,7 @@
         let audioCtx;
         function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
         function speak(text) {
-            if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance); }
+            if ('speechSynthesis' in window) { YuaanSpeech.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.9; utterance.pitch = 1.2; YuaanSpeech.speak(utterance); }
         }
         function playSound(type) {
             const ctx = getAudio(); const osc = ctx.createOscillator(); const gain = ctx.createGain();

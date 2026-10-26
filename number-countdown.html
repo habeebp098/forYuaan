@@ -29,6 +29,7 @@
     @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:17px 12px;border-radius:21px}.sky{min-height:142px}.rocket{font-size:4.4rem}.rail-number{font-size:.8rem}.rocket-handle{width:42px;height:42px;font-size:1.6rem}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
   </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
   <div class="page">
@@ -51,7 +52,7 @@
       let current=10,startX=0,dragging=false,finished=false;
       for(let value=10;value>=0;value--){const mark=document.createElement('span');mark.className='rail-number';mark.textContent=value;rail.append(mark)}
       handle.type='button';handle.className='rocket-handle';handle.setAttribute('aria-label','Drag rocket one step forward');handle.setAttribute('aria-valuemin','0');handle.setAttribute('aria-valuemax','10');handle.setAttribute('aria-valuenow','10');rail.append(handle);
-      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;speechSynthesis.speak(voice)}
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}YuaanSpeech.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;YuaanSpeech.speak(voice)}
       function place(){const progress=10-current;handle.style.left=`${(progress+.5)*100/11}%`;countdown.textContent=current;step.textContent=current===0?'Ready for launch!':`${current} to go`;handle.setAttribute('aria-valuenow',String(current));handle.setAttribute('aria-label',current===0?'Countdown complete':'Drag rocket right to count down')}
       function moveOne(){if(finished)return;if(current>0){current--;place();if(current===0){finished=true;feedback.className='feedback good';feedback.textContent='Zero! Blast off!';speak('Zero. Blast off, Yuaan!',()=>{rocket.classList.add('launch');feedback.textContent='Blast off, Yuaan! You finished the countdown!'})}else{feedback.textContent='Keep counting backward.';speak(words[current])}}}
       handle.addEventListener('pointerdown',event=>{if(finished)return;event.preventDefault();startX=event.clientX;dragging=true;handle.setPointerCapture(event.pointerId)});
@@ -59,7 +60,7 @@
       handle.addEventListener('pointercancel',()=>{dragging=false});
       handle.addEventListener('keydown',event=>{if(event.key==='ArrowRight'){event.preventDefault();moveOne()}});
       document.getElementById('hear').addEventListener('click',()=>speak(words[current]));
-      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();current=10;finished=false;dragging=false;rocket.classList.remove('launch');feedback.className='feedback';feedback.textContent='Drag the rocket one step to count down.';place();speak('Start at ten.')});
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)YuaanSpeech.cancel();current=10;finished=false;dragging=false;rocket.classList.remove('launch');feedback.className='feedback';feedback.textContent='Drag the rocket one step to count down.';place();speak('Start at ten.')});
       place();window.addEventListener('load',()=>setTimeout(()=>speak('Start at ten. Drag the rocket right one step.'),350));
     })();
   </script>

@@ -34,6 +34,7 @@
     @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:17px 12px;border-radius:21px}.stage{width:min(100%,340px)}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
   </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
   <div class="page">
@@ -64,7 +65,7 @@
       const svg=document.getElementById('tracing'),guides=document.getElementById('guides'),maskGuides=document.getElementById('mask-guides'),traces=document.getElementById('traces'),dot=document.getElementById('start-dot'),feedback=document.getElementById('feedback'),label=document.getElementById('progress-label'),hear=document.getElementById('hear');
       const words=['one','two','three','four','five','six','seven','eight','nine','ten'];let number=1,visited=new Set(),covered=new Set(),samples=[],stroke=null,solved=false,advanceTimer;
       const ns='http://www.w3.org/2000/svg';
-      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;speechSynthesis.speak(voice)}
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}YuaanSpeech.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;YuaanSpeech.speak(voice)}
       function pointString(points){return points.map(([x,y])=>`${x},${y}`).join(' ')}
       function makeSamples(paths){const result=[];paths.forEach(path=>{for(let i=1;i<path.length;i++){const [x1,y1]=path[i-1],[x2,y2]=path[i];const distance=Math.hypot(x2-x1,y2-y1);const count=Math.max(1,Math.ceil(distance/1.5));for(let n=0;n<=count;n++){const t=n/count;result.push([x1+(x2-x1)*t,y1+(y2-y1)*t])}}});return result}
       function render(){clearTimeout(advanceTimer);number=Math.min(number,10);solved=false;stroke=null;covered=new Set();traces.replaceChildren();guides.replaceChildren();maskGuides.replaceChildren();const paths=data[number];samples=makeSamples(paths);paths.forEach(points=>{const shadow=document.createElementNS(ns,'polyline');shadow.setAttribute('class','guide-shadow');shadow.setAttribute('points',pointString(points));guides.append(shadow);const guide=document.createElementNS(ns,'polyline');guide.setAttribute('class','guide');guide.setAttribute('points',pointString(points));guides.append(guide);const maskLine=document.createElementNS(ns,'polyline');maskLine.setAttribute('points',pointString(points));maskGuides.append(maskLine)});dot.setAttribute('cx',paths[0][0][0]);dot.setAttribute('cy',paths[0][0][1]);label.textContent=`${number} of 10`;svg.setAttribute('aria-label',`Trace number ${number}`);feedback.className='feedback';feedback.textContent='Start on the dotted path and follow it.';hear.disabled=false}
@@ -79,8 +80,8 @@
       function finish(){if(solved)return;solved=true;visited.add(number);hear.disabled=true;feedback.className='feedback good';feedback.textContent=`You traced ${number}!`;speak(`Number ${words[number-1]}. Nice tracing.`,()=>{advanceTimer=setTimeout(advance,1000)})}
       svg.addEventListener('pointerdown',pointerDown);svg.addEventListener('pointermove',pointerMove);svg.addEventListener('pointerup',pointerUp);svg.addEventListener('pointercancel',()=>{stroke=null;feedback.textContent='Lift and try tracing again.'});
       hear.addEventListener('click',()=>speak(words[number-1]));
-      document.getElementById('clear').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();render()});
-      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();number=1;visited.clear();render();speak('Trace number one.')});
+      document.getElementById('clear').addEventListener('click',()=>{if('speechSynthesis'in window)YuaanSpeech.cancel();render()});
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)YuaanSpeech.cancel();number=1;visited.clear();render();speak('Trace number one.')});
       render();window.addEventListener('load',()=>setTimeout(()=>speak('Trace number one.'),350));
     })();
   </script>

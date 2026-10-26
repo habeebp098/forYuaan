@@ -33,6 +33,7 @@
     @media(max-width:420px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:20px 15px;border-radius:21px}.sequence{gap:7px;padding:10px}.sequence span{border-radius:12px}.choices{gap:8px}.choice{min-height:58px;border-radius:14px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
   </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
   <div class="page">
@@ -63,7 +64,7 @@
       const sequence=document.getElementById('sequence'),choices=document.getElementById('choices');
       const feedback=document.getElementById('feedback'),roundLabel=document.getElementById('round'),repeatButton=document.getElementById('repeat');
       const words=['one','two','three','four','five','six','seven','eight','nine','ten'];let index=0,solved=false,advanceTimer;
-      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;speechSynthesis.speak(u)}
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}YuaanSpeech.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;YuaanSpeech.speak(u)}
       function sayQuestion(){speak(`Look at the numbers. ${rounds[index].shown.join(', ')}. What comes next?`)}
       function render(){clearTimeout(advanceTimer);repeatButton.disabled=false;const r=rounds[index];solved=false;sequence.replaceChildren();r.shown.forEach(n=>{const s=document.createElement('span');s.textContent=n;sequence.append(s)});const gap=document.createElement('span');gap.className='missing';gap.setAttribute('aria-label','empty place for the next number');sequence.append(gap);choices.replaceChildren();r.options.forEach(n=>{const b=document.createElement('button');b.type='button';b.className='choice';b.textContent=n;b.setAttribute('aria-label',String(n));b.addEventListener('click',()=>choose(n));choices.append(b)});feedback.className='feedback';feedback.textContent='Which number comes next?';roundLabel.textContent=`${index+1} of ${rounds.length}`}
       function advance(){if(index===rounds.length-1){feedback.className='feedback good';feedback.textContent='You found every next number! Well done, Yuaan!';return}index++;render();sayQuestion()}

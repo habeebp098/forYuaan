@@ -79,6 +79,7 @@
   .sep { width: 2px; height: 40px; background: #eee; border-radius: 2px; }
   .label { font-family: 'Fredoka One', cursive; font-size: 0.9rem; color: #aaa; }
 </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
 <header>
@@ -194,7 +195,7 @@ document.getElementById('saveBtn').onclick = () => {
   a.click();
   if('speechSynthesis' in window){
     const u=new SpeechSynthesisUtterance("Yay! Beautiful drawing Yuaan!");
-    u.pitch=1.4; u.rate=0.9; speechSynthesis.speak(u);
+    u.pitch=1.4; u.rate=0.9; YuaanSpeech.speak(u);
   }
 };
 </script>

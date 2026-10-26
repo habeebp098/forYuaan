@@ -29,6 +29,7 @@
         
         #status-text { font-size: 2rem; font-weight: bold; color: #2c3e50; margin-bottom: 20px; height: 40px; }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls"><a href="index.html" class="btn">🏠 Home</a><div>Mechanic's Garage</div><button class="btn" onclick="nextProblem()">Next Car 🚙</button></div>
@@ -58,7 +59,7 @@
         ];
         let currentProblem = 0;
 
-        function speak(text) { try { window.speechSynthesis.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; window.speechSynthesis.speak(u); } catch(e){} }
+        function speak(text) { try { YuaanSpeech.cancel(); let u = new SpeechSynthesisUtterance(text); u.rate = 0.9; YuaanSpeech.speak(u); } catch(e){} }
 
         function loadProblem() {
             document.querySelectorAll('.problem-indicator').forEach(el => el.classList.remove('show-problem'));

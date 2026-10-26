@@ -29,6 +29,7 @@
     @media(max-width:440px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:18px 13px;border-radius:21px}.collection{min-height:112px;gap:6px;padding:10px}.object{border-radius:12px}.choices{gap:6px}.choice{min-height:49px;border-radius:12px;font-size:1.3rem}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
   </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
   <div class="page">
@@ -58,14 +59,14 @@
       const words=['one','two','three','four','five','six','seven','eight','nine','ten'];
       const collection=document.getElementById('collection'),story=document.getElementById('story'),addButton=document.getElementById('add'),question=document.getElementById('question'),choices=document.getElementById('choices'),feedback=document.getElementById('feedback'),hear=document.getElementById('hear');
       let index=0,added=false,solved=false,advanceTimer;
-      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;speechSynthesis.speak(voice)}
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}YuaanSpeech.cancel();const voice=new SpeechSynthesisUtterance(text);voice.rate=.78;voice.pitch=1.08;if(after)voice.onend=after;YuaanSpeech.speak(voice)}
       function sayStory(){const item=rounds[index];const first=item.start===1?'There is one apple.':`There are ${words[item.start-1]} ${item.many}.`;speak(`${first} Tap add one more ${item.one}.`)}
       function render(){clearTimeout(advanceTimer);added=false;solved=false;addButton.disabled=false;hear.disabled=false;question.hidden=true;const item=rounds[index];const first=item.start===1?'There is 1 apple.':`There are ${item.start} ${item.many}.`;story.textContent=`${first} Add one more ${item.one}.`;collection.replaceChildren();for(let n=0;n<item.start;n++){const object=document.createElement('span');object.className='object';object.textContent=item.icon;object.setAttribute('aria-hidden','true');collection.append(object)}choices.replaceChildren();for(let n=1;n<=10;n++){const button=document.createElement('button');button.type='button';button.className='choice';button.textContent=n;button.setAttribute('aria-label',String(n));button.disabled=true;button.addEventListener('click',()=>choose(n));choices.append(button)}feedback.className='feedback';feedback.textContent='Tap “Add one” to see the new group.'}
       function advance(){if(index===rounds.length-1){feedback.className='feedback good';feedback.textContent='You added one more each time! Great work, Yuaan!';return}index++;render();sayStory()}
       addButton.addEventListener('click',()=>{if(added)return;added=true;addButton.disabled=true;const item=rounds[index];const object=document.createElement('span');object.className='object';object.textContent=item.icon;object.setAttribute('aria-label','One more item');collection.append(object);question.hidden=false;feedback.className='feedback';feedback.textContent='Now choose how many there are.';for(const button of choices.children)button.disabled=false;speak('Now count the group again. How many are there now?')});
       function choose(number){if(solved||!added)return;const answer=rounds[index].start+1;if(number!==answer){feedback.className='feedback try';feedback.textContent='Count the whole group again.';speak('Count the whole group again.');return}solved=true;hear.disabled=true;for(const button of choices.children)button.disabled=true;feedback.className='feedback good';feedback.textContent=`Yes! One more makes ${answer}.`;speak(`One more makes ${words[answer-1]}.`,()=>{advanceTimer=setTimeout(advance,1100)})}
       hear.addEventListener('click',()=>{if(added)speak('Now count the group again. How many are there now?');else sayStory()});
-      document.getElementById('reset').addEventListener('click',()=>{clearTimeout(advanceTimer);if('speechSynthesis'in window)speechSynthesis.cancel();index=0;render();sayStory()});
+      document.getElementById('reset').addEventListener('click',()=>{clearTimeout(advanceTimer);if('speechSynthesis'in window)YuaanSpeech.cancel();index=0;render();sayStory()});
       render();window.addEventListener('load',()=>setTimeout(sayStory,350));
     })();
   </script>

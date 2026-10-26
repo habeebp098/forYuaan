@@ -124,6 +124,7 @@
         }
 
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
 
@@ -180,11 +181,11 @@
         function speak(text) { 
             try {
                 if ('speechSynthesis' in window) { 
-                    window.speechSynthesis.cancel(); 
+                    YuaanSpeech.cancel();
                     const utterance = new SpeechSynthesisUtterance(text); 
                     utterance.rate = 0.85; // Slower for clear pronunciation
                     utterance.pitch = 1.2; 
-                    window.speechSynthesis.speak(utterance); 
+                    YuaanSpeech.speak(utterance);
                 } 
             } catch (e) {} 
         }

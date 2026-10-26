@@ -149,6 +149,7 @@ h1 { font-family:'Boogaloo',cursive; font-size:clamp(2rem,6vw,3.5rem); color:whi
 }
 .win-btn:hover{transform:scale(1.05);}
 </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
 
@@ -312,9 +313,9 @@ function playMatch(){
 
 function speak(txt){
   if('speechSynthesis' in window){
-    speechSynthesis.cancel();
+    YuaanSpeech.cancel();
     const u=new SpeechSynthesisUtterance(txt);
-    u.rate=.9; u.pitch=1.4; speechSynthesis.speak(u);
+    u.rate=.9; u.pitch=1.4; YuaanSpeech.speak(u);
   }
 }
 

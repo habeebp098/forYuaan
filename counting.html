@@ -66,6 +66,7 @@
         .party { animation: jump 0.5s infinite alternate ease-in-out; } 
         @keyframes jump { 0% { transform: translateY(0) scale(1.1); } 100% { transform: translateY(-30px) scale(1.1); } }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls">
@@ -92,9 +93,9 @@
 
         function speak(text) { 
             if ('speechSynthesis' in window) { 
-                window.speechSynthesis.cancel(); 
+                YuaanSpeech.cancel();
                 const utterance = new SpeechSynthesisUtterance(text.toString()); 
-                utterance.rate = 0.9; utterance.pitch = 1.3; window.speechSynthesis.speak(utterance); 
+                utterance.rate = 0.9; utterance.pitch = 1.3; YuaanSpeech.speak(utterance);
             } 
         }
 

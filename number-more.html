@@ -38,6 +38,7 @@
     @media(max-width:460px){.page{width:min(100% - 20px,420px)}header{min-height:58px}.brand{font-size:.78rem}.panel{padding:19px 13px;border-radius:21px}.groups{gap:6px}.group{padding:10px 5px}.things{min-height:94px;gap:4px}.thing{border-radius:7px}.group-name{font-size:.74rem}.versus{font-size:.72rem}.choice{font-size:.9rem}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
   </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
   <div class="page">
@@ -67,13 +68,13 @@
       ];
       const groups=document.getElementById('groups'),feedback=document.getElementById('feedback'),roundLabel=document.getElementById('round'),hearButton=document.getElementById('hear');
       let index=0,answered=false,advanceTimer;
-      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;speechSynthesis.speak(u)}
+      function speak(text,after){if(!('speechSynthesis'in window)){if(after)after();return}YuaanSpeech.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.78;u.pitch=1.08;if(after)u.onend=after;YuaanSpeech.speak(u)}
       function sayQuestion(){speak('Look carefully at both groups. Tap the group with more things.')}
       function render(){clearTimeout(advanceTimer);hearButton.disabled=false;const r=rounds[index];answered=false;roundLabel.textContent=`Pair ${index+1} of ${rounds.length}`;groups.replaceChildren();[['left',r.left],['right',r.right]].forEach(([side,total])=>{const group=document.createElement('button');group.type='button';group.className='group';group.setAttribute('aria-label',`${side==='left'?'Left':'Right'} group with ${total} ${r.name}`);group.addEventListener('click',()=>answer(side));const things=document.createElement('span');things.className='things';for(let n=0;n<total;n++){const item=document.createElement('span');item.className='thing';item.setAttribute('aria-hidden','true');item.textContent=r.icon;things.append(item)}const label=document.createElement('span');label.className='group-name';label.textContent=`${side==='left'?'Left':'Right'} group`;group.append(things,label);groups.append(group)});feedback.className='feedback';feedback.textContent='Look at both groups, then tap one.'}
       function advance(){if(index===rounds.length-1){feedback.className='feedback good';feedback.textContent='You compared every pair! Great work, Yuaan!';return}index++;render();sayQuestion()}
       function answer(side){if(answered)return;const r=rounds[index];if(side===r.more){answered=true;hearButton.disabled=true;feedback.className='feedback good';const finished=index===rounds.length-1;feedback.textContent=finished?'You finished the number activities!':'That group has more!';for(const b of groups.children)b.disabled=true;speak(finished?'You finished the number activities, Yuaan!':'That group has more. Good comparing!',()=>{advanceTimer=setTimeout(advance,finished?1800:1100)})}else{feedback.className='feedback try';feedback.textContent='Look at both groups again. Tap the one with more.';speak('Look at both groups again. Tap the one with more.')}}
       document.getElementById('hear').addEventListener('click',sayQuestion);
-      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();index=0;render();sayQuestion()});
+      document.getElementById('reset').addEventListener('click',()=>{if('speechSynthesis'in window)YuaanSpeech.cancel();index=0;render();sayQuestion()});
       render();window.addEventListener('load',()=>setTimeout(sayQuestion,350));
     })();
   </script>

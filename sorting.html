@@ -149,6 +149,7 @@ h1{
 }
 .complete-box button:hover{transform:scale(1.05);}
 </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
 
@@ -380,9 +381,9 @@ function playTone(good){
 
 function speak(txt){
   if('speechSynthesis' in window){
-    speechSynthesis.cancel();
+    YuaanSpeech.cancel();
     const u=new SpeechSynthesisUtterance(txt);
-    u.rate=.88;u.pitch=1.25;speechSynthesis.speak(u);
+    u.rate=.88;u.pitch=1.25;YuaanSpeech.speak(u);
   }
 }
 

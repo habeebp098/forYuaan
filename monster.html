@@ -51,6 +51,7 @@
         .eye { border-radius: 50%; background-color: white !important; border: 3px solid black; display: flex; justify-content: center; align-items: center; }
         .pupil { background-color: black; border-radius: 50%; }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls">
@@ -81,9 +82,9 @@
 
         function speakWord(word) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
+                YuaanSpeech.cancel();
                 const utterance = new SpeechSynthesisUtterance(word);
-                utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance);
+                utterance.rate = 0.9; utterance.pitch = 1.2; YuaanSpeech.speak(utterance);
             }
         }
         function playBloop() {

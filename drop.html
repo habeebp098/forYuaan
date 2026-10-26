@@ -25,6 +25,7 @@
         @keyframes sway { 0% { transform: translateX(calc(-50% - 20px)) rotate(-20deg); } 50% { transform: translateX(calc(-50% + 20px)) rotate(20deg); } 100% { transform: translateX(calc(-50% - 20px)) rotate(-20deg); } }
         @keyframes earthquake { 10%, 90% { transform: translate3d(-5px, 0, 0); } 20%, 80% { transform: translate3d(5px, 5px, 0); } 30%, 50%, 70% { transform: translate3d(-10px, -5px, 0); } 40%, 60% { transform: translate3d(10px, 5px, 0); } }
     </style>
+<script src="speech.js?v=1"></script>
 </head>
 <body>
     <div id="controls">
@@ -42,7 +43,7 @@
     <script>
         const boulder = document.getElementById('boulder'); const feather = document.getElementById('feather'); let isHeavyDropped = false; let isLightDropped = false;
         let audioCtx; function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
-        function speak(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.9; utterance.pitch = 1.2; window.speechSynthesis.speak(utterance); } }
+        function speak(text) { if ('speechSynthesis' in window) { YuaanSpeech.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = 0.9; utterance.pitch = 1.2; YuaanSpeech.speak(utterance); } }
         function playSound(type) {
             const ctx = getAudio(); const osc = ctx.createOscillator(); const gain = ctx.createGain();
             if (type === 'bloop') { osc.type = 'sine'; osc.frequency.setValueAtTime(300, ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1); gain.gain.setValueAtTime(1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
